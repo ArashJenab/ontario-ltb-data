@@ -1,0 +1,20 @@
+# Downloaded LTB order PDFs — regenerated on demand by extract_amounts.py,
+# hundreds of documents / potentially several GB, not suitable for git.
+pdfs/
+
+# Build artifacts / scratch outputs — the final map is committed at /map.html;
+# scripts/_build/ is just the intermediate working copy the build script writes.
+scripts/_build/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

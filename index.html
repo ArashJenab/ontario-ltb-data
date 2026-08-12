@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ontario LTB Data</title>
+<meta name="description" content="What Ontario's own public records show about who wins at the Landlord and Tenant Board, and where disputes concentrate — built entirely from open data.">
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #f7f8fb;
+    --ink: #1a2130;
+    --ink-muted: #5c6675;
+    --ink-faint: #8b93a1;
+    --border: #dde1e8;
+    --border-strong: #c7cdd7;
+    --landlord: #2a78d6;
+    --tenant: #eb6834;
+    --neutral-accent: #4b3f8f;
+    --shadow: 0 1px 2px rgba(20, 24, 32, 0.06), 0 8px 24px rgba(20, 24, 32, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1319; --surface: #171c25; --surface-2: #12161d;
+      --ink: #e8ecf3; --ink-muted: #9aa4b4; --ink-faint: #6b7484;
+      --border: #262d3a; --border-strong: #333c4c;
+      --landlord: #5b9be0; --tenant: #f0895a; --neutral-accent: #8b81d6;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1319; --surface: #171c25; --surface-2: #12161d;
+    --ink: #e8ecf3; --ink-muted: #9aa4b4; --ink-faint: #6b7484;
+    --border: #262d3a; --border-strong: #333c4c;
+    --landlord: #5b9be0; --tenant: #f0895a; --neutral-accent: #8b81d6;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex; justify-content: center;
+    padding: clamp(20px, 5vw, 64px) clamp(16px, 4vw, 40px);
+  }
+  .page { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 40px; }
+
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-faint); }
+  h1 { margin: 8px 0 0 0; font-size: clamp(30px, 5vw, 46px); font-weight: 700; letter-spacing: -0.015em; line-height: 1.1; text-wrap: balance; }
+  .dek { margin: 16px 0 0 0; max-width: 68ch; font-size: 17px; line-height: 1.6; color: var(--ink-muted); }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+  .cta {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 22px; border-radius: 10px; font-weight: 700; font-size: 15px;
+    text-decoration: none; border: 1px solid transparent;
+  }
+  .cta-primary { background: var(--ink); color: var(--bg); }
+  .cta-secondary { background: var(--surface); color: var(--ink); border-color: var(--border-strong); }
+  .cta:hover { filter: brightness(1.08); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 700px) { .stats { grid-template-columns: 1fr; } }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
+  .stat-num { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .stat-num.landlord { color: var(--landlord); }
+  .stat-num.tenant { color: var(--tenant); }
+  .stat-num.geo { color: var(--neutral-accent); }
+  .stat-label { margin-top: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-muted); }
+
+  .preview-link { display: block; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .preview-link img { display: block; width: 100%; height: auto; }
+  .preview-caption { padding: 12px 18px; background: var(--surface); font-size: 13px; color: var(--ink-muted); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .preview-caption a { color: var(--ink); font-weight: 700; text-decoration: none; }
+
+  section h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px 0; }
+
+  .file-list { display: flex; flex-direction: column; gap: 10px; }
+  .file-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+    padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    text-decoration: none; color: var(--ink);
+  }
+  .file-row:hover { border-color: var(--border-strong); }
+  .file-row .name { font-weight: 700; font-size: 14.5px; }
+  .file-row .desc { font-size: 13px; color: var(--ink-muted); text-align: right; }
+
+  footer { font-size: 12.5px; line-height: 1.7; color: var(--ink-faint); border-top: 1px solid var(--border); padding-top: 20px; }
+  footer a { color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div>
+    <div class="eyebrow">Open data &middot; Ontario</div>
+    <h1>Who wins at Ontario's Landlord and Tenant Board?</h1>
+    <p class="dek">
+      What the LTB's own public records show — built entirely from two open sources:
+      the Board's order-data export and Statistics Canada's census. No private or scraped data.
+    </p>
+    <div class="cta-row">
+      <a class="cta cta-primary" href="map.html">Explore the interactive map →</a>
+      <a class="cta cta-secondary" href="report.html">Read the 2-page summary</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num landlord">5.7&times;</div>
+      <div class="stat-label">more applications filed by landlords than by tenants — 34,422 vs. 6,043, an exact count of the full dataset</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num tenant">26&ndash;74&times;</div>
+      <div class="stat-label">more money awarded to landlords than to tenants, estimated across three independent sampling designs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num geo">~7&times;</div>
+      <div class="stat-label">the provincial median rate of LTB activity in the highest per-capita postal areas, once normalized by population</div>
+    </div>
+  </div>
+
+  <a class="preview-link" href="map.html">
+    <img src="docs/map-preview.png" alt="Preview of the interactive Ontario rental dispute map">
+    <div class="preview-caption">
+      <span>Zoomable choropleth of all 520 Ontario FSAs &mdash; toggle raw counts vs. per-capita rates, landlord vs. tenant</span>
+      <a href="map.html">Open map →</a>
+    </div>
+  </a>
+
+  <section>
+    <h2>Explore further</h2>
+    <div class="file-list">
+      <a class="file-row" href="report.html">
+        <span class="name">Executive summary</span>
+        <span class="desc">2-page findings summary, written for a general/policy audience</span>
+      </a>
+      <a class="file-row" href="https://github.com/ArashJenab/ontario-ltb-data">
+        <span class="name">Full repository</span>
+        <span class="desc">All data, charts, scripts, and methodology notes</span>
+      </a>
+      <a class="file-row" href="results/">
+        <span class="name">results/</span>
+        <span class="desc">Every chart and CSV behind the findings, one folder per analysis</span>
+      </a>
+      <a class="file-row" href="data/">
+        <span class="name">data/</span>
+        <span class="desc">Source data and every derived dataset</span>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    Built from the <a href="https://data.ontario.ca/dataset/ltb-order-catalogue">Ontario LTB Order Catalogue</a> (Open Government Licence &ndash; Ontario)
+    and <a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=9810001901">Statistics Canada table 98-10-0019-01</a> (Statistics Canada Open Licence), 2021 Census.
+    See <a href="DATA_SOURCES.md">DATA_SOURCES.md</a> for full attribution. Code is <a href="LICENSE">MIT-licensed</a>;
+    figures here are estimates derived from public data, not official statistics from either source agency &mdash; see the
+    <a href="report.html">summary</a> for methodology and margins.
+  </footer>
+
+</div>
+</body>
+</html>

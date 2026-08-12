@@ -1,0 +1,11 @@
+code,full_name,filed_by,order_count
+L1,non-payment of rent,landlord,20162
+L2,"end tenancy / evict, other reasons",landlord,5247
+L4,evict — breached settlement/order,landlord,5158
+T2,tenant rights,tenant,2200
+T6,maintenance,tenant,1079
+T1,rent rebate,tenant,1041
+L10,collect money from former tenant,landlord,948
+L3,tenant gave notice to terminate,landlord,805
+L5,above-guideline rent increase,landlord,551
+T5,landlord's bad faith notice to terminate,tenant,547

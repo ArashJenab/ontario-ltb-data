@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ontario's Landlord and Tenant Board, By the Numbers</title>
+<meta name="description" content="A 2-page open-data analysis of who wins at Ontario's Landlord and Tenant Board.">
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --ink: #1a2130;
+    --ink-muted: #444c5a;
+    --ink-faint: #8b93a1;
+    --border: #dde1e8;
+    --landlord: #2a78d6;
+    --tenant: #eb6834;
+    --callout-bg: #f4f5fa;
+    --callout-border: #4b3f8f;
+    --shadow: 0 1px 2px rgba(20, 24, 32, 0.06), 0 8px 24px rgba(20, 24, 32, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1319; --surface: #171c25; --ink: #e8ecf3; --ink-muted: #c3cad6; --ink-faint: #8b93a1;
+      --border: #262d3a; --landlord: #5b9be0; --tenant: #f0895a;
+      --callout-bg: #1a1f2c; --callout-border: #8b81d6;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1319; --surface: #171c25; --ink: #e8ecf3; --ink-muted: #c3cad6; --ink-faint: #8b93a1;
+    --border: #262d3a; --landlord: #5b9be0; --tenant: #f0895a;
+    --callout-bg: #1a1f2c; --callout-border: #8b81d6;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex; justify-content: center;
+    padding: clamp(20px, 5vw, 56px) 20px;
+  }
+  .sheet {
+    width: 100%; max-width: 760px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow);
+    padding: clamp(28px, 5vw, 56px);
+  }
+  .back-link { display: block; max-width: 760px; width: 100%; margin: 0 auto 14px auto; font-size: 13.5px; }
+  .back-link a { color: var(--ink-faint); text-decoration: none; }
+  .back-link a:hover { color: var(--ink-muted); }
+  .wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  h1 { margin: 10px 0 0 0; font-size: clamp(24px, 4vw, 32px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; text-wrap: balance; }
+
+  .lede {
+    margin-top: 22px; padding: 18px 20px; background: var(--callout-bg);
+    border-left: 3px solid var(--callout-border); border-radius: 0 8px 8px 0;
+    font-size: 15.5px; line-height: 1.6; color: var(--ink);
+  }
+  .lede b { font-weight: 700; }
+  .intro { font-size: 14.5px; line-height: 1.6; color: var(--ink-muted); margin-top: 16px; }
+  .intro a { color: inherit; }
+
+  h2 {
+    margin: 34px 0 12px 0; font-size: 17px; font-weight: 700; letter-spacing: -0.005em;
+    padding-top: 20px; border-top: 1px solid var(--border);
+  }
+  h2:first-of-type { border-top: none; padding-top: 0; }
+  p { font-size: 14.5px; line-height: 1.65; color: var(--ink-muted); margin: 0 0 12px 0; }
+  p b { color: var(--ink); font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--ink-faint); font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { color: var(--ink); }
+  tr:first-child td { font-weight: 700; }
+
+  footer {
+    margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--border);
+    font-size: 12px; line-height: 1.6; color: var(--ink-faint); font-style: italic;
+  }
+
+  @media print {
+    body { padding: 0; background: #fff; }
+    .back-link { display: none; }
+    .sheet { box-shadow: none; border: none; max-width: 100%; padding: 0; }
+    :root { --bg: #fff; --surface: #fff; --ink: #000; --ink-muted: #222; --callout-bg: #f4f4f4; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back-link"><a href="index.html">← Ontario LTB Data</a></div>
+  <div class="sheet">
+
+    <div class="eyebrow">An open-data analysis &middot; August 2026</div>
+    <h1>Ontario's Landlord and Tenant Board, By the Numbers</h1>
+
+    <div class="lede">
+      <b>In one sentence:</b> Ontario's own public records show landlords filing more than five times as often as
+      tenants and being awarded at least 26 times as much money, dispute activity is heavily concentrated in
+      specific neighbourhoods once population is accounted for, and no public agency currently shows any of this
+      to the people it affects.
+    </div>
+
+    <p class="intro">
+      This analysis uses only two public sources — the LTB's own open-data order export (40,844 records) and
+      Statistics Canada's 2021 Census — and nothing else. All figures, code, and underlying data are public:
+      <a href="https://github.com/ArashJenab/ontario-ltb-data">github.com/ArashJenab/ontario-ltb-data</a>.
+    </p>
+
+    <h2>Finding 1: Landlords are awarded far more than tenants</h2>
+    <p>
+      Sampling completed LTB orders and reading the dollar amount each one actually states, landlords were
+      awarded an estimated <b>$130 million</b> against tenants — non-payment of rent, breach of a settlement,
+      and other landlord-filed evictions — versus an estimated <b>$4.9 million</b> awarded to tenants, across
+      rent rebates, maintenance remedies, and tenant-rights compensation combined.
+    </p>
+    <table>
+      <thead><tr><th>Sampling design</th><th>Landlord-side</th><th>Tenant-side</th><th>Ratio</th></tr></thead>
+      <tbody>
+        <tr><td>100 orders / category (balanced)</td><td>$130M</td><td>$4.9M</td><td>26 : 1</td></tr>
+        <tr><td>10 orders / category (pilot)</td><td>$81M</td><td>$2.2M</td><td>37 : 1</td></tr>
+        <tr><td>Budget split by category size</td><td>$151M</td><td>$2.0M</td><td>74 : 1</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Three independent sampling designs put the ratio anywhere from 26 to 1 up to 74 to 1. None came close to
+      parity, and the true figure — a full accounting would require reading all 40,844 orders rather than a
+      sample — is unlikely to be smaller than the most conservative estimate here.
+    </p>
+
+    <h2>Finding 2: Landlords file over 5 times as often — no estimation required</h2>
+    <p>
+      Independent of any dollar figure, this is a direct count of the complete public dataset, not a sample: of
+      all 40,844 applications on record, <b>34,422 (84%) were filed by landlords</b> against tenants, versus
+      <b>6,043 (15%) filed by tenants</b> against landlords. Landlords bring cases to the Board 5.7 times more
+      often than tenants do.
+    </p>
+
+    <h2>Finding 3: Dispute activity is concentrated — but not where raw counts suggest</h2>
+    <p>
+      Normalizing filings against each area's population (rather than raw counts, which just track population
+      density) surfaces a very different map. The highest-activity postal areas — Hamilton's L8N, London's N6B,
+      parts of Etobicoke, Sudbury, and Ottawa — see roughly <b>7 times the provincial median rate</b> of LTB
+      activity per resident, and there is an <b>8-fold gap</b> between the most- and least-active areas once
+      tiny-population outliers are excluded.
+    </p>
+    <p>
+      Raw counts alone point somewhere else entirely: Toronto's M3N has the single highest number of
+      applications in the province, but drops to 11th place once its (large) population is factored in. Whether
+      an area looks "high-activity" depends entirely on whether the analysis accounts for population — and to
+      date, nothing public does. <a href="map.html">Explore the interactive map →</a>
+    </p>
+
+    <h2>How this was built</h2>
+    <p>
+      Application-filing counts and geographic figures (Findings 2 and 3) are exact counts of the full public
+      dataset — no estimation involved. Dollar figures (Finding 1) required downloading and reading a sample of
+      order PDFs individually, since the open-data export lists case metadata but not the amounts each order
+      states; reading all 40,844 documents was outside this pass's scope, so those numbers are estimates, not a
+      census, and should be read as order-of-magnitude rather than precise. An interactive, population-normalized
+      map of dispute activity by postal area — built from the same two public sources — accompanies this report.
+    </p>
+
+    <h2>Why this matters</h2>
+    <p>
+      Nothing in this analysis required data the government doesn't already hold. The LTB already publishes its
+      order records; Statistics Canada already publishes population by area. Putting the two together — enough
+      to build the map and the figures above — took a few days' work with public tools. No public agency
+      currently does this, so residents, journalists, and elected officials assessing whether the Board is
+      working as intended have no way to see it for themselves.
+    </p>
+    <p>
+      Two things follow. First, a public dashboard along these lines would cost a fraction of many other
+      provincial data initiatives and would let anyone check these numbers directly rather than take a private
+      analysis's word for it. Second, once the disparity is visible, it raises a legitimate question for
+      legislative attention: is a 26-to-1-or-worse gap between landlord- and tenant-side outcomes explained by
+      the underlying merits of the cases the Board hears, or does it point to something structural worth
+      examining?
+    </p>
+
+    <footer>
+      Prepared from the Landlord and Tenant Board open-data export and Statistics Canada table 98-10-0019-01
+      (2021 Census, population by forward sortation area). Methodology, raw data, and the full sampling
+      comparison are available in the <a href="https://github.com/ArashJenab/ontario-ltb-data">source repository</a>.
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>
