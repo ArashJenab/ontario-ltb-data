@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Fetch Ontario FSA boundary polygons from the StatCan 2021 Cartographic
-Boundary Files ArcGIS REST service, paginating (server caps ~200-400
-features per request), and save as a single GeoJSON FeatureCollection.
+Fetch Ontario municipality (Census Subdivision) boundary polygons from the
+StatCan 2021 Cartographic Boundary Files ArcGIS REST service (layer 9 = CSD,
+vs. layer 14 = FSA used in fetch_fsa_boundaries.py), same adaptive-pagination
+approach since the server's payload limit is geometry-complexity-based, not
+a fixed record count.
 """
 import json
 import time
@@ -11,10 +13,10 @@ from pathlib import Path
 import requests
 
 BASE = Path(__file__).resolve().parent.parent
-OUT_DIR = BASE / "data" / "raw_fsa_boundaries"
-OUT_PATH = OUT_DIR / "ontario_fsa.geojson"
+OUT_DIR = BASE / "data" / "raw_csd_boundaries"
+OUT_PATH = OUT_DIR / "ontario_csd.geojson"
 
-SERVICE_URL = "https://geo.statcan.gc.ca/geo_wa/rest/services/2021/Cartographic_boundary_files/MapServer/14/query"
+SERVICE_URL = "https://geo.statcan.gc.ca/geo_wa/rest/services/2021/Cartographic_boundary_files/MapServer/9/query"
 PAGE_SIZE = 200
 ONTARIO_PRUID = "35"
 
@@ -30,12 +32,14 @@ def esri_rings_to_geojson(rings):
     """
     Esri geometries don't nest holes inside their exterior ring the way
     GeoJSON Polygon coordinates do — a single Esri "polygon" can contain
-    several genuinely disjoint parts, distinguished only by ring winding
-    order, not nesting. Dumping every ring into one GeoJSON Polygon (treating
-    rings 2+ as holes of ring 1) silently produces a degenerate near-empty
-    shape whenever a feature has more than one true exterior ring. Holes are
-    assigned to the most recently started exterior ring, which is the
-    standard Esri ring ordering guarantee.
+    several genuinely disjoint parts (e.g. a municipality with river
+    islands), distinguished only by ring winding order, not nesting. Dumping
+    every ring into one GeoJSON Polygon (treating rings 2+ as holes of ring
+    1) silently produces a degenerate near-empty shape whenever a feature
+    has more than one true exterior ring — exactly what broke Windsor
+    (20 rings, most of them separate small parts, not holes).
+    Holes are assigned to the most recently started exterior ring, which is
+    the standard Esri ring ordering guarantee.
     """
     parts = []
     for ring in rings:
@@ -51,7 +55,7 @@ def esri_rings_to_geojson(rings):
 def fetch_page(offset, page_size):
     params = {
         "where": f"PRUID='{ONTARIO_PRUID}'",
-        "outFields": "CFSAUID,PRUID,PRNAME,LANDAREA",
+        "outFields": "CSDUID,CSDNAME,CSDTYPE,PRUID,LANDAREA",
         "outSR": "4326",
         "f": "json",
         "geometryPrecision": 5,
@@ -70,10 +74,6 @@ def main():
     page_size = PAGE_SIZE
 
     while True:
-        # The server's payload-size limit depends on geometry complexity, not
-        # just record count — some FSAs (large rural/coastal ones) blow past
-        # it well under PAGE_SIZE. Halve and retry on error, then ease back
-        # up to the standard page size once we're past the dense patch.
         data = None
         attempt_size = page_size
         while attempt_size >= 1:
@@ -100,9 +100,10 @@ def main():
             all_features.append({
                 "type": "Feature",
                 "properties": {
-                    "fsa": attrs["CFSAUID"],
+                    "csduid": attrs["CSDUID"],
+                    "name": attrs["CSDNAME"],
+                    "type": attrs["CSDTYPE"],
                     "pruid": attrs["PRUID"],
-                    "prname": attrs["PRNAME"],
                     "landarea": attrs["LANDAREA"],
                 },
                 "geometry": esri_rings_to_geojson(geom["rings"]),
@@ -117,9 +118,10 @@ def main():
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(fc, f)
 
-    print(f"\nSaved {len(all_features)} FSA polygons to {OUT_PATH}")
-    fsas = sorted(set(f["properties"]["fsa"] for f in all_features))
-    print("Sample FSAs:", fsas[:10], "...")
+    print(f"\nSaved {len(all_features)} CSD polygons to {OUT_PATH}")
+    names = sorted(set(f["properties"]["name"] for f in all_features))
+    print(f"Total municipalities: {len(names)}")
+    print("Sample:", names[:10], "...")
 
 
 if __name__ == "__main__":

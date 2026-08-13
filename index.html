@@ -69,10 +69,17 @@
   .stat-num.geo { color: var(--neutral-accent); }
   .stat-label { margin-top: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-muted); }
 
-  .preview-link { display: block; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .preview-grid { grid-template-columns: 1fr; } }
+  .preview-link { display: block; color: inherit; text-decoration: none; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); }
   .preview-link img { display: block; width: 100%; height: auto; }
-  .preview-caption { padding: 12px 18px; background: var(--surface); font-size: 13px; color: var(--ink-muted); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .preview-caption a { color: var(--ink); font-weight: 700; text-decoration: none; }
+  .preview-caption { padding: 12px 16px; background: var(--surface); font-size: 12.5px; color: var(--ink-muted); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 10px; text-decoration: none; }
+  .preview-caption span:last-child { color: var(--ink); font-weight: 700; white-space: nowrap; }
+
+  .chart-block { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface); }
+  .chart-block img { display: block; width: 100%; height: auto; }
+  .chart-caption { padding: 14px 18px; font-size: 13px; color: var(--ink-muted); border-top: 1px solid var(--border); }
+  .chart-caption a { color: var(--ink); font-weight: 700; text-decoration: none; }
 
   section h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px 0; }
 
@@ -102,6 +109,7 @@
     </p>
     <div class="cta-row">
       <a class="cta cta-primary" href="map.html">Explore the interactive map →</a>
+      <a class="cta cta-secondary" href="city-map.html">By city instead</a>
       <a class="cta cta-secondary" href="report.html">Read the 2-page summary</a>
     </div>
   </div>
@@ -113,21 +121,38 @@
     </div>
     <div class="stat-card">
       <div class="stat-num tenant">26&ndash;74&times;</div>
-      <div class="stat-label">more money awarded to landlords than to tenants, estimated across three independent sampling designs</div>
+      <div class="stat-label">more money awarded to landlords than to tenants — and even per case filed, landlords average 3.7&times; more</div>
     </div>
     <div class="stat-card">
       <div class="stat-num geo">~7&times;</div>
-      <div class="stat-label">the provincial median rate of LTB activity in the highest per-capita postal areas, once normalized by population</div>
+      <div class="stat-label">the provincial median rate of LTB activity in the highest per-capita areas, once normalized by population</div>
     </div>
   </div>
 
-  <a class="preview-link" href="map.html">
-    <img src="docs/map-preview.png" alt="Preview of the interactive Ontario rental dispute map">
-    <div class="preview-caption">
-      <span>Zoomable choropleth of all 520 Ontario FSAs &mdash; toggle raw counts vs. per-capita rates, landlord vs. tenant</span>
-      <a href="map.html">Open map →</a>
+  <div class="preview-grid">
+    <a class="preview-link" href="map.html">
+      <img src="docs/map-preview.png" alt="Preview of the interactive Ontario rental dispute map by postal FSA">
+      <div class="preview-caption">
+        <span>All 520 FSAs, by postal code</span>
+        <span>Open map →</span>
+      </div>
+    </a>
+    <a class="preview-link" href="city-map.html">
+      <img src="docs/city-map-preview.png" alt="Preview of the interactive Ontario rental dispute map by municipality">
+      <div class="preview-caption">
+        <span>Same data, by recognizable city name</span>
+        <span>Open map →</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="chart-block">
+    <img src="results/landlord_vs_tenant_overview/overview_chart.png" alt="Donut charts comparing landlord vs tenant case volume and dollars awarded, plus average award per case">
+    <div class="chart-caption">
+      The dollar gap (26&times;) is larger than the case-volume gap (7.1&times;) — landlords don't just file more, they
+      win more per case too. <a href="results/landlord_vs_tenant_overview/">Full breakdown →</a>
     </div>
-  </a>
+  </div>
 
   <section>
     <h2>Explore further</h2>

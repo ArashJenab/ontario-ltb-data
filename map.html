@@ -84,6 +84,10 @@
     gap: 22px;
   }
 
+  .nav-links { font-size: 13px; }
+  .nav-links a { color: var(--ink-faint); text-decoration: none; }
+  .nav-links a:hover { color: var(--ink-muted); }
+
   .eyebrow {
     font-size: 12px;
     font-weight: 700;
@@ -322,12 +326,14 @@
 </style>
 
 <div class="page">
+  <div class="nav-links"><a href="index.html">&larr; Ontario LTB Data</a> &middot; <a href="city-map.html">City-level map &rarr;</a></div>
   <div>
     <div class="eyebrow">Ontario &middot; 2021 census population &times; LTB open-data applications</div>
     <h1>Where Ontario's rental disputes concentrate</h1>
     <p class="dek">Landlord and Tenant Board applications by postal FSA, normalized against resident population.
        Toggle between raw volume and per-10,000-resident rates, and between landlord-filed and tenant-filed cases &mdash;
-       hover any area for the full breakdown.</p>
+       hover any area for the full breakdown. Prefer city names to postal codes?
+       <a href="city-map.html">See the city-level map</a>.</p>
   </div>
 
   <div class="controls">

@@ -1,0 +1,565 @@
+csduid,name,population
+3520005,Toronto,2794356
+3506008,Ottawa,1017449
+3521005,Mississauga,717961
+3521010,Brampton,656480
+3525005,Hamilton,569353
+3539036,London,422324
+3519036,Markham,338503
+3519028,Vaughan,323103
+3530013,Kitchener,256885
+3537039,Windsor,229660
+3524001,Oakville,213759
+3519038,Richmond Hill,202022
+3524002,Burlington,186948
+3518013,Oshawa,175383
+3553005,Greater Sudbury / Grand Sudbury,166004
+3543042,Barrie,147829
+3523008,Guelph,143740
+3518009,Whitby,138501
+3530010,Cambridge,138479
+3526053,St. Catharines,136803
+3524009,Milton,132979
+3510010,Kingston,132485
+3518005,Ajax,126666
+3530016,Waterloo,121436
+3558004,Thunder Bay,108843
+3529006,Brantford,104688
+3536020,Chatham-Kent,103988
+3518017,Clarington,101427
+3518001,Pickering,99186
+3526043,Niagara Falls,94415
+3519048,Newmarket,87942
+3515014,Peterborough,83651
+3516010,Kawartha Lakes,79247
+3521024,Caledon,76581
+3557061,Sault Ste. Marie,72051
+3538030,Sarnia,72047
+3528052,Norfolk County,67490
+3524015,Halton Hills,62951
+3519046,Aurora,62057
+3526032,Welland,55750
+3512005,Belleville,55071
+3548044,North Bay,52662
+3519044,Whitchurch-Stouffville,49864
+3528018,Haldimand County,49216
+3501012,Cornwall,47845
+3519070,Georgina,47642
+3532042,Woodstock,46705
+3512015,Quinte West,46560
+3543007,New Tecumseth,43948
+3543017,Innisfil,43326
+3543014,Bradford West Gwillimbury,42880
+3534021,St. Thomas,42840
+3556027,Timmins,41145
+3537064,Lakeshore,40410
+3529005,Brant,39474
+3519054,East Gwillimbury,34637
+3543052,Orillia,33411
+3531011,Stratford,33232
+3526003,Fort Erie,32901
+3537034,LaSalle,32721
+3523025,Centre Wellington,31093
+3522014,Orangeville,30167
+3537003,Leamington,29680
+3526065,Grimsby,28883
+3519049,King,27333
+3530035,Woolwich,26999
+3502036,Clarence-Rockland,26505
+3526057,Lincoln,25719
+3513020,Prince Edward County,25704
+3543064,Wasaga Beach,24862
+3543031,Collingwood,24811
+3539015,Strathroy-Caradoc,23871
+3526037,Thorold,23816
+3537028,Amherstburg,23524
+3537048,Tecumseh,23300
+3543023,Oro-Medonte,23017
+3543021,Essa,22970
+3537013,Kingsville,22119
+3507015,Brockville,22116
+3543009,Springwater,21701
+3542059,Owen Sound,21612
+3518020,Scugog,21581
+3518029,Uxbridge,21556
+3530020,Wilmot,21429
+3537016,Essex,21216
+3544042,Huntsville,21147
+3514021,Cobourg,20519
+3510020,South Frontenac,20188
+3526011,Port Colborne,20033
+3502048,Russell,19598
+3526047,Niagara-on-the-Lake,19088
+3539033,Middlesex Centre,18928
+3515015,Selwyn,18653
+3532004,Tillsonburg,18615
+3526028,Pelham,18192
+3547076,Petawawa,18160
+3507065,North Grenville,17964
+3511005,Loyalist,17943
+3543074,Midland,17817
+3544018,Bracebridge,17305
+3514020,Port Hope,17294
+3511015,Greater Napanee,16879
+3541045,Saugeen Shores,15908
+3531040,North Perth,15538
+3526021,West Lincoln,15454
+3560010,Kenora,14967
+3543005,Clearview,14814
+3509030,Mississippi Mills,14740
+3538003,St. Clair,14659
+3548055,West Nipissing / Nipissing Ouest,14583
+3543015,Severn,14576
+3547064,Pembroke,14364
+3539027,Thames Centre,13980
+3523009,Guelph/Eramosa,13904
+3514045,Trent Hills,13861
+3534020,Central Elgin,13746
+3532018,Ingersoll,13693
+3501011,South Stormont,13570
+3502025,The Nation / La Nation,13350
+3501005,South Glengarry,13330
+3544002,Gravenhurst,13157
+3542004,West Grey,13131
+3543068,Tiny,12966
+3531030,Perth East,12595
+3518039,Brock,12567
+3509028,Carleton Place,12517
+3523050,Wellington North,12431
+3541024,Kincardine,12268
+3514004,Brighton,12108
+3523017,Erin,11981
+3538040,Lambton Shores,11876
+3542047,Meaford,11485
+3557041,Elliot Lake,11372
+3530027,Wellesley,11318
+3501030,North Dundas,11304
+3532002,Norwich,11151
+3542053,Georgian Bluffs,11100
+3543071,Tay,11091
+3514019,Hamilton,11059
+3501020,South Dundas,11044
+3543003,Adjala-Tosorontio,10989
+3507040,Rideau Lakes,10883
+3523033,Mapleton,10839
+3530004,North Dumfries,10619
+3542015,Grey Highlands,10424
+3543019,Ramara,10377
+3502008,Hawkesbury,10194
+3501050,North Glengarry,10144
+3543072,Penetanguishene,10077
+3540005,South Huron,10063
+3515013,Cavan Monaghan,10016
+3502023,Alfred and Plantagenet,9949
+3507021,Leeds and the Thousand Islands,9804
+3541032,Brockton,9784
+3554020,Temiskaming Shores,9634
+3547002,Arnprior,9629
+3507014,Elizabethtown-Kitley,9545
+3540040,Huron East,9512
+3547075,Laurentian Valley,9450
+3522012,Mono,9421
+3542045,The Blue Mountains,9390
+3534010,Malahide,9308
+3509004,Smiths Falls,9254
+3541055,South Bruce Peninsula,9137
+3523043,Minto,9094
+3531025,West Perth,9038
+3509024,Beckwith,9021
+3522021,Shelburne,8994
+3542005,Southgate,8716
+3502010,Champlain,8665
+3532027,Zorra,8628
+3538035,Plympton-Wyoming,8308
+3547048,Renfrew,8190
+3509010,Drummond/North Elmsley,8183
+3556066,Kapuskasing,8057
+3542029,Hanover,7967
+3523001,Puslinch,7944
+3540028,Goderich,7881
+3532038,East Zorra-Tavistock,7841
+3511030,Stone Mills,7826
+3540025,Central Huron,7799
+3554068,Kirkland Lake,7750
+3541015,Huron-Kinloss,7723
+3534011,Aylmer,7699
+3544053,Muskoka Lakes,7652
+3515023,Douro-Dummer,7632
+3547003,McNab/Braeside,7591
+3532012,South-West Oxford,7583
+3532045,Blandford-Blenheim,7565
+3540010,Bluewater,7540
+3507004,Edwardsburgh/Cardinal,7505
+3560090,"Kenora, Unorganized",7475
+3514024,Alnwick/Haldimand,7473
+3559012,Fort Frances,7466
+3501042,North Stormont,7400
+3560027,Dryden,7388
+3531016,St. Marys,7386
+3507006,Augusta,7386
+3547056,Whitewater Region,7225
+3546024,Dysart et al,7182
+3534005,Bayham,7096
+3515005,Otonabee-South Monaghan,7087
+3542037,Chatsworth,7080
+3546015,Minden Hills,6971
+3541043,Arran-Elderslie,6913
+3526014,Wainfleet,6887
+3549032,Parry Sound,6879
+3514014,Cramahe,6509
+3509021,Perth,6469
+3515044,Trent Lakes,6439
+3539041,North Middlesex,6307
+3558090,"Thunder Bay, Unorganized",6221
+3512030,Tweed,6067
+3557095,"Algoma, Unorganized, North Part",6050
+3558011,Oliver Paipoonge,6035
+3538019,Petrolia,6013
+3509015,Tay Valley,5925
+3539005,Southwest Middlesex,5893
+3540063,Ashfield-Colborne-Wawanosh,5884
+3541004,South Bruce,5880
+3560034,Sioux Lookout,5839
+3509039,Lanark Highlands,5737
+3539060,Lucan Biddulph,5680
+3556042,Cochrane,5390
+3507024,Gananoque,5383
+3549003,Seguin,5280
+3552026,Espanola,5185
+3515030,Havelock-Belmont-Methuen,5083
+3534042,West Elgin,5060
+3540055,North Huron,5052
+3512020,Stirling-Rawdon,5015
+3548034,East Ferris,4946
+3510035,Central Frontenac,4892
+3534024,Southwold,4851
+3512026,Centre Hastings,4801
+3556076,Hearst,4794
+3515003,Asphodel-Norwood,4658
+3512001,Tyendinaga,4538
+3556031,Iroquois Falls,4418
+3541069,Northern Bruce Peninsula,4404
+3512076,Hastings Highlands,4385
+3522008,Amaranth,4327
+3558075,Greenstone,4309
+3512046,Marmora and Lake,4267
+3547096,Deep River,4175
+3534030,Dutton/Dunwich,4152
+3560042,Red Lake,4094
+3507008,Prescott,4078
+3512061,Bancroft,4065
+3540046,Howick,4045
+3549066,Callander,3964
+3502044,Casselman,3960
+3547030,Madawaska Valley,3927
+3509001,Montague,3914
+3547035,Bonnechere Valley,3898
+3522010,Grand Valley,3851
+3546005,Highlands East,3830
+3531013,Perth South,3776
+3544027,Lake of Bays,3759
+3538043,Warwick,3641
+3540050,Morris-Turnberry,3590
+3522016,Mulmur,3571
+3544065,Georgian Bay,3441
+3557038,Blind River,3422
+3502001,East Hawkesbury,3418
+3549060,Powassan,3346
+3558028,Shuniah,3247
+3552023,Sables-Spanish Rivers,3237
+3554094,"Timiskaming, Unorganized, West Part",3210
+3547046,Horton,3182
+3558059,Marathon,3138
+3507052,Merrickville-Wolford,3135
+3522019,Melancthon,3132
+3547070,North Algona Wilberforce,3111
+3507042,Athens,3042
+3539047,Adelaide-Metcalfe,3011
+3547043,Admaston/Bromley,2995
+3552093,"Sudbury, Unorganized, North Part",2902
+3547090,Laurentian Hills,2885
+3515037,North Kawartha,2877
+3547008,Greater Madawaska,2864
+3552001,French River / Rivière des Français,2828
+3538016,Enniskillen,2825
+3522001,East Garafraxa,2794
+3549031,McDougall,2744
+3551043,Wikwemikong Unceded,2728
+3552013,Markstay-Warren,2708
+3557076,Wawa,2705
+3549014,Perry,2650
+3559001,Atikokan,2642
+3551017,Northeastern Manitoulin and the Islands,2641
+3507017,Front of Yonge,2595
+3546018,Algonquin Highlands,2588
+3556014,Black River-Matheson,2572
+3556092,"Cochrane, Unorganized, North Part",2546
+3512004,Tyendinaga Mohawk Territory,2535
+3511035,Addington Highlands,2534
+3549096,"Parry Sound, Unorganized, Centre Part",2495
+3547033,"Killaloe, Hagarty and Richards",2410
+3538015,Brooke-Alvinston,2359
+3510045,North Frontenac,2285
+3558001,Neebing,2241
+3551006,Central Manitoulin,2235
+3512036,Madoc,2233
+3548027,Bonfield,2146
+3560071,Sandy Lake 88,2100
+3558066,Manitouwadge,1974
+3538007,Dawn-Euphemia,1968
+3552092,Chapleau,1942
+3538031,Point Edward,1930
+3510005,Frontenac Islands,1930
+3548021,Mattawa,1881
+3557035,Huron Shores,1860
+3549071,Nipissing,1769
+3549043,Magnetawan,1753
+3512002,Deseronto,1747
+3548073,Nipissing 10,1640
+3512058,Faraday,1612
+3548094,"Nipissing, Unorganized, North Part",1591
+3560051,Attawapiskat 91A,1586
+3549046,Strong,1566
+3547020,"Brudenell, Lyndoch and Raglan",1552
+3558054,Terrace Bay,1528
+3557051,"Macdonald, Meredith and Aberdeen Additional",1513
+3556106,Moosonee,1512
+3549036,Carling,1491
+3558044,Nipigon,1473
+3549019,Armour,1459
+3554052,Englehart,1442
+3557008,St. Joseph,1426
+3559090,"Rainy River, Unorganized",1423
+3549028,McKellar,1419
+3556094,Factory Island 1,1376
+3552004,St.-Charles,1357
+3548031,Chisholm,1312
+3557028,Thessalon,1260
+3515019,Curve Lake First Nation 35,1244
+3538056,Kettle Point 44,1233
+3560001,Ignace,1206
+3559019,Emo,1204
+3556048,Smooth Rock Falls,1200
+3554036,Armstrong,1199
+3556056,Moonbeam,1157
+3557011,Laird,1121
+3557071,Sagamok,1110
+3549056,South River,1101
+3560070,Deer Lake,1087
+3549039,Whitestone,1075
+3557074,Garden River 14,1071
+3560096,Kasabonika Lake,1060
+3548001,South Algonquin,1055
+3558051,Schreiber,1039
+3560075,Kitchenuhmaykoosib Aaki 84,1029
+3560056,Lac Seul 28,1022
+3560021,Machin,1012
+3551011,Assiginack,1008
+3543050,Chippewas of Rama First Nation,998
+3554008,Cobalt,989
+3548013,Papineau-Cameron,982
+3549005,The Archipelago,979
+3560053,Fort Hope 64,977
+3557066,Prince,975
+3549018,Kearney,974
+3549054,Machar,969
+3557096,Hornepayne,968
+3558003,Fort William 52,964
+3549022,Burk's Falls,957
+3559011,Alberton,954
+3512065,Carlow/Mayo,953
+3549048,Sundridge,938
+3551045,M'Chigeeng 22,926
+3560032,Ear Falls,924
+3560059,Weagamow Lake 87,921
+3549012,McMurrich/Monteith,907
+3558041,Red Rock,895
+3548069,Temagami,862
+3560061,Wabaseemoong,815
+3551026,Gore Bay,808
+3558019,Conmee,798
+3559016,La Vallee,788
+3541057,Saugeen 29,784
+3556093,Fort Albany (Part) 67,775
+3559024,Chapple,763
+3557019,Plummer Additional,757
+3556070,Val Rita-Harty,757
+3551021,Billings,753
+3559042,Rainy River,752
+3557016,Johnson,749
+3554062,Larder Lake,745
+3549024,Ryerson,745
+3556095,Constance Lake 92,741
+3512048,Tudor and Cashel,740
+3560008,Sioux Narrows-Nestor Falls,727
+3560079,Webequie,723
+3512054,Wollaston,721
+3558016,O'Connor,689
+3554044,Charlton and Dack,686
+3543069,Christian Island 30,679
+3557039,Spanish,670
+3560067,Poplar Hill,663
+3560054,Cat Lake 63C,651
+3538025,Sarnia 45,648
+3538018,Oil Springs,647
+3507033,Westport,634
+3559063,Couchiching 16A,633
+3551027,Gordon/Barrie Island,613
+3560004,Whitefish Bay 32A,610
+3529021,New Credit (Part) 40A,609
+3560076,Sachigo Lake 1,608
+3560085,Wunnumin 1,587
+3560058,English River 21,584
+3557021,Bruce Mines,582
+3541060,Neyaashiinigmiing 27,580
+3554058,McGarry,579
+3552028,Baldwin,579
+3557079,Dubreuilville,576
+3557014,Tarbutt and Tarbutt Additional,573
+3557091,White River,557
+3548022,Calvin,557
+3556077,Mattice-Val Côté,542
+3514027,Alderville First Nation,542
+3557040,The North Shore,531
+3554021,Hudson,530
+3554014,Harris,530
+3554026,Harley,524
+3560055,Osnaburgh 63B,524
+3554001,Coleman,517
+3560098,Kingfisher Lake 1,511
+3554049,Evanturel,502
+3559031,Morley,493
+3547037,Pikwakanagan (Golden Lake 39),490
+3556052,Fauquier-Strickland,467
+3551040,Whitefish River 4,457
+3560088,Wapekeka 2,456
+3551001,Tehkummah,450
+3560095,Bearskin Lake,447
+3560068,Shoal Lake 39A,445
+3558012,Gillies,441
+3539002,Newbury,440
+3512051,Limerick,436
+3557073,Mississagi River 8,414
+3552051,Whitefish Lake 6,412
+3558068,Long Lake 58,410
+3560104,Kee-Way-Win,409
+3560066,Kenora 38B,402
+3559040,Dawson,399
+3560049,Pickle Lake,398
+3552036,Killarney,397
+3560063,Sabaskong Bay 35D,383
+3551028,Burpee and Mills,382
+3557004,Hilton,382
+3558034,Dorion,375
+3551041,Sucker Creek 23,373
+3552031,Nairn and Hyman,373
+3558062,Pic River 50,372
+3549073,Parry Island First Nation,367
+3560078,Fort Severn 89,364
+3560086,Summer Beaver,355
+3554006,Latchford,355
+3557072,Serpent River 7,351
+3554042,James,348
+3515008,Hiawatha First Nation,341
+3554029,Casey,341
+3554024,Kerns,330
+3536029,Moravian 47,328
+3557001,Jocelyn,314
+3554054,Chamberlain,311
+3559047,Lake of the Woods,308
+3559026,Manitou Rapids 11,300
+3560046,Slate Falls,299
+3558097,Whitesand,297
+3549051,Joly,293
+3559066,Seine River 23A,270
+3554056,Matachewan,268
+3547098,"Head, Clara and Maria",267
+3560080,North Spirit Lake,265
+3560024,Eagle Lake 27,257
+3559051,Big Grassy River 35G,251
+3560091,Peawanuck,247
+3548072,Bear Island 1,244
+3560093,Neskantaga,244
+3560052,Marten Falls 65,243
+3558064,Lake Helen 53A,240
+3559068,Rainy Lake 17A,234
+3558085,Osnaburgh 63A,233
+3519076,Chippewas of Georgina Island First Nation,231
+3537001,Pelee,230
+3551094,"Manitoulin, Unorganized, West Part",219
+3554034,Hilliard,215
+3544073,Moose Point 79,213
+3552052,Mattagami 71,210
+3549077,Dokis 9,201
+3556073,Opasatika,200
+3558067,Ginoogaming First Nation,200
+3557006,Hilton Beach,198
+3560089,The Dalles 38C,180
+3549095,"Parry Sound, Unorganized, North East Part",179
+3558076,Aroland,178
+3560057,Wabigoon Lake 27,175
+3560069,Rat Portage 38A,171
+3528035,New Credit (Part) 40A,166
+3559064,Rainy Lake 26A,158
+3551042,Sheguiandah 24,158
+3556033,Abitibi 70,156
+3549072,Shawanaga 17,155
+3552054,Duck Lake 76B,154
+3558069,Rocky Bay 1,154
+3548019,Mattawan,153
+3554066,Gauthier,151
+3557026,Thessalon 12,151
+3558060,Pic Mobert North,138
+3549076,French River 13,137
+3559053,Saug-A-Gaw-Sing 1,136
+3539018,Munsee-Delaware Nation 1,129
+3556102,New Post 69A,128
+3551044,Sheshegwaning 20,127
+3558061,Pic Mobert South,127
+3518022,Mississaugas of Scugog Island,125
+3560083,Whitefish Bay 34A,125
+3559061,Rainy Lake 18C,125
+3553040,Wahnapitei 11,124
+3559060,Neguaguon Lake 25D,118
+3558065,Gull River 55,110
+3554032,Brethour,105
+3548091,"Nipissing, Unorganized, South Part",102
+3549078,Magnetewan 1,102
+3558063,Pays Plat 51,100
+3560082,Shoal Lake (Part) 40,96
+3560005,Whitefish Bay 33A,94
+3554038,Thornloe,92
+3558080,Ojibway Nation of Saugeen (Savant Lake),88
+3560064,Shoal Lake 34B2,81
+3554057,Matachewan 72,66
+3557078,Gros Cap 49,63
+3552056,Chapleau Cree Fox Lake,62
+3560084,Wabauskang 21,57
+3560060,Northwest Angle 33B,52
+3560065,Lake of the Woods 37,49
+3551100,Zhiibaahaasing 19A,41
+3543070,Christian Island 30A,30
+3556098,"Cochrane, Unorganized, South East Part",25
+3552053,Chapleau 74A,17
+3560100,Wawakapewin,16
+3551034,Cockburn Island,16
+3549075,Henvey Inlet 2,15
+3541056,Chief's Point No. 28,15
+3559089,Sturgeon Falls 23,10
+3559052,Big Island Mainland 93,5
+3557094,"Algoma, Unorganized, South East Part",5
+3556091,"Cochrane, Unorganized, South West Part",5
+3552037,Point Grondine 3,5
+3559069,Rainy Lake 17B,5
+3554091,"Timiskaming, Unorganized, East Part",5
+3558074,Sand Point First Nation,5
+3549093,Naiscoutaing 17A,0
+3559046,Assabaska,0
+3559062,Agency 1,0
+3552058,Chapleau 75,0
+3560081,Lansdowne House,0
+3556096,Moose Factory 68,0
+3558100,Lac des Mille Lacs 22A1,0
+3556100,Flying Post 73,0
+3558092,Red Rock 53,0
+3558077,Lake Nipigon,0

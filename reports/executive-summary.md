@@ -16,7 +16,7 @@ Sampling completed LTB orders and reading the dollar amount each one actually st
 | 10 orders / category (pilot) | $81M | $2.2M | 37 : 1 |
 | Budget split by category size | $151M | $2.0M | 74 : 1 |
 
-Three independent sampling designs put the ratio anywhere from 26 to 1 up to 74 to 1. None came close to parity, and the true figure — a full accounting would require reading all 40,844 orders rather than a sample — is unlikely to be smaller than the most conservative estimate here.
+Three independent sampling designs put the ratio anywhere from 26 to 1 up to 74 to 1. None came close to parity, and the true figure — a full accounting would require reading all 40,844 orders rather than a sample — is unlikely to be smaller than the most conservative estimate here. The gap isn't only about volume: restricted to the same categories on both sides, landlords file 7.1× more cases but are awarded 26.3× more money — meaning landlords also average roughly **3.7× more per case** ($4,249 vs. $1,143) than tenants do.
 
 ## Finding 2: Landlords file over 5 times as often — no estimation required
 
@@ -26,7 +26,7 @@ Independent of any dollar figure, this is a direct count of the complete public 
 
 Normalizing filings against each area's population (rather than raw counts, which just track population density) surfaces a very different map. The highest-activity postal areas — Hamilton's L8N, London's N6B, parts of Etobicoke, Sudbury, and Ottawa — see roughly **7 times the provincial median rate** of LTB activity per resident, and there is an **8-fold gap** between the most- and least-active areas once tiny-population outliers are excluded.
 
-Raw counts alone point somewhere else entirely: Toronto's M3N has the single highest number of applications in the province, but drops to 11th place once its (large) population is factored in. Whether an area looks "high-activity" depends entirely on whether the analysis accounts for population — and to date, nothing public does.
+Raw counts alone point somewhere else entirely: Toronto's M3N has the single highest number of applications in the province, but drops to 11th place once its (large) population is factored in. Whether an area looks "high-activity" depends entirely on whether the analysis accounts for population — and to date, nothing public does. The same view is also available rolled up to the municipality level (Toronto, Hamilton, Windsor, etc.) rather than postal codes, for anyone who doesn't think in FSAs.
 
 ## How this was built
 

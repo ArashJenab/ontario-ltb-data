@@ -2,6 +2,12 @@
 # hundreds of documents / potentially several GB, not suitable for git.
 pdfs/
 
+# Raw pre-simplification boundary downloads (~95MB each) — regenerated on
+# demand by fetch_fsa_boundaries.py / fetch_csd_boundaries.py; only the
+# simplified data/ontario_*_simplified.geojson output is kept in the repo.
+data/raw_fsa_boundaries/
+data/raw_csd_boundaries/
+
 # Build artifacts / scratch outputs — the final map is committed at /map.html;
 # scripts/_build/ is just the intermediate working copy the build script writes.
 scripts/_build/

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Assemble the self-contained FSA choropleth map HTML artifact."""
+"""Assemble the self-contained municipality (city-level) choropleth map HTML artifact."""
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
-PAYLOAD_PATH = BASE / "data" / "fsa_map_payload.json"
-OUT_PATH = BASE / "scripts" / "_build" / "fsa_dispute_map.html"
+PAYLOAD_PATH = BASE / "data" / "csd_map_payload.json"
+OUT_PATH = BASE / "scripts" / "_build" / "csd_dispute_map.html"
 
 TEMPLATE = r"""
 <meta charset="utf-8">
-<title>Ontario Rental Dispute Map</title>
+<title>Ontario Rental Dispute Map by City</title>
 <style>
   :root {
     --bg: #eef1f5;
@@ -270,10 +270,10 @@ TEMPLATE = r"""
     opacity: 0;
     transition: opacity 0.08s ease;
     z-index: 50;
-    max-width: 240px;
+    max-width: 260px;
   }
   .tooltip.visible { opacity: 1; }
-  .tooltip .t-fsa { font-weight: 700; font-size: 14px; letter-spacing: 0.02em; }
+  .tooltip .t-fsa { font-weight: 700; font-size: 14px; letter-spacing: 0.01em; }
   .tooltip .t-row { display: flex; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; }
   .tooltip .t-muted { opacity: 0.7; }
   .tooltip .t-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
@@ -299,7 +299,7 @@ TEMPLATE = r"""
   }
   .rank-row {
     display: grid;
-    grid-template-columns: 22px 46px 1fr auto;
+    grid-template-columns: 22px minmax(0, 1fr) 70px auto;
     align-items: center;
     gap: 10px;
     padding: 7px 0;
@@ -308,7 +308,7 @@ TEMPLATE = r"""
   }
   .rank-row:last-child { border-bottom: none; }
   .rank-idx { color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: 12px; }
-  .rank-fsa { font-weight: 700; letter-spacing: 0.02em; }
+  .rank-fsa { font-weight: 700; letter-spacing: 0.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rank-bar-track { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
   .rank-bar-fill { height: 100%; border-radius: 3px; }
   .rank-val { font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--ink-muted); white-space: nowrap; }
@@ -334,14 +334,14 @@ TEMPLATE = r"""
 </style>
 
 <div class="page">
-  <div class="nav-links"><a href="index.html">&larr; Ontario LTB Data</a> &middot; <a href="city-map.html">City-level map &rarr;</a></div>
+  <div class="nav-links"><a href="index.html">&larr; Ontario LTB Data</a> &middot; <a href="map.html">Postal-code (FSA) map &rarr;</a></div>
   <div>
     <div class="eyebrow">Ontario &middot; 2021 census population &times; LTB open-data applications</div>
-    <h1>Where Ontario's rental disputes concentrate</h1>
-    <p class="dek">Landlord and Tenant Board applications by postal FSA, normalized against resident population.
-       Toggle between raw volume and per-10,000-resident rates, and between landlord-filed and tenant-filed cases &mdash;
-       hover any area for the full breakdown. Prefer city names to postal codes?
-       <a href="city-map.html">See the city-level map</a>.</p>
+    <h1>Where Ontario's rental disputes concentrate, by city</h1>
+    <p class="dek">Landlord and Tenant Board applications rolled up from postal FSA to municipality, normalized against
+       resident population. Toggle between raw volume and per-10,000-resident rates, and between landlord-filed and
+       tenant-filed cases &mdash; hover any area for the full breakdown. Prefer postal codes?
+       <a href="map.html">See the FSA-level map</a>.</p>
   </div>
 
   <div class="controls">
@@ -370,7 +370,7 @@ TEMPLATE = r"""
         <div class="legend-title" id="legend-title">Total applications / 10,000 residents</div>
         <div class="legend-bins" id="legend-bins"></div>
         <div class="legend-nodata"><span class="legend-swatch"></span><span>No data / population too small</span></div>
-        <div class="legend-note">Colored by rank (equal-count bins), not raw value &mdash; a few extreme FSAs no longer wash out the rest.</div>
+        <div class="legend-note">Colored by rank (equal-count bins), not raw value &mdash; a few extreme municipalities no longer wash out the rest.</div>
       </div>
       <div class="zoom-controls">
         <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
@@ -382,12 +382,12 @@ TEMPLATE = r"""
 
     <div class="side">
       <div class="panel">
-        <h2 id="rank-title">Top 10 FSAs</h2>
+        <h2 id="rank-title">Top 10 municipalities</h2>
         <div id="rank-list"></div>
       </div>
       <div class="panel">
         <h2>Province-wide</h2>
-        <div class="stat-row"><span class="k">FSAs with matched data</span><span class="v" id="stat-matched"></span></div>
+        <div class="stat-row"><span class="k">Municipalities with data</span><span class="v" id="stat-matched"></span></div>
         <div class="stat-row"><span class="k">Total applications</span><span class="v" id="stat-total"></span></div>
         <div class="stat-row"><span class="k">Landlord-filed</span><span class="v" id="stat-landlord"></span></div>
         <div class="stat-row"><span class="k">Tenant-filed</span><span class="v" id="stat-tenant"></span></div>
@@ -396,10 +396,12 @@ TEMPLATE = r"""
   </div>
 
   <footer>
-    Application counts: Landlord and Tenant Board open-data export (40,844 records, FSA parsed from rental unit address).
-    Population: Statistics Canada table 98-10-0019-01, 2021 Census. Per-10,000 rate = applications &divide; population &times; 10,000.
-    Raw counts favor high-population areas; per-10,000 rates get noisy for small-population FSAs &mdash; treat single-digit-population-thousands
-    FSAs with some caution. Grey areas have an FSA boundary but no matching LTB applications in this export.
+    Application counts: Landlord and Tenant Board open-data export (40,844 records), rolled up from postal FSA to
+    municipality by area-weighted overlap (an FSA split across two municipalities is divided proportionally by
+    area, not assigned whole to one). Population: Statistics Canada table 98-10-0002-01, 2021 Census, by Census
+    Subdivision. Per-10,000 rate = applications &divide; population &times; 10,000. Raw counts favor high-population
+    areas; per-10,000 rates get noisy for small-population municipalities built from very few FSAs &mdash; treat
+    small towns with some caution. Grey areas have a municipal boundary but no matching LTB applications in this export.
   </footer>
 </div>
 
@@ -415,10 +417,13 @@ TEMPLATE = r"""
     tenant:   ["#fdf1e9", "#fad9be", "#f4b383", "#eb8c50", "#d66325", "#7a3210"]
   };
   var LENS_LABEL = { total: "Total", landlord: "Landlord-filed", tenant: "Tenant-filed" };
-  var LENS_DOT = { total: "var(--neutral-accent)", landlord: "var(--landlord)", tenant: "var(--tenant)" };
 
   var state = { metric: "per10k", lens: "total" };
-  var POP_FLOOR = 1000; // below this, a per-10k rate is too noisy to color reliably
+  // Higher than the FSA map's floor (1,000): area-weighted allocation from a
+  // large rural FSA onto a sparsely-populated municipality (esp. "Unorganized"
+  // territories, which can be huge in land area but tiny in population)
+  // inflates small-population rates much more here than at the FSA level.
+  var POP_FLOOR = 10000;
 
   var svg = document.getElementById('map-svg');
   var tooltip = document.getElementById('tooltip');
@@ -435,12 +440,6 @@ TEMPLATE = r"""
     return f.population === null || f.population >= POP_FLOOR;
   }
 
-  // Quantile (equal-COUNT) bins instead of linear min-max: this data is
-  // heavily right-skewed (a couple of tiny-population FSAs post rates in
-  // the hundreds/10k while the typical FSA sits under 30/10k), so a linear
-  // scale leaves almost everything the same pale shade with one or two
-  // outliers eating the dark end. Ranking into equal-sized bins guarantees
-  // real, visible contrast is spent where the data actually varies.
   function computeBins(lens, metric) {
     var vals = features
       .filter(function (f) { return isReliable(f, metric); })
@@ -455,7 +454,7 @@ TEMPLATE = r"""
       var i0 = Math.floor(idx), i1 = Math.min(vals.length - 1, i0 + 1), frac = idx - i0;
       breaks.push(vals.length ? vals[i0] + (vals[i1] - vals[i0]) * frac : 0);
     }
-    return breaks; // nBins+1 edges
+    return breaks;
   }
   function binIndex(v, breaks) {
     for (var i = 0; i < breaks.length - 2; i++) {
@@ -464,19 +463,18 @@ TEMPLATE = r"""
     return breaks.length - 2;
   }
 
-  // build path elements once; recolor on state change
   var pathEls = features.map(function (f) {
     var el = document.createElementNS("http://www.w3.org/2000/svg", "path");
     el.setAttribute("d", f.d);
-    el.setAttribute("data-fsa", f.fsa);
+    el.setAttribute("data-csduid", f.csduid);
     el.addEventListener("mousemove", function (e) { showTooltip(e, f); });
     el.addEventListener("mouseleave", function () { if (!pinned) hideTooltip(); });
     el.addEventListener("click", function () {
-      if (wasDragged) return; // a pan ending on top of a path shouldn't also toggle its pin
-      if (pinned === f.fsa) { pinned = null; el.classList.remove('pinned'); hideTooltip(); }
+      if (wasDragged) return;
+      if (pinned === f.csduid) { pinned = null; el.classList.remove('pinned'); hideTooltip(); }
       else {
         pathEls.forEach(function(p){ p.classList.remove('pinned'); });
-        pinned = f.fsa; el.classList.add('pinned');
+        pinned = f.csduid; el.classList.add('pinned');
       }
     });
     svg.appendChild(el);
@@ -485,7 +483,7 @@ TEMPLATE = r"""
 
   function fmt(n) {
     if (n === null || n === undefined) return "—";
-    return n.toLocaleString();
+    return Math.round(n).toLocaleString();
   }
   function fmtRate(n) {
     if (n === null || n === undefined) return "—";
@@ -494,10 +492,12 @@ TEMPLATE = r"""
 
   function showTooltip(e, f) {
     if (dragStart) return;
-    var dotColor = { total: getVar('--neutral-accent'), landlord: getVar('--landlord'), tenant: getVar('--tenant') };
+    var dotColor = { landlord: getVar('--landlord'), tenant: getVar('--tenant') };
+    var fsaNote = f.fsa_count ? ('<div class="t-row t-muted"><span>Built from</span><span>' + f.fsa_count.toFixed(1) + ' FSA' + (f.fsa_count === 1 ? '' : 's') + '</span></div>') : '';
     tooltip.innerHTML =
-      '<div class="t-fsa">' + f.fsa + '</div>' +
+      '<div class="t-fsa">' + f.name + '</div>' +
       '<div class="t-row t-muted"><span>Population (2021)</span><span>' + fmt(f.population) + '</span></div>' +
+      fsaNote +
       '<div class="t-row"><span><span class="t-dot" style="background:' + dotColor.landlord + '"></span>Landlord-filed</span><span>' + fmt(f.landlord) + ' &middot; ' + fmtRate(f.landlord_per10k) + '/10k</span></div>' +
       '<div class="t-row"><span><span class="t-dot" style="background:' + dotColor.tenant + '"></span>Tenant-filed</span><span>' + fmt(f.tenant) + ' &middot; ' + fmtRate(f.tenant_per10k) + '/10k</span></div>' +
       '<div class="t-row" style="margin-top:4px;border-top:1px solid rgba(128,128,128,0.4);padding-top:4px;"><span>Total</span><span>' + fmt(f.total) + ' &middot; ' + fmtRate(f.total_per10k) + '/10k</span></div>';
@@ -505,7 +505,7 @@ TEMPLATE = r"""
     positionTooltip(e);
   }
   function positionTooltip(e) {
-    var pad = 14, tw = 250, th = 160;
+    var pad = 14, tw = 260, th = 180;
     var x = e.clientX + pad, y = e.clientY + pad;
     if (x + tw > window.innerWidth) x = e.clientX - tw - pad;
     if (y + th > window.innerHeight) y = window.innerHeight - th - pad;
@@ -536,20 +536,17 @@ TEMPLATE = r"""
       }
     });
 
-    // legend: one swatch per bin, labeled with its value range (not a
-    // continuous min-max gradient — that's exactly what hid the contrast)
     document.getElementById('legend-title').textContent =
       LENS_LABEL[lens] + ' applications' + (metric === 'per10k' ? ' / 10,000 residents' : ' (raw count)') + ', by rank';
     var fmtBin = metric === 'per10k' ? function(v){ return v.toFixed(1); } : function(v){ return fmt(Math.round(v)); };
     var binsHtml = '';
     for (var b = 0; b < ramp.length; b++) {
       var lo = breaks[b], hi = breaks[b + 1];
-      var label = (b === ramp.length - 1) ? (fmtBin(lo) + '+') : (fmtBin(lo) + '\u2013' + fmtBin(hi));
+      var label = (b === ramp.length - 1) ? (fmtBin(lo) + '+') : (fmtBin(lo) + '–' + fmtBin(hi));
       binsHtml += '<div class="legend-bin-row"><span class="legend-bin-swatch" style="background:' + ramp[b] + '"></span><span>' + label + '</span></div>';
     }
     document.getElementById('legend-bins').innerHTML = binsHtml;
 
-    // rank list
     var ranked = features
       .filter(function(f){ return f.population !== null && valueFor(f, lens, metric) !== null; })
       .filter(function(f){ return isReliable(f, metric); })
@@ -562,16 +559,15 @@ TEMPLATE = r"""
       var label = metric === 'per10k' ? fmtRate(v) + '/10k' : fmt(v);
       return '<div class="rank-row">' +
         '<span class="rank-idx">' + (i+1) + '</span>' +
-        '<span class="rank-fsa">' + f.fsa + '</span>' +
+        '<span class="rank-fsa" title="' + f.name + '">' + f.name + '</span>' +
         '<span class="rank-bar-track"><span class="rank-bar-fill" style="width:' + pct + '%;background:' + barColor + '"></span></span>' +
         '<span class="rank-val">' + label + '</span>' +
       '</div>';
     }).join('');
     document.getElementById('rank-list').innerHTML = rankHtml;
     document.getElementById('rank-title').textContent =
-      'Top 10 FSAs — ' + LENS_LABEL[lens] + (metric === 'per10k' ? ' per 10k' : ' (raw)');
+      'Top 10 municipalities — ' + LENS_LABEL[lens] + (metric === 'per10k' ? ' per 10k' : ' (raw)');
 
-    // province stats (constant regardless of lens/metric)
     var matchedCount = features.filter(function(f){ return f.population !== null; }).length;
     var sumTotal = features.reduce(function(a,f){ return a + (f.total||0); }, 0);
     var sumLandlord = features.reduce(function(a,f){ return a + (f.landlord||0); }, 0);
@@ -582,9 +578,6 @@ TEMPLATE = r"""
     document.getElementById('stat-tenant').textContent = fmt(sumTenant);
   }
 
-  // ---- pan / zoom (viewBox-based; the map defaults to a crop around the
-  // populated area since most of Ontario's land area has near-zero LTB
-  // activity, but the full province is still reachable by zooming out) ----
   var fullView = { x: 0, y: 0, w: payload.width, h: payload.height };
   var view = { x: payload.focusView.x, y: payload.focusView.y, w: payload.focusView.width, h: payload.focusView.height };
   var MIN_W = fullView.w * 0.015;
