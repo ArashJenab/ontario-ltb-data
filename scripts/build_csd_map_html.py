@@ -367,8 +367,8 @@ TEMPLATE = r"""
     <div class="control-group">
       <span class="control-label">Color by</span>
       <div class="segmented" id="colormode-toggle">
-        <button data-colormode="quantile" aria-pressed="true">Rank (6 groups)</button>
-        <button data-colormode="continuous" aria-pressed="false">Value (every area distinct)</button>
+        <button data-colormode="quantile" aria-pressed="false">Rank (6 groups)</button>
+        <button data-colormode="continuous" aria-pressed="true">Value (every area distinct)</button>
       </div>
     </div>
   </div>
@@ -433,7 +433,7 @@ TEMPLATE = r"""
   };
   var LENS_LABEL = { total: "Total", landlord: "Landlord-filed", tenant: "Tenant-filed" };
 
-  var state = { metric: "per10k", lens: "total", colormode: "quantile" };
+  var state = { metric: "per10k", lens: "total", colormode: "continuous" };
   // Higher than the FSA map's floor (1,000): area-weighted allocation from a
   // large rural FSA onto a sparsely-populated municipality (esp. "Unorganized"
   // territories, which can be huge in land area but tiny in population)

@@ -367,8 +367,8 @@ TEMPLATE = r"""
     <div class="control-group">
       <span class="control-label">Color by</span>
       <div class="segmented" id="colormode-toggle">
-        <button data-colormode="quantile" aria-pressed="true">Rank (6 groups)</button>
-        <button data-colormode="continuous" aria-pressed="false">Value (every area distinct)</button>
+        <button data-colormode="quantile" aria-pressed="false">Rank (6 groups)</button>
+        <button data-colormode="continuous" aria-pressed="true">Value (every area distinct)</button>
       </div>
     </div>
   </div>
@@ -432,7 +432,7 @@ TEMPLATE = r"""
   var LENS_LABEL = { total: "Total", landlord: "Landlord-filed", tenant: "Tenant-filed" };
   var LENS_DOT = { total: "var(--neutral-accent)", landlord: "var(--landlord)", tenant: "var(--tenant)" };
 
-  var state = { metric: "per10k", lens: "total", colormode: "quantile" };
+  var state = { metric: "per10k", lens: "total", colormode: "continuous" };
   var POP_FLOOR = 1000; // below this, a per-10k rate is too noisy to color reliably
 
   var svg = document.getElementById('map-svg');
