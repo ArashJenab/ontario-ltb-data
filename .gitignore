@@ -8,6 +8,11 @@ pdfs/
 data/raw_fsa_boundaries/
 data/raw_csd_boundaries/
 
+# Local archive of every fetch_ltb_orders.py run (gzipped, last 5 kept) — a
+# safety net against upstream changes/removals, not a durable multi-machine
+# backup. fetch_log.csv (the audit trail of decisions) IS tracked in git.
+data/snapshots/
+
 # Build artifacts / scratch outputs — the final map is committed at /map.html;
 # scripts/_build/ is just the intermediate working copy the build script writes.
 scripts/_build/

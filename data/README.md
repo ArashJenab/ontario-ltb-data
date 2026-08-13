@@ -6,7 +6,8 @@ Source data and derived datasets. Everything in [`results/`](../results/) is bui
 
 | File | What it is |
 |---|---|
-| `ltb_open_data_export.json` | The LTB's own open-data export — 40,844 order records. Source of truth for every finding in this repo. |
+| `ltb_open_data_export.json` | The LTB's own open-data export — 40,844 order records. Source of truth for every finding in this repo. Refreshed via `scripts/fetch_ltb_orders.py` (CKAN Data API), not a manual download — see [`DATA_SOURCES.md`](../DATA_SOURCES.md#keeping-the-snapshot-current). |
+| `fetch_log.csv` | Audit trail of every `fetch_ltb_orders.py` run — date, record counts, churn %, whether it was adopted. |
 | `fsa_population.csv` | `fsa`, `population` — 1,646 FSAs, all of Canada, 2021 Census. |
 | `fsa_applications_normalized.csv` | [`results/applications_by_area/fsa_application_counts.csv`](../results/applications_by_area/) joined with `fsa_population.csv`, plus `total_applications_per_10k`, `landlord_filed_per_10k`, `tenant_filed_per_10k` — applications per 10,000 residents, sorted descending. |
 | `ontario_fsa_simplified.geojson` | Ontario FSA boundary polygons (520 of them), simplified from StatCan's full cartographic detail (94MB → 3.5MB, ~400m tolerance) so they're usable as inline SVG. |

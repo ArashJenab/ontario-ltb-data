@@ -8,7 +8,20 @@ This project uses two public datasets. Neither is scraped, purchased, or private
 - **Dataset**: [LTB Order Catalogue](https://data.ontario.ca/dataset/ltb-order-catalogue), via the Ontario Data Catalogue
 - **License**: [Open Government Licence – Ontario](https://www.ontario.ca/page/open-government-licence-ontario)
 - **What it contains**: copies of final orders issued by the LTB, published in phases (historical orders from 2021 onward; orders subject to confidentiality orders are excluded)
-- **Used here as**: `data/ltb_open_data_export.json` — the export snapshot this analysis is built from (40,844 records)
+- **Accessed via**: the dataset's [CKAN Data API](https://data.ontario.ca/dataset/ltb-order-catalogue) (`datastore_search`, resource id `86e75d11-1c2c-4cd9-9b0d-9fccec302b30`), not a manual browser export
+- **Used here as**: `data/ltb_open_data_export.json` — the snapshot this analysis is built from (40,844 records as of 2026-08-13)
+
+### Keeping the snapshot current
+
+`python scripts/fetch_ltb_orders.py` re-pulls the full dataset from the CKAN API and decides whether to adopt it:
+
+- Every fetch is archived to `data/snapshots/` (gitignored local backup, last 5 kept), regardless of outcome.
+- The fetch is compared against the current `data/ltb_open_data_export.json` by Document ID: records added + removed, as a percentage of the old total ("churn").
+- Below the churn threshold (default 10%, `--threshold` to change it): the fetch is **dismissed** — a few thousand new orders on top of ~40,000 is expected drift, not enough to skew the aggregate stats or invalidate the existing proportional dollar-amount sample.
+- At or above the threshold: the fetch is **adopted** (`data/ltb_open_data_export.json` is overwritten) and the script prints a reminder to redraw the dollar-amount sample, since resampling means re-downloading and re-extracting PDFs for ~600 orders and is deliberately not automatic.
+- Every run — adopted or not — is logged to `data/fetch_log.csv` (tracked in git) as an audit trail of what changed and what was decided.
+
+Run it whenever you want a refresh; nothing in the pipeline calls it automatically.
 
 Under the Open Government Licence – Ontario, you're free to copy, modify, publish, translate, and distribute this information, including commercially, provided you attribute the source and don't imply endorsement by the Ontario government or the LTB. This repository's use complies with those terms; the license applies to the LTB data itself, independent of this repo's own [MIT license](LICENSE) on the analysis code.
 
