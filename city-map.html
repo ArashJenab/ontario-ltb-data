@@ -104,7 +104,7 @@
   }
   .dek {
     margin: 8px 0 0 0;
-    max-width: 80ch;
+    max-width: 100%;
     text-wrap: pretty;
     font-size: 15px;
     line-height: 1.55;
@@ -155,6 +155,7 @@
   .segmented button[data-lens="landlord"][aria-pressed="true"] { background: var(--landlord); }
   .segmented button[data-lens="tenant"][aria-pressed="true"] { background: var(--tenant); }
   .segmented button[data-metric][aria-pressed="true"] { background: var(--ink); }
+  .segmented button[data-colormode][aria-pressed="true"] { background: var(--ink); }
 
   .layout {
     display: grid;
@@ -204,6 +205,8 @@
   .legend-nodata { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
   .legend-swatch { width: 11px; height: 11px; border-radius: 3px; background: var(--no-data); border: 1px solid var(--border-strong); flex: none; }
   .legend-note { font-size: 10.5px; color: var(--ink-faint); margin-top: 3px; max-width: 190px; line-height: 1.4; }
+  .legend-gradient-bar { width: 170px; height: 12px; border-radius: 4px; }
+  .legend-gradient-scale { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; margin-top: 4px; }
 
   .zoom-controls {
     position: absolute;
@@ -330,7 +333,8 @@
   <div>
     <div class="eyebrow">Ontario &middot; 2021 census population &times; LTB open-data applications</div>
     <h1>Where Ontario's rental disputes concentrate, by city</h1>
-    <p class="dek">Landlord and Tenant Board applications rolled up from postal FSA to municipality, normalized against
+    <p class="dek">Landlord and Tenant Board applications rolled up from postal FSA (Forward Sortation Area &mdash;
+       the first 3 characters of a postal code) to municipality, normalized against
        resident population. Toggle between raw volume and per-10,000-resident rates, and between landlord-filed and
        tenant-filed cases &mdash; hover any area for the full breakdown. Prefer postal codes?
        <a href="map.html">See the FSA-level map</a>.</p>
@@ -352,6 +356,13 @@
         <button data-lens="tenant" aria-pressed="false">Tenant-filed</button>
       </div>
     </div>
+    <div class="control-group">
+      <span class="control-label">Color by</span>
+      <div class="segmented" id="colormode-toggle">
+        <button data-colormode="quantile" aria-pressed="true">Rank (6 groups)</button>
+        <button data-colormode="continuous" aria-pressed="false">Value (every area distinct)</button>
+      </div>
+    </div>
   </div>
 
   <div class="layout">
@@ -361,8 +372,12 @@
       <div class="legend">
         <div class="legend-title" id="legend-title">Total applications / 10,000 residents</div>
         <div class="legend-bins" id="legend-bins"></div>
+        <div class="legend-gradient" id="legend-gradient" style="display:none;">
+          <div class="legend-gradient-bar" id="legend-gradient-bar"></div>
+          <div class="legend-gradient-scale"><span id="legend-grad-min">0</span><span id="legend-grad-max">&mdash;</span></div>
+        </div>
         <div class="legend-nodata"><span class="legend-swatch"></span><span>No data / population too small</span></div>
-        <div class="legend-note">Colored by rank (equal-count bins), not raw value &mdash; a few extreme municipalities no longer wash out the rest.</div>
+        <div class="legend-note" id="legend-note">Colored by rank (equal-count bins), not raw value &mdash; a few extreme municipalities no longer wash out the rest.</div>
       </div>
       <div class="zoom-controls">
         <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
@@ -410,7 +425,7 @@
   };
   var LENS_LABEL = { total: "Total", landlord: "Landlord-filed", tenant: "Tenant-filed" };
 
-  var state = { metric: "per10k", lens: "total" };
+  var state = { metric: "per10k", lens: "total", colormode: "quantile" };
   // Higher than the FSA map's floor (1,000): area-weighted allocation from a
   // large rural FSA onto a sparsely-populated municipality (esp. "Unorganized"
   // territories, which can be huge in land area but tiny in population)
@@ -453,6 +468,43 @@
       if (v <= breaks[i + 1]) return i;
     }
     return breaks.length - 2;
+  }
+
+  // "By value" mode: a smooth gradient across the ramp instead of 6 discrete
+  // groups, so two nearby-but-different areas get visibly different shades
+  // instead of identical ones. Uses a sqrt transform, not linear, for the
+  // same right-skew reason quantile bins exist.
+  function computeContinuousDomain(lens, metric) {
+    var vals = features
+      .filter(function (f) { return isReliable(f, metric); })
+      .map(function (f) { return valueFor(f, lens, metric); })
+      .filter(function (v) { return v !== null && v !== undefined; });
+    return { min: vals.length ? Math.min.apply(null, vals) : 0, max: vals.length ? Math.max.apply(null, vals) : 1 };
+  }
+  function hexToRgb(h) {
+    h = h.replace('#', '');
+    return [parseInt(h.substring(0, 2), 16), parseInt(h.substring(2, 4), 16), parseInt(h.substring(4, 6), 16)];
+  }
+  function mixHex(a, b, t) {
+    var ca = hexToRgb(a), cb = hexToRgb(b);
+    var r = Math.round(ca[0] + (cb[0] - ca[0]) * t);
+    var g = Math.round(ca[1] + (cb[1] - ca[1]) * t);
+    var bl = Math.round(ca[2] + (cb[2] - ca[2]) * t);
+    return "rgb(" + r + "," + g + "," + bl + ")";
+  }
+  function continuousColor(ramp, v, domain) {
+    var span = domain.max - domain.min;
+    var t = span > 0 ? Math.sqrt(Math.max(0, v - domain.min)) / Math.sqrt(span) : 0;
+    t = Math.max(0, Math.min(1, t));
+    var idx = t * (ramp.length - 1);
+    var i0 = Math.floor(idx), i1 = Math.min(ramp.length - 1, i0 + 1), frac = idx - i0;
+    return mixHex(ramp[i0], ramp[i1], frac);
+  }
+  function colorForFeature(f, lens, metric, ramp, breaks, domain) {
+    var v = valueFor(f, lens, metric);
+    if (v === null || v === undefined || !isReliable(f, metric)) return null;
+    if (state.colormode === 'continuous') return continuousColor(ramp, v, domain);
+    return ramp[binIndex(v, breaks)];
   }
 
   var pathEls = features.map(function (f) {
@@ -516,28 +568,40 @@
     var lens = state.lens, metric = state.metric;
     var ramp = RAMPS[lens];
     var breaks = computeBins(lens, metric);
+    var domain = computeContinuousDomain(lens, metric);
     var maxVal = breaks[breaks.length - 1];
+    var colorOf = function (f) { return colorForFeature(f, lens, metric, ramp, breaks, domain); };
 
     pathEls.forEach(function (el, i) {
       var f = features[i];
-      var v = valueFor(f, lens, metric);
-      if (v === null || v === undefined || !isReliable(f, metric)) {
-        el.setAttribute("fill", getVar('--no-data'));
-      } else {
-        el.setAttribute("fill", ramp[binIndex(v, breaks)]);
-      }
+      el.setAttribute("fill", colorOf(f) || getVar('--no-data'));
     });
 
+    var quantileMode = state.colormode !== 'continuous';
     document.getElementById('legend-title').textContent =
-      LENS_LABEL[lens] + ' applications' + (metric === 'per10k' ? ' / 10,000 residents' : ' (raw count)') + ', by rank';
+      LENS_LABEL[lens] + ' applications' + (metric === 'per10k' ? ' / 10,000 residents' : ' (raw count)') +
+      (quantileMode ? ', by rank' : ', by value');
     var fmtBin = metric === 'per10k' ? function(v){ return v.toFixed(1); } : function(v){ return fmt(Math.round(v)); };
-    var binsHtml = '';
-    for (var b = 0; b < ramp.length; b++) {
-      var lo = breaks[b], hi = breaks[b + 1];
-      var label = (b === ramp.length - 1) ? (fmtBin(lo) + '+') : (fmtBin(lo) + '–' + fmtBin(hi));
-      binsHtml += '<div class="legend-bin-row"><span class="legend-bin-swatch" style="background:' + ramp[b] + '"></span><span>' + label + '</span></div>';
+
+    document.getElementById('legend-bins').style.display = quantileMode ? '' : 'none';
+    document.getElementById('legend-gradient').style.display = quantileMode ? 'none' : '';
+    if (quantileMode) {
+      var binsHtml = '';
+      for (var b = 0; b < ramp.length; b++) {
+        var lo = breaks[b], hi = breaks[b + 1];
+        var label = (b === ramp.length - 1) ? (fmtBin(lo) + '+') : (fmtBin(lo) + '\u2013' + fmtBin(hi));
+        binsHtml += '<div class="legend-bin-row"><span class="legend-bin-swatch" style="background:' + ramp[b] + '"></span><span>' + label + '</span></div>';
+      }
+      document.getElementById('legend-bins').innerHTML = binsHtml;
+      document.getElementById('legend-note').textContent =
+        'Colored by rank (equal-count bins) \u2014 every group has the same number of areas, regardless of how close their values are.';
+    } else {
+      document.getElementById('legend-gradient-bar').style.background = 'linear-gradient(90deg,' + ramp.join(',') + ')';
+      document.getElementById('legend-grad-min').textContent = fmtBin(domain.min);
+      document.getElementById('legend-grad-max').textContent = fmtBin(domain.max);
+      document.getElementById('legend-note').textContent =
+        'Colored by value on a smooth scale \u2014 every area gets its own shade, so nearby values look similar but rarely identical.';
     }
-    document.getElementById('legend-bins').innerHTML = binsHtml;
 
     var ranked = features
       .filter(function(f){ return f.population !== null && valueFor(f, lens, metric) !== null; })
@@ -547,7 +611,7 @@
     var rankHtml = ranked.map(function(f, i) {
       var v = valueFor(f, lens, metric);
       var pct = maxVal > 0 ? (v / maxVal * 100) : 0;
-      var barColor = ramp[ramp.length - 1];
+      var barColor = colorOf(f) || getVar('--no-data');
       var label = metric === 'per10k' ? fmtRate(v) + '/10k' : fmt(v);
       return '<div class="rank-row">' +
         '<span class="rank-idx">' + (i+1) + '</span>' +
@@ -672,11 +736,12 @@
       btn.addEventListener('click', function () {
         group.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
         btn.setAttribute('aria-pressed', 'true');
-        state[key] = btn.dataset[key === 'metric' ? 'metric' : 'lens'];
+        state[key] = btn.dataset[key];
         render();
       });
     });
   }
+  wireToggle('colormode-toggle', 'colormode');
   wireToggle('metric-toggle', 'metric');
   wireToggle('lens-toggle', 'lens');
 
