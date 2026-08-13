@@ -107,16 +107,16 @@
     </div>
 
     <p class="intro">
-      This analysis uses only two public sources — the LTB's own open-data order export (40,844 records) and
-      Statistics Canada's 2021 Census — and nothing else. All figures, code, and underlying data are public:
+      This analysis uses only two public sources: the LTB's own open-data order export (40,844 records) and
+      Statistics Canada's 2021 Census, and nothing else. All figures, code, and underlying data are public:
       <a href="https://github.com/ArashJenab/ontario-ltb-data">github.com/ArashJenab/ontario-ltb-data</a>.
     </p>
 
     <h2>Finding 1: Landlords are awarded far more than tenants</h2>
     <p>
       Sampling completed LTB orders and reading the dollar amount each one actually states, landlords were
-      awarded an estimated <b>$130 million</b> against tenants — non-payment of rent, breach of a settlement,
-      and other landlord-filed evictions — versus an estimated <b>$4.9 million</b> awarded to tenants, across
+      awarded an estimated <b>$130 million</b> against tenants (non-payment of rent, breach of a settlement,
+      and other landlord-filed evictions), versus an estimated <b>$4.9 million</b> awarded to tenants, across
       rent rebates, maintenance remedies, and tenant-rights compensation combined.
     </p>
     <table>
@@ -129,14 +129,14 @@
     </table>
     <p>
       Three independent sampling designs put the ratio anywhere from 26 to 1 up to 74 to 1. None came close to
-      parity, and the true figure — a full accounting would require reading all 40,844 orders rather than a
-      sample — is unlikely to be smaller than the most conservative estimate here. The gap isn't only about
+      parity, and the true figure (a full accounting would require reading all 40,844 orders rather than a
+      sample) is unlikely to be smaller than the most conservative estimate here. The gap isn't only about
       volume: restricted to the same categories on both sides, landlords file 7.1&times; more cases but are
-      awarded 26.3&times; more money — meaning landlords also average roughly <b>3.7&times; more per case</b>
+      awarded 26.3&times; more money, meaning landlords also average roughly <b>3.7&times; more per case</b>
       ($4,249 vs. $1,143) than tenants do.
     </p>
 
-    <h2>Finding 2: Landlords file over 5 times as often — no estimation required</h2>
+    <h2>Finding 2: Landlords file over 5 times as often, no estimation required</h2>
     <p>
       Independent of any dollar figure, this is a direct count of the complete public dataset, not a sample: of
       all 40,844 applications on record, <b>34,422 (84%) were filed by landlords</b> against tenants, versus
@@ -144,18 +144,18 @@
       often than tenants do.
     </p>
 
-    <h2>Finding 3: Dispute activity is concentrated — but not where raw counts suggest</h2>
+    <h2>Finding 3: Dispute activity is concentrated, but not where raw counts suggest</h2>
     <p>
       Normalizing filings against each area's population (rather than raw counts, which just track population
-      density) surfaces a very different map. The highest-activity postal areas — Hamilton's L8N, London's N6B,
-      parts of Etobicoke, Sudbury, and Ottawa — see roughly <b>7 times the provincial median rate</b> of LTB
+      density) surfaces a very different map. The highest-activity postal areas (Hamilton's L8N, London's N6B,
+      parts of Etobicoke, Sudbury, and Ottawa) see roughly <b>7 times the provincial median rate</b> of LTB
       activity per resident, and there is an <b>8-fold gap</b> between the most- and least-active areas once
       tiny-population outliers are excluded.
     </p>
     <p>
       Raw counts alone point somewhere else entirely: Toronto's M3N has the single highest number of
       applications in the province, but drops to 11th place once its (large) population is factored in. Whether
-      an area looks "high-activity" depends entirely on whether the analysis accounts for population — and to
+      an area looks "high-activity" depends entirely on whether the analysis accounts for population, and to
       date, nothing public does. The same view is also available rolled up to the municipality level (Toronto,
       Hamilton, Windsor, etc.) rather than postal codes. <a href="map.html">By postal code →</a> ·
       <a href="city-map.html">By city →</a>
@@ -164,18 +164,18 @@
     <h2>How this was built</h2>
     <p>
       Application-filing counts and geographic figures (Findings 2 and 3) are exact counts of the full public
-      dataset — no estimation involved. Dollar figures (Finding 1) required downloading and reading a sample of
+      dataset, no estimation involved. Dollar figures (Finding 1) required downloading and reading a sample of
       order PDFs individually, since the open-data export lists case metadata but not the amounts each order
       states; reading all 40,844 documents was outside this pass's scope, so those numbers are estimates, not a
       census, and should be read as order-of-magnitude rather than precise. An interactive, population-normalized
-      map of dispute activity by postal area — built from the same two public sources — accompanies this report.
+      map of dispute activity by postal area, built from the same two public sources, accompanies this report.
     </p>
 
     <h2>Why this matters</h2>
     <p>
       Nothing in this analysis required data the government doesn't already hold. The LTB already publishes its
-      order records; Statistics Canada already publishes population by area. Putting the two together — enough
-      to build the map and the figures above — took a few days' work with public tools. No public agency
+      order records; Statistics Canada already publishes population by area. Putting the two together, enough
+      to build the map and the figures above, took a few days' work with public tools. No public agency
       currently does this, so residents, journalists, and elected officials assessing whether the Board is
       working as intended have no way to see it for themselves.
     </p>
@@ -192,6 +192,9 @@
       Prepared from the Landlord and Tenant Board open-data export and Statistics Canada table 98-10-0019-01
       (2021 Census, population by forward sortation area). Methodology, raw data, and the full sampling
       comparison are available in the <a href="https://github.com/ArashJenab/ontario-ltb-data">source repository</a>.
+      This is an independent analysis developed using data published by the Government of Ontario. It is not an
+      official publication of, and is not affiliated with or endorsed by, the Government of Ontario or the
+      Landlord and Tenant Board.
     </footer>
 
   </div>

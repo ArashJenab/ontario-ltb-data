@@ -329,10 +329,10 @@
   <div>
     <div class="eyebrow">Ontario &middot; 2021 census population &times; LTB open-data applications</div>
     <h1>Where Ontario's rental disputes concentrate, by city</h1>
-    <p class="dek">Landlord and Tenant Board applications rolled up from postal FSA (Forward Sortation Area &mdash;
+    <p class="dek">Landlord and Tenant Board applications rolled up from postal FSA (Forward Sortation Area,
        the first 3 characters of a postal code) to municipality, normalized against
        resident population. Toggle between raw volume and per-10,000-resident rates, and between landlord-filed and
-       tenant-filed cases &mdash; hover any area for the full breakdown. Prefer postal codes?
+       tenant-filed cases: hover any area for the full breakdown. Prefer postal codes?
        <a href="map.html">See the FSA-level map</a>.</p>
   </div>
 
@@ -362,10 +362,10 @@
         <div class="legend-title" id="legend-title">Total applications / 10,000 residents</div>
         <div class="legend-gradient" id="legend-gradient">
           <div class="legend-gradient-bar" id="legend-gradient-bar"></div>
-          <div class="legend-gradient-scale"><span id="legend-grad-min">0</span><span id="legend-grad-max">&mdash;</span></div>
+          <div class="legend-gradient-scale"><span id="legend-grad-min">0</span><span id="legend-grad-max"></span></div>
         </div>
         <div class="legend-nodata"><span class="legend-swatch"></span><span>No data / population too small</span></div>
-        <div class="legend-note" id="legend-note">Colored by value on a smooth scale &mdash; every area gets its own shade, so nearby values look similar but rarely identical.</div>
+        <div class="legend-note" id="legend-note">Colored by value on a smooth scale: every area gets its own shade, so nearby values look similar but rarely identical.</div>
       </div>
       <div class="zoom-controls">
         <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
@@ -395,8 +395,11 @@
     municipality by area-weighted overlap (an FSA split across two municipalities is divided proportionally by
     area, not assigned whole to one). Population: Statistics Canada table 98-10-0002-01, 2021 Census, by Census
     Subdivision. Per-10,000 rate = applications &divide; population &times; 10,000. Raw counts favor high-population
-    areas; per-10,000 rates get noisy for small-population municipalities built from very few FSAs &mdash; treat
+    areas; per-10,000 rates get noisy for small-population municipalities built from very few FSAs, so treat
     small towns with some caution. Grey areas have a municipal boundary but no matching LTB applications in this export.
+    This is an independent analysis developed using data published by the Government of Ontario. It is not an
+    official publication of, and is not affiliated with or endorsed by, the Government of Ontario or the
+    Landlord and Tenant Board.
   </footer>
 </div>
 
@@ -407,7 +410,7 @@
   var features = payload.features;
 
   // one shared green-to-red ramp (low = green/fewer disputes, high = red/more
-  // disputes) instead of a different hue per lens — ColorBrewer's RdYlGn,
+  // disputes) instead of a different hue per lens, using ColorBrewer's RdYlGn,
   // reversed so green sits at the low end.
   var GREEN_RED_RAMP = ["#1a9850", "#66bd63", "#a6d96a", "#fee08b", "#f46d43", "#a50026"];
   var RAMPS = { total: GREEN_RED_RAMP, landlord: GREEN_RED_RAMP, tenant: GREEN_RED_RAMP };
@@ -490,11 +493,11 @@
   });
 
   function fmt(n) {
-    if (n === null || n === undefined) return "—";
+    if (n === null || n === undefined) return "N/A";
     return Math.round(n).toLocaleString();
   }
   function fmtRate(n) {
-    if (n === null || n === undefined) return "—";
+    if (n === null || n === undefined) return "N/A";
     return n.toFixed(1);
   }
 
@@ -567,7 +570,7 @@
     }).join('');
     document.getElementById('rank-list').innerHTML = rankHtml;
     document.getElementById('rank-title').textContent =
-      'Top 10 municipalities — ' + LENS_LABEL[lens] + (metric === 'per10k' ? ' per 10k' : ' (raw)');
+      'Top 10 municipalities: ' + LENS_LABEL[lens] + (metric === 'per10k' ? ' per 10k' : ' (raw)');
 
     var matchedCount = features.filter(function(f){ return f.population !== null; }).length;
     var sumTotal = features.reduce(function(a,f){ return a + (f.total||0); }, 0);
