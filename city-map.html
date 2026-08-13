@@ -155,7 +155,6 @@
   .segmented button[data-lens="landlord"][aria-pressed="true"] { background: var(--landlord); }
   .segmented button[data-lens="tenant"][aria-pressed="true"] { background: var(--tenant); }
   .segmented button[data-metric][aria-pressed="true"] { background: var(--ink); }
-  .segmented button[data-colormode][aria-pressed="true"] { background: var(--ink); }
 
   .layout {
     display: grid;
@@ -199,9 +198,6 @@
     backdrop-filter: blur(3px);
   }
   .legend-title { font-weight: 700; color: var(--ink); margin-bottom: 8px; font-size: 12px; }
-  .legend-bins { display: flex; flex-direction: column; gap: 3px; }
-  .legend-bin-row { display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
-  .legend-bin-swatch { width: 15px; height: 11px; border-radius: 3px; flex: none; }
   .legend-nodata { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
   .legend-swatch { width: 11px; height: 11px; border-radius: 3px; background: var(--no-data); border: 1px solid var(--border-strong); flex: none; }
   .legend-note { font-size: 10.5px; color: var(--ink-faint); margin-top: 3px; max-width: 190px; line-height: 1.4; }
@@ -305,7 +301,7 @@
   .rank-idx { color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: 12px; }
   .rank-fsa { font-weight: 700; letter-spacing: 0.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rank-bar-track { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
-  .rank-bar-fill { height: 100%; border-radius: 3px; }
+  .rank-bar-fill { display: block; height: 100%; border-radius: 3px; }
   .rank-val { font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--ink-muted); white-space: nowrap; }
 
   .stat-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
@@ -356,13 +352,6 @@
         <button data-lens="tenant" aria-pressed="false">Tenant-filed</button>
       </div>
     </div>
-    <div class="control-group">
-      <span class="control-label">Color by</span>
-      <div class="segmented" id="colormode-toggle">
-        <button data-colormode="quantile" aria-pressed="false">Rank (6 groups)</button>
-        <button data-colormode="continuous" aria-pressed="true">Value (every area distinct)</button>
-      </div>
-    </div>
   </div>
 
   <div class="layout">
@@ -371,13 +360,12 @@
       <div class="zoom-hint" id="zoom-hint">Scroll to zoom &middot; drag to pan</div>
       <div class="legend">
         <div class="legend-title" id="legend-title">Total applications / 10,000 residents</div>
-        <div class="legend-bins" id="legend-bins"></div>
-        <div class="legend-gradient" id="legend-gradient" style="display:none;">
+        <div class="legend-gradient" id="legend-gradient">
           <div class="legend-gradient-bar" id="legend-gradient-bar"></div>
           <div class="legend-gradient-scale"><span id="legend-grad-min">0</span><span id="legend-grad-max">&mdash;</span></div>
         </div>
         <div class="legend-nodata"><span class="legend-swatch"></span><span>No data / population too small</span></div>
-        <div class="legend-note" id="legend-note">Colored by rank (equal-count bins), not raw value &mdash; a few extreme municipalities no longer wash out the rest.</div>
+        <div class="legend-note" id="legend-note">Colored by value on a smooth scale &mdash; every area gets its own shade, so nearby values look similar but rarely identical.</div>
       </div>
       <div class="zoom-controls">
         <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
@@ -418,14 +406,14 @@
   var payload = JSON.parse(document.getElementById('map-data').textContent);
   var features = payload.features;
 
-  var RAMPS = {
-    total:    ["#eef0fb", "#d6d9f5", "#b3b7ea", "#8288d6", "#574fb0", "#322875"],
-    landlord: ["#eaf2fc", "#c9e0f7", "#93c2ee", "#5ca0e2", "#2e7dd1", "#163f6e"],
-    tenant:   ["#fdf1e9", "#fad9be", "#f4b383", "#eb8c50", "#d66325", "#7a3210"]
-  };
+  // one shared green-to-red ramp (low = green/fewer disputes, high = red/more
+  // disputes) instead of a different hue per lens — ColorBrewer's RdYlGn,
+  // reversed so green sits at the low end.
+  var GREEN_RED_RAMP = ["#1a9850", "#66bd63", "#a6d96a", "#fee08b", "#f46d43", "#a50026"];
+  var RAMPS = { total: GREEN_RED_RAMP, landlord: GREEN_RED_RAMP, tenant: GREEN_RED_RAMP };
   var LENS_LABEL = { total: "Total", landlord: "Landlord-filed", tenant: "Tenant-filed" };
 
-  var state = { metric: "per10k", lens: "total", colormode: "continuous" };
+  var state = { metric: "per10k", lens: "total" };
   // Higher than the FSA map's floor (1,000): area-weighted allocation from a
   // large rural FSA onto a sparsely-populated municipality (esp. "Unorganized"
   // territories, which can be huge in land area but tiny in population)
@@ -447,33 +435,10 @@
     return f.population === null || f.population >= POP_FLOOR;
   }
 
-  function computeBins(lens, metric) {
-    var vals = features
-      .filter(function (f) { return isReliable(f, metric); })
-      .map(function (f) { return valueFor(f, lens, metric); })
-      .filter(function (v) { return v !== null && v !== undefined; })
-      .sort(function (a, b) { return a - b; });
-    var nBins = RAMPS[lens].length;
-    var breaks = [];
-    for (var i = 0; i <= nBins; i++) {
-      var p = i / nBins;
-      var idx = p * (vals.length - 1);
-      var i0 = Math.floor(idx), i1 = Math.min(vals.length - 1, i0 + 1), frac = idx - i0;
-      breaks.push(vals.length ? vals[i0] + (vals[i1] - vals[i0]) * frac : 0);
-    }
-    return breaks;
-  }
-  function binIndex(v, breaks) {
-    for (var i = 0; i < breaks.length - 2; i++) {
-      if (v <= breaks[i + 1]) return i;
-    }
-    return breaks.length - 2;
-  }
-
-  // "By value" mode: a smooth gradient across the ramp instead of 6 discrete
-  // groups, so two nearby-but-different areas get visibly different shades
-  // instead of identical ones. Uses a sqrt transform, not linear, for the
-  // same right-skew reason quantile bins exist.
+  // A smooth gradient across the ramp, not discrete bins, so two nearby-but-
+  // different areas get visibly different shades instead of identical ones.
+  // Uses a sqrt transform, not linear, for the same right-skew reason noted
+  // on the FSA map.
   function computeContinuousDomain(lens, metric) {
     var vals = features
       .filter(function (f) { return isReliable(f, metric); })
@@ -500,11 +465,10 @@
     var i0 = Math.floor(idx), i1 = Math.min(ramp.length - 1, i0 + 1), frac = idx - i0;
     return mixHex(ramp[i0], ramp[i1], frac);
   }
-  function colorForFeature(f, lens, metric, ramp, breaks, domain) {
+  function colorForFeature(f, lens, metric, ramp, domain) {
     var v = valueFor(f, lens, metric);
     if (v === null || v === undefined || !isReliable(f, metric)) return null;
-    if (state.colormode === 'continuous') return continuousColor(ramp, v, domain);
-    return ramp[binIndex(v, breaks)];
+    return continuousColor(ramp, v, domain);
   }
 
   var pathEls = features.map(function (f) {
@@ -567,41 +531,22 @@
   function render() {
     var lens = state.lens, metric = state.metric;
     var ramp = RAMPS[lens];
-    var breaks = computeBins(lens, metric);
     var domain = computeContinuousDomain(lens, metric);
-    var maxVal = breaks[breaks.length - 1];
-    var colorOf = function (f) { return colorForFeature(f, lens, metric, ramp, breaks, domain); };
+    var maxVal = domain.max;
+    var colorOf = function (f) { return colorForFeature(f, lens, metric, ramp, domain); };
 
     pathEls.forEach(function (el, i) {
       var f = features[i];
       el.setAttribute("fill", colorOf(f) || getVar('--no-data'));
     });
 
-    var quantileMode = state.colormode !== 'continuous';
     document.getElementById('legend-title').textContent =
-      LENS_LABEL[lens] + ' applications' + (metric === 'per10k' ? ' / 10,000 residents' : ' (raw count)') +
-      (quantileMode ? ', by rank' : ', by value');
+      LENS_LABEL[lens] + ' applications' + (metric === 'per10k' ? ' / 10,000 residents' : ' (raw count)') + ', by value';
     var fmtBin = metric === 'per10k' ? function(v){ return v.toFixed(1); } : function(v){ return fmt(Math.round(v)); };
 
-    document.getElementById('legend-bins').style.display = quantileMode ? '' : 'none';
-    document.getElementById('legend-gradient').style.display = quantileMode ? 'none' : '';
-    if (quantileMode) {
-      var binsHtml = '';
-      for (var b = 0; b < ramp.length; b++) {
-        var lo = breaks[b], hi = breaks[b + 1];
-        var label = (b === ramp.length - 1) ? (fmtBin(lo) + '+') : (fmtBin(lo) + '\u2013' + fmtBin(hi));
-        binsHtml += '<div class="legend-bin-row"><span class="legend-bin-swatch" style="background:' + ramp[b] + '"></span><span>' + label + '</span></div>';
-      }
-      document.getElementById('legend-bins').innerHTML = binsHtml;
-      document.getElementById('legend-note').textContent =
-        'Colored by rank (equal-count bins) \u2014 every group has the same number of areas, regardless of how close their values are.';
-    } else {
-      document.getElementById('legend-gradient-bar').style.background = 'linear-gradient(90deg,' + ramp.join(',') + ')';
-      document.getElementById('legend-grad-min').textContent = fmtBin(domain.min);
-      document.getElementById('legend-grad-max').textContent = fmtBin(domain.max);
-      document.getElementById('legend-note').textContent =
-        'Colored by value on a smooth scale \u2014 every area gets its own shade, so nearby values look similar but rarely identical.';
-    }
+    document.getElementById('legend-gradient-bar').style.background = 'linear-gradient(90deg,' + ramp.join(',') + ')';
+    document.getElementById('legend-grad-min').textContent = fmtBin(domain.min);
+    document.getElementById('legend-grad-max').textContent = fmtBin(domain.max);
 
     var ranked = features
       .filter(function(f){ return f.population !== null && valueFor(f, lens, metric) !== null; })
@@ -741,7 +686,6 @@
       });
     });
   }
-  wireToggle('colormode-toggle', 'colormode');
   wireToggle('metric-toggle', 'metric');
   wireToggle('lens-toggle', 'lens');
 
