@@ -1,42 +1,62 @@
-# Ontario's Landlord and Tenant Board, By the Numbers
+# What Ontario's rental disputes cost, and who pays
 
-*An open-data analysis — August 2026*
+*An open-data analysis. Generated 2026-08-27 by `scripts/build_site.py`.*
 
-**In one sentence:** Ontario's own public records show landlords filing more than five times as often as tenants and being awarded at least 26 times as much money, dispute activity is heavily concentrated in specific neighbourhoods once population is accounted for, and no public agency currently shows any of this to the people it affects.
+**Window.** The Landlord and Tenant Board publishes one rolling current-year file. This analysis covers **2026-01-02 to 2026-05-29**, 148 days, holding 40,844 orders across 37,401 distinct cases. Not a full year and not all time. No earlier period is published anywhere, so no trend can be measured yet. Annual figures below are that window multiplied by 2.466.
 
-This analysis uses only two public sources — the LTB's own open-data order export (40,844 records) and Statistics Canada's 2021 Census — and nothing else. All figures, code, and underlying data are public: **[github.com/ArashJenab/ontario-ltb-data](https://github.com/ArashJenab/ontario-ltb-data)**.
+**In one sentence:** the Board handles a normal-sized caseload by international standards, but the weight of it falls on people who own a single rental unit and on tenants who never reach the Board at all, and the public record is not shaped like the problem it gets used to describe.
 
-## Finding 1: Landlords are awarded far more than tenants
+## 1. The scale is ordinary
 
-Sampling completed LTB orders and reading the dollar amount each one actually states, landlords were awarded an estimated **$130 million** against tenants — non-payment of rent, breach of a settlement, and other landlord-filed evictions — versus an estimated **$4.9 million** awarded to tenants, across rent rebates, maintenance remedies, and tenant-rights compensation combined.
+About **4.22% of Ontario's 1,724,970 renter households**, roughly 1 in 24, have a landlord case filed against them each year. Three independent routes agree: this export annualised, this export counting distinct rental units, and the Board's own published intake for 2024-25.
 
-| Sampling design | Landlord-side awards | Tenant-side awards | Ratio |
-|---|---:|---:|---:|
-| 100 orders / category (balanced) | $130M | $4.9M | **26 : 1** |
-| 10 orders / category (pilot) | $81M | $2.2M | 37 : 1 |
-| Budget split by category size | $151M | $2.0M | 74 : 1 |
+For comparison, the United States filing rate is about 8.0% of renter households (Eviction Lab, 2024), and only about 1.0% of Canadian renters are actually evicted in a year (CMHC, 2025). **An application is not an eviction**: most non-payment cases end with the tenant paying and staying. Quoting the filing rate as an eviction rate is wrong in either direction.
 
-Three independent sampling designs put the ratio anywhere from 26 to 1 up to 74 to 1. None came close to parity, and the true figure — a full accounting would require reading all 40,844 orders rather than a sample — is unlikely to be smaller than the most conservative estimate here. The gap isn't only about volume: restricted to the same categories on both sides, landlords file 7.1× more cases but are awarded 26.3× more money — meaning landlords also average roughly **3.7× more per case** ($4,249 vs. $1,143) than tenants do.
+## 2. Who actually carries the cost
 
-## Finding 2: Landlords file over 5 times as often — no estimation required
+| | Individual owners | Corporate or institutional |
+|---|---:|---:|
+| Landlords | 9,291 | 4,517 |
+| Share of cases | 37.7% | 62.3% |
+| Filed exactly once | **85.8%** | 61.3% |
+| Own a single address | **91.1%** | 63.0% |
+| Share of the money at stake | 33.4% | 66.6% |
+| Mean owed each | $5,193 | $20,133 |
 
-Independent of any dollar figure, this is a direct count of the complete public dataset, not a sample: of all 40,844 applications on record, **34,422 (84%) were filed by landlords** against tenants, versus **6,043 (15%) filed by tenants** against landlords. Landlords bring cases to the Board 5.7 times more often than tenants do.
+The median case is about the same size on both sides, roughly $5,226. What differs is what it means: **3.7 months of rent, or 30.9% of that unit's annual gross revenue** before mortgage, tax or repairs. For 91.1% of individual owners, that unit is all they have. A corporate owner is owed roughly 3.9 times more on average because it brings more cases, not larger ones.
 
-## Finding 3: Dispute activity is concentrated in specific areas — but not the ones raw counts suggest
+The application mix says the same thing from another angle. **77.0% of applications to collect from a tenant who has already left** are brought by individuals: the cases least likely ever to be recovered. The reverse also holds and belongs in the record, because an analysis that only reports one direction is not evidence: above-guideline rent increases are **77.5% corporate**.
 
-Normalizing filings against each area's population (rather than raw counts, which just track population density) surfaces a very different map. The highest-activity postal areas — Hamilton's L8N, London's N6B, parts of Etobicoke, Sudbury, and Ottawa — see roughly **7 times the provincial median rate** of LTB activity per resident, and there is an **8-fold gap** between the most- and least-active areas once tiny-population outliers are excluded.
+## 3. The record is not a picture of eviction
 
-Raw counts alone point somewhere else entirely: Toronto's M3N has the single highest number of applications in the province, but drops to 11th place once its (large) population is factored in. Whether an area looks "high-activity" depends entirely on whether the analysis accounts for population — and to date, nothing public does. The same view is also available rolled up to the municipality level (Toronto, Hamilton, Windsor, etc.) rather than postal codes, for anyone who doesn't think in FSAs.
+Non-payment is **63.4%** of the Board's landlord cases but only **8%** of the evictions tenants report to Statistics Canada. The reasons tenants most often give, that the landlord sold the property (37%) or wanted the unit (26%), usually end with the tenant leaving on a notice and produce no order at all.
 
-## How this was built
+This cuts both ways. The Board's file understates how often tenants lose housing, **and** it is not evidence about the frequency of the no-fault evictions it barely contains.
 
-Application-filing counts and geographic figures (Findings 2 and 3) are exact counts of the full public dataset — no estimation involved. Dollar figures (Finding 1) required downloading and reading a sample of order PDFs individually, since the open-data export lists case metadata but not the amounts each order states; reading all 40,844 documents was outside this pass's scope, so those numbers are estimates, not a census, and should be read as order-of-magnitude rather than precise. An interactive, population-normalized map of dispute activity by postal area — built from the same two public sources — accompanies this report.
+## 4. Recurrence, and process
+
+**89.99% of tenants appear in exactly one case.** The 10.0% who recur account for 19.0% of cases and are taken to the Board for breaching a settlement at **3.44 times** the rate of one-time tenants (29.8% of their cases against 8.7%). Most recur at the same address rather than moving on.
+
+**18.4% of landlord-filed orders are made without a hearing, against 2.1% of tenant-filed ones.** Much of that gap is procedurally expected, since an application to enforce something already agreed may proceed without a fresh hearing, but the size of it is a fact about the system worth knowing.
+
+## 5. What was tested and not found
+
+- **Area income does not explain where landlords file.** Rank correlation -0.119 across 371 postal areas, about 1% of the variation between them. Rental disputes are not concentrated in poor postal codes in any strong sense, in either direction.
+- **No gendered pairing between the sides.** Male and female landlords face essentially the same gender mix of tenants, though individual landlords who file do skew about two to one male.
+- **The serial-tenant claim is not supported at this timescale.** About 2.7% of tenants appear at more than one address in 148 days, and the apparent top of that list turns out to be legal clinics named in the tenant field. What the data does support is narrower: the settlement-breach difference above.
 
 ## Why this matters
 
-Nothing in this analysis required data the government doesn't already hold. The LTB already publishes its order records; Statistics Canada already publishes population by area. Putting the two together — enough to build the map and the figures above — took a few days' work with public tools. No public agency currently does this, so residents, journalists, and elected officials assessing whether the Board is working as intended have no way to see it for themselves.
+None of this required data the province does not already hold. The Board publishes its orders; Statistics Canada publishes the census. Three gaps stand out, and all three are cheap to close:
 
-Two things follow. First, a public dashboard along these lines would cost a fraction of many other provincial data initiatives and would let anyone check these numbers directly rather than take a private analysis's word for it. Second, once the disparity is visible, it raises a legitimate question for legislative attention: is a 26-to-1-or-worse gap between landlord- and tenant-side outcomes explained by the underlying merits of the cases the Board hears, or does it point to something structural worth examining?
+1. **Only a rolling current-year file is published**, so no trend can be measured. Nobody, inside or outside government, can presently say whether this is improving or deteriorating.
+2. **Amounts are not in the export**, so every dollar figure here required downloading and reading order PDFs one at a time. The Board already holds these figures.
+3. **There is no outcome field**, so whether an application ended in eviction, payment, settlement or dismissal cannot be answered from public data at all.
+
+A public dashboard covering those three would cost a fraction of most provincial data initiatives, and would let landlords, tenants, journalists and members of the Legislature check these numbers directly rather than take a private analysis's word for them.
 
 ---
-*Prepared from the Landlord and Tenant Board open-data export and Statistics Canada table 98-10-0019-01 (2021 Census, population by forward sortation area). Methodology, raw data, and the full sampling comparison are available alongside this report.*
+
+*Every figure above traces to a named public source; see `sources.html` for which, and for how far each can be pushed. Application counts, party classification, geography and process rates are exact counts of the complete export. Dollar figures are estimates from a sample of order PDFs and are presented as such. No landlord, tenant or address is named anywhere in this analysis.*
+
+*This is an independent analysis developed using data published by the Government of Ontario. It is not an official publication of, and is not affiliated with or endorsed by, the Government of Ontario or the Landlord and Tenant Board.*

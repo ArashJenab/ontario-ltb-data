@@ -83,8 +83,12 @@ def load():
 
     d["by_kind"] = {r["landlord_kind"]: r for r in d["entities"]}
     d["burden_by_kind"] = {r["landlord_kind"]: r for r in d["burden"]}
-    summary = ltbdata.summarise(ltbdata.load_orders(unique_files=True))
-    d["summary"] = summary
+    # Summarise the FULL order list, not the deduplicated one: the pages quote
+    # both counts side by side ("N orders across M distinct cases"), and
+    # summarising the deduplicated list makes those two numbers identical.
+    # summarise() derives `files` from unique file numbers either way, so this
+    # gives the correct value for both.
+    d["summary"] = ltbdata.summarise(ltbdata.load_orders())
     return d
 
 
@@ -290,6 +294,7 @@ public data and are not official statistics of either agency.
 def main():
     import site_pages
     import site_report
+    import site_summary
 
     d = load()
 
@@ -333,6 +338,12 @@ def main():
         html = shell(title, description, body + footer(), extra_css)
         (BASE / filename).write_text(html, encoding="utf-8")
         print(f"  wrote {filename:16s} {len(html) / 1024:6.1f} KB")
+
+    summary_path = BASE / "reports" / "executive-summary.md"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    markdown = site_summary.build(d) + "\n"
+    summary_path.write_text(markdown, encoding="utf-8")
+    print(f"  wrote {'executive-summary.md':16s} {len(markdown) / 1024:6.1f} KB")
 
     print(f"\nBuilt from window {d['summary']['first_date']} to "
           f"{d['summary']['last_date']} ({d['summary']['days']} days)")
