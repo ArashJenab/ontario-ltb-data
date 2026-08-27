@@ -6,7 +6,8 @@ The sources page exists because the commonest way this analysis gets dismissed
 is "where did that number come from" - so every figure on the site is traced
 here to a named source, its licence, and the window it covers.
 """
-from build_site import BUILT, num, table, tile
+import svgchart as sv
+from build_site import BUILT, SERIES, num, table, tile
 
 # Every external source, in the order a reader would want them.
 SOURCES = [
@@ -334,29 +335,70 @@ def build_onepager(d):
     return "\n".join(p)
 
 
+def ledger(title, rows, foot=None):
+    """A short table of facts set as one figure, for the numbers that only mean
+    something next to each other."""
+    out = [f'<div class="ledger"><h4>{title}</h4><dl>']
+    for entry in rows:
+        label, value = entry[0], entry[1]
+        emphasis = " total" if len(entry) > 2 and entry[2] else ""
+        out.append(
+            f'<div class="row{emphasis}"><dt>{label}</dt><dd>{value}</dd></div>'
+        )
+    out.append("</dl>")
+    if foot:
+        out.append(f'<div class="foot">{foot}</div>')
+    out.append("</div>")
+    return "".join(out)
+
+
 def build_index(d):
-    """The front door. Generated from the same data as everything else, so the
-    headline figures on it cannot drift from the report they link to."""
+    """The front door.
+
+    This carries the findings rather than only linking to them: someone who
+    reads this page and nothing else should come away with the size of the
+    thing, who carries it, and what the record does not show. Generated from
+    the same CSVs as the report, so the two cannot drift apart.
+    """
     s = d["summary"]
-    ind = d["by_kind"]["individual"]
-    ind_b = d["burden_by_kind"]["individual"]
-    ontario = d["exposure"][2]
-    arrears = d["reasons"][0]
+    ind, corp = d["by_kind"]["individual"], d["by_kind"]["corporate"]
+    ind_b, corp_b = d["burden_by_kind"]["individual"], d["burden_by_kind"]["corporate"]
+    ontario, us, evicted = d["exposure"][2], d["exposure"][3], d["exposure"][4]
+    arrears, other = d["reasons"][0], d["reasons"][1]
     l4 = next(r for r in d["repeat_mix"] if r["code"] == "L4")
     ll_hearing, tt_hearing = d["hearing"][0], d["hearing"][1]
+    l10 = next(r for r in d["mix"] if r["code"] == "L10")
+    l3 = next(r for r in d["mix"] if r["code"] == "L3")
+    l5 = next(r for r in d["mix"] if r["code"] == "L5")
+    l1 = next(r for r in d["mix"] if r["code"] == "L1")
+    income_corr = next(
+        r for r in d["correlations"]
+        if r["census_measure"] == "Median household income" and r["rate"].startswith("Landlord")
+    )
 
     p = []
     a = p.append
+
+    # ---- hero --------------------------------------------------------------
     a('<div class="eyebrow">Open data &middot; Ontario</div>')
     a("<h1>What Ontario's rental disputes actually cost, and who pays</h1>")
-    a('<p class="dek">A ledger of Ontario\'s Landlord and Tenant Board, built only '
-      'from two public sources: the Board\'s own order export and Statistics Canada\'s '
-      'census. No private or scraped data. It reports what the record shows in both '
-      'directions, including the things it does not show.</p>')
+    a('<p class="dek">Built only from two public sources: the Landlord and Tenant '
+      "Board's own order export and Statistics Canada's census. No private or "
+      'scraped data, no named parties, and findings reported in whichever '
+      'direction they came out.</p>')
+    a(f'<div class="lede">The Board handles a normal-sized caseload by international '
+      f'standards. What is not normal is where the weight of it lands. '
+      f'<b>{int(num(ind["entities"])):,} people who own a single rental unit</b> '
+      f'bring {ind["pct_of_cases"]}% of all landlord cases, and for '
+      f'{ind["pct_filed_exactly_once"]}% of them it happens once and never again. By '
+      f'the time an order arrives the typical one is owed '
+      f'<b>{ind_b["median_as_months_of_rent"]} months of rent on their only '
+      f'property</b>. On the other side, the evictions tenants most often actually '
+      'experience barely appear in this record at all.</div>')
     a(f'<div class="window"><b>{s["files"]:,} cases</b> over {s["days"]} days '
       f'({s["first_date"]} to {s["last_date"]}). Not a full year and not all time: '
-      'Ontario publishes one rolling current-year file. Annualised figures say so '
-      'where they appear.</div>')
+      'Ontario publishes one rolling current-year file, so no trend can be measured '
+      'yet. Annualised figures say so where they appear.</div>')
     a('<div class="nav">'
       '<a class="primary" href="report.html">Read the full report</a>'
       '<a href="onepager.html">One-page briefing</a>'
@@ -364,61 +406,194 @@ def build_index(d):
       '<a href="sources.html">Sources</a></div>')
 
     a('<div class="tiles">')
+    a(tile(f'{ind_b["median_as_pct_of_annual_rent"]}%',
+           "of a unit's annual rent is owed by the time an order lands, on the "
+           "typical case", "a"))
+    a(tile(f'{ind["pct_holds_one_address"]}%',
+           "of individual landlords at the Board own exactly one address", "a"))
     a(tile(f'1 in {ontario["one_in"]}',
-           "renter households have a landlord case filed against them each year, "
-           "about half the United States rate", "a"))
-    a(tile(f'{ind["pct_filed_exactly_once"]}%',
-           f'of individual landlords filed exactly once, and '
-           f'{ind["pct_holds_one_address"]}% own a single address', "c"))
-    a(tile(f'{arrears["pct_of_ltb_landlord_cases"]}% vs {arrears["pct_of_tenant_reported_evictions"]}%',
-           "of cases are about unpaid rent, in the Board's file versus in the "
-           "evictions tenants actually report", "b"))
-    a(tile(f'{l4["ratio"]}x',
-           "the rate at which repeat tenants are taken to the Board for breaching a "
-           "settlement, against one-time tenants", "a"))
+           "renter households have a case filed against them each year, about half "
+           "the United States rate", "b"))
+    a(tile(f'{ll_hearing["pct_ex_parte"]}% / {tt_hearing["pct_ex_parte"]}%',
+           "of landlord / tenant orders are made without a hearing", "c"))
     a("</div>")
 
-    a('<div class="preview-grid">')
-    for href, image, alt, caption in (
-        ("map.html", "docs/map-preview.png",
-         "Ontario rental dispute map by postal area",
-         "All 520 postal areas"),
-        ("city-map.html", "docs/city-map-preview.png",
-         "Ontario rental dispute map by municipality",
-         "The same data, by city name"),
-    ):
-        a(f'<a class="preview-link" href="{href}">'
-          f'<img src="{image}" alt="{alt}" loading="lazy">'
-          f'<div class="preview-caption"><span>{caption}</span>'
-          f'<span>Open map</span></div></a>')
-    a("</div>")
-
-    a("<h2>What it found</h2>")
+    # ---- 1. the weight on a single-unit owner ------------------------------
+    a("<h2>What this costs someone who owns one unit</h2>")
+    a('<p>The aggregate figure, roughly $123M at stake across the province, invites '
+      'the reading that a class of landlords received a windfall. It is spread '
+      'across about 12,000 separate landlords, and two thirds of them are people, '
+      'not companies. Set out per landlord, the same money looks entirely '
+      'different.</p>')
+    a(ledger(
+        "The typical individual owner's case",
+        [("Rent owed by the time an order issues",
+          f'{ind_b["median_as_months_of_rent"]} months'),
+         ("As a sum", f'${int(num(ind_b["median_per_entity"])):,}'),
+         ("Share of that unit's annual gross revenue, before mortgage, tax or repairs",
+          f'{ind_b["median_as_pct_of_annual_rent"]}%', True),
+         ("Share of individual owners who hold any other address",
+          f'{100 - num(ind["pct_holds_one_address"]):.1f}%'),
+         ("Share who appear at the Board more than once",
+          f'{100 - num(ind["pct_filed_exactly_once"]):.1f}%')],
+        foot="Median case, individual owners only. The dollar figure is an estimate "
+             "from a sample of order PDFs; the ownership figures are exact counts of "
+             'the full export. <a href="sources.html">How each was produced</a>.'))
     a("<figure>")
-    a(f'<p><b>The scale is ordinary; the distribution is not.</b> About '
-      f'{ontario["pct_of_renter_households"]}% of renter households a year, against '
-      'about 8% in tracked United States cities. But nine in ten tenants appear '
-      'exactly once, and most landlords do too.</p>')
-    a(f'<p><b>"Landlords" is not one group.</b> '
-      f'{int(num(ind["entities"])):,} individual owners bring '
-      f'{ind["pct_of_cases"]}% of cases. The median one is owed '
-      f'${int(num(ind_b["median_per_entity"])):,}, which is '
-      f'{ind_b["median_as_months_of_rent"]} months of rent or '
-      f'{ind_b["median_as_pct_of_annual_rent"]}% of that unit\'s annual gross '
-      'revenue. The same sum is a line item to a portfolio owner.</p>')
-    a('<p><b>The record is not a picture of eviction.</b> The reasons tenants most '
-      'often give for losing a home mostly produce no order at all, so the Board\'s '
-      'file understates how often it happens <i>and</i> is not evidence about the '
-      'no-fault evictions it barely contains.</p>')
-    a(f'<p><b>The two sides do not get the same process.</b> '
-      f'{ll_hearing["pct_ex_parte"]}% of landlord-filed orders are made without a '
-      f'hearing, against {tt_hearing["pct_ex_parte"]}% of tenant-filed ones.</p>')
-    a('<p><b>Some things were tested and not found.</b> Area income barely predicts '
-      'where landlords file. There is no gendered pairing between the sides. The '
-      'serial-tenant claim is not supported at this timescale, though a real '
-      'difference in settlement-breaching is.</p>')
+    a(sv.grouped_hbar(
+        [{"label": "Share of all cases",
+          "values": [num(ind["pct_of_cases"]), num(corp["pct_of_cases"])],
+          "displays": [f'{ind["pct_of_cases"]}%', f'{corp["pct_of_cases"]}%']},
+         {"label": "Filed exactly once",
+          "values": [num(ind["pct_filed_exactly_once"]), num(corp["pct_filed_exactly_once"])],
+          "displays": [f'{ind["pct_filed_exactly_once"]}%', f'{corp["pct_filed_exactly_once"]}%']},
+         {"label": "Own a single address",
+          "values": [num(ind["pct_holds_one_address"]), num(corp["pct_holds_one_address"])],
+          "displays": [f'{ind["pct_holds_one_address"]}%', f'{corp["pct_holds_one_address"]}%']}],
+        series=[(f'Individual owners ({int(num(ind["entities"])):,})', SERIES["individual"]),
+                (f'Corporate or institutional ({int(num(corp["entities"])):,})', SERIES["corporate"])],
+        label_width=190, title="Two different kinds of landlord",
+        chart_label="Individual versus corporate landlords"))
+    a(f'<figcaption>For an organisation this is a recurring process, '
+      f'{corp["mean_cases_per_entity"]} cases each on average and spread across a '
+      'portfolio. The typical individual owner brings one, at the single address '
+      'they have, and is never seen again. <b>The same dollar loss is a line item to '
+      'one of them and roughly a third of a year\'s revenue to the '
+      'other.</b></figcaption>')
     a("</figure>")
 
+    if d.get("burden_bands"):
+        bands = d["burden_bands"]
+        months = d["burden_months"][0] if d.get("burden_months") else None
+        over_six = sum(
+            num(b["pct_of_orders"], 0) for b in bands
+            if b["band"] in ("6 to 12 months", "Over 12 months")
+        )
+        a("<figure>")
+        a(sv.hbar([{"label": b["band"], "value": num(b["pct_of_orders"]),
+                    "display": f'{b["pct_of_orders"]}%',
+                    "color": SERIES["individual"]} for b in bands],
+                  label_width=170,
+                  title="Rent owed when the order issued, in months of that unit's rent",
+                  chart_label="Distribution of months of rent owed"))
+        caption = (
+            f'Read from the rent each order states, so it is that unit\'s own rent '
+            f'rather than a provincial average. <b>{over_six:.0f}% of orders are for '
+            f'more than six months of rent</b> on a single unit.'
+        )
+        if months:
+            caption += (
+                f' Median {months["median_months"]} months, mean '
+                f'{months["mean_months"]} (95% interval {months["mean_months_ci_low"]} '
+                f'to {months["mean_months_ci_high"]}), from {int(num(months["n"])):,} '
+                'orders read individually.'
+            )
+        a(f"<figcaption>{caption}</figcaption>")
+        a("</figure>")
+
+    a("<figure>")
+    a(sv.split_bar(
+        [{"label": f'{r["code"]} · {r["meaning"]}',
+          "values": [num(r["pct_individual"]), num(r["pct_corporate"])]}
+         for r in (l10, l3, l1, l5)],
+        series=[("Individual owners", SERIES["individual"]),
+                ("Corporate or institutional", SERIES["corporate"])],
+        label_width=290, title="Who brings which kind of case",
+        chart_label="Application type split by kind of landlord"))
+    a(f'<figcaption><b>Individual owners dominate the categories where the money is '
+      f'already gone.</b> {l10["pct_individual"]}% of applications to collect from a '
+      f'tenant who has already left are brought by individuals, and '
+      f'{l3["pct_individual"]}% of those about a tenant who gave notice and stayed. '
+      f'The reverse holds too, and belongs here: above-guideline rent increases are '
+      f'{l5["pct_corporate"]}% corporate.</figcaption>')
+    a("</figure>")
+
+    # ---- 2. how often, and to whom -----------------------------------------
+    a("<h2>How often this happens, and to whom</h2>")
+    a("<figure>")
+    a(sv.hbar(
+        [{"label": "Ontario, landlord cases filed",
+          "value": num(ontario["pct_of_renter_households"]),
+          "display": f'{ontario["pct_of_renter_households"]}%',
+          "color": SERIES["landlord"]},
+         {"label": "United States, filings 2024",
+          "value": num(us["pct_of_renter_households"]),
+          "display": f'{us["pct_of_renter_households"]}%',
+          "color": SERIES["tenant"]},
+         {"label": "Renters actually evicted, Canada",
+          "value": num(evicted["pct_of_renter_households"]),
+          "display": f'{evicted["pct_of_renter_households"]}%',
+          "color": SERIES["corporate"]}],
+        label_width=250, title="Share of renter households per year",
+        chart_label="Ontario filing rate against international benchmarks"))
+    a('<figcaption>Ontario runs at about half the United States filing rate, and the '
+      'figure is confirmed three ways including the Board\'s own published intake. '
+      '<b>An application is not an eviction</b>: only about 1% of renters are '
+      'actually evicted in a year, because most non-payment cases end with the '
+      'tenant paying and staying. Anyone quoting the filing rate as an eviction rate '
+      'is wrong, in either direction.</figcaption>')
+    a("</figure>")
+
+    a("<figure>")
+    a(sv.grouped_hbar(
+        [{"label": "Behind on rent",
+          "values": [num(arrears["pct_of_ltb_landlord_cases"]),
+                     num(arrears["pct_of_tenant_reported_evictions"])],
+          "displays": [f'{arrears["pct_of_ltb_landlord_cases"]}%',
+                       f'{arrears["pct_of_tenant_reported_evictions"]}%']},
+         {"label": "Every other reason",
+          "values": [num(other["pct_of_ltb_landlord_cases"]),
+                     num(other["pct_of_tenant_reported_evictions"])],
+          "displays": [f'{other["pct_of_ltb_landlord_cases"]}%',
+                       f'{other["pct_of_tenant_reported_evictions"]}%']}],
+        series=[("In the Board's orders", SERIES["record"]),
+                ("In what tenants report", SERIES["reported"])],
+        label_width=190, title="Why the tenancy ended",
+        chart_label="Reasons recorded at the Board versus reasons tenants report"))
+    a('<figcaption><b>The record is close to inverted relative to lived '
+      'experience.</b> Non-payment dominates the Board because a landlord needs an '
+      'order to recover money. The reasons tenants most often give, that the '
+      'landlord sold or wanted the unit, usually end with the tenant leaving on a '
+      'notice and produce no record at all. So the file understates how often '
+      'tenants lose housing <i>and</i> is not evidence about the no-fault evictions '
+      'it barely contains.</figcaption>')
+    a("</figure>")
+
+    # ---- 3. the map --------------------------------------------------------
+    a("<h2>Where it concentrates</h2>")
+    a('<a class="preview-link wide" href="map.html">'
+      '<img src="docs/map-preview.png" loading="lazy" '
+      'alt="Interactive map of Ontario rental dispute rates by postal area">'
+      '<div class="preview-caption">'
+      '<span>All 520 postal areas, normalised by renter households</span>'
+      '<span>Open the map</span></div></a>')
+    a('<p class="src">Rates are per renter household rather than per resident: an '
+      'area that is 80% renters would otherwise look busier than one that is 20% '
+      'renters with nothing else differing. A '
+      '<a href="city-map.html">municipality view</a> of the same data is available '
+      'for anyone who does not think in postal codes.</p>')
+
+    # ---- 4. nulls ----------------------------------------------------------
+    a("<h2>What was tested and not found</h2>")
+    a("<p>Reporting only the things that came out is how an analysis stops being "
+      "evidence. These were tested and did not.</p>")
+    a("<figure>")
+    a(f'<p><b>Area income does not explain where landlords file.</b> Rank '
+      f'correlation {income_corr["spearman_rho"]} across {income_corr["n_fsas"]} '
+      'postal areas, about 1% of the variation between them. Rental disputes are not '
+      'concentrated in poor postal codes in any strong sense, in either direction.</p>')
+    a('<p><b>There is no gendered pairing between the sides.</b> Male and female '
+      'landlords face essentially the same gender mix of tenants, though individual '
+      'landlords who file do skew about two to one male.</p>')
+    a(f'<p><b>The serial-tenant claim is not supported at this timescale.</b> About '
+      f'2.7% of tenants appear at more than one address in {s["days"]} days, and the '
+      'apparent top of that list turns out to be legal clinics named in the tenant '
+      'field. What the data <i>does</i> support is narrower and real: the 10% of '
+      f'tenants who recur are taken to the Board for breaching a settlement at '
+      f'{l4["ratio"]} times the rate of one-time tenants.</p>')
+    a("</figure>")
+
+    # ---- 5. everything else ------------------------------------------------
     a("<h2>Everything else</h2>")
     a('<div class="file-list">')
     for href, name, desc in (
@@ -447,6 +622,7 @@ INDEX_CSS = """
 .preview-link { display:block; color:inherit; text-decoration:none; border-radius:14px;
                 overflow:hidden; border:1px solid var(--border); box-shadow:var(--shadow); }
 .preview-link img { display:block; width:100%; height:auto; }
+.preview-link.wide { display:block; margin-top:22px; }
 .preview-caption { padding:12px 16px; background:var(--surface); font-size:12.5px;
                    color:var(--ink-muted); border-top:1px solid var(--border);
                    display:flex; justify-content:space-between; gap:10px; }

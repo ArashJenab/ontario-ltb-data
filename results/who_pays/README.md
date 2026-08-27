@@ -23,11 +23,13 @@ Estimated total at stake across L1, L2 and L4: **$123.5M**.
 | | Individual owners | Corporate / institutional |
 |---|---:|---:|
 | Share of the money | 33.4% | 66.6% |
-| Median per landlord | $5,226 | $5,226 |
 | Mean per landlord | $5,193 | $20,133 |
 | 90th percentile | $6,088 | $29,511 |
+| Median per landlord | $5,226 | $5,226 |
 
-At Ontario's household-weighted average rent of $1,407/month (2021 census), the median individual owner's $5,226 is **3.7 months of rent**, or **30.9% of that unit's annual gross revenue** before mortgage, tax or repairs. The same median for a corporate owner is one line item among many.
+**The two medians are identical, and that is an artifact, not a finding.** Under this model every landlord whose only case is one L1 receives the same estimate, and the median landlord of both kinds is exactly that. The median is therefore uninformative about the difference between them; the mean and the 90th percentile are the columns that carry it. A corporate owner is owed roughly 3.9 times as much on average, because it brings many cases, not because its cases are individually larger.
+
+That is the whole point. The typical *case* is about the same size on both sides. At Ontario's household-weighted average rent of $1,407/month (2021 census), the median owner's $5,226 is **3.7 months of rent**, or **30.9% of that unit's annual gross revenue** before mortgage, tax or repairs. What differs is what that case represents: for 91.1% of individual owners it is their only unit and, on this evidence, a one-time event; for a corporate owner it is one line item among many, spread across a portfolio.
 
 ## Concentration
 
@@ -53,12 +55,12 @@ Gini coefficient of filings per landlord: **0.529** (0 would mean every landlord
 | Code | Meaning | Cases | Individual | Corporate |
 |---|---|---:|---:|---:|
 | L1 | Non-payment of rent | 19,951 | 33.2% | 66.8% |
-| L2 | End tenancy, other reasons | 4,879 | 52.0% | 48.0% |
+| L2 | End tenancy (other reasons) | 4,879 | 52.0% | 48.0% |
 | L4 | Breached a settlement or order | 3,877 | 29.9% | 70.1% |
 | L10 | Collect money from a former tenant | 867 | 77.0% | 23.0% |
-| L3 | Tenant gave notice, did not leave | 742 | 69.4% | 30.6% |
+| L3 | Tenant gave notice but stayed | 742 | 69.4% | 30.6% |
 | L5 | Above-guideline rent increase | 528 | 22.5% | 77.5% |
-| L9 | Collect rent, tenancy continuing | 374 | 35.3% | 64.7% |
+| L9 | Collect rent during tenancy | 374 | 35.3% | 64.7% |
 | A2 | Application about a mobile home site | 192 | 31.2% | 68.8% |
 
 Read both directions. Individual owners dominate the categories about recovering money from someone who has already gone (L10) and about a tenant who gave notice and stayed (L3). Corporate owners dominate above-guideline rent increases (L5).

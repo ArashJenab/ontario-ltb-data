@@ -68,6 +68,19 @@ def load():
         "gender": read(RESULTS / "parties" / "gender_summary.csv"),
         "household": read(RESULTS / "parties" / "household_size.csv"),
     }
+    # The burden analysis depends on a long PDF extraction run, so the site
+    # must build with or without it. Sections keyed off these appear only once
+    # results/burden/ exists.
+    burden_dir = RESULTS / "burden"
+    for key, filename in (
+        ("burden_months", "months_owed.csv"),
+        ("burden_bands", "months_distribution.csv"),
+        ("burden_kinds", "by_landlord_kind.csv"),
+        ("attendance", "attendance.csv"),
+    ):
+        path = burden_dir / filename
+        d[key] = read(path) if path.exists() else None
+
     d["by_kind"] = {r["landlord_kind"]: r for r in d["entities"]}
     d["burden_by_kind"] = {r["landlord_kind"]: r for r in d["burden"]}
     summary = ltbdata.summarise(ltbdata.load_orders(unique_files=True))
@@ -168,6 +181,20 @@ footer a { color:var(--ink-muted); }
 .finding { margin-top:18px; padding:16px 18px; background:var(--surface-2);
            border:1px solid var(--border); border-radius:10px; font-size:15px; }
 .finding b { color:var(--ink); }
+.ledger { margin-top:22px; background:var(--surface); border:1px solid var(--border);
+          border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
+.ledger h4 { margin:0; padding:16px 20px 12px; font-size:15px; font-weight:700;
+             border-bottom:1px solid var(--border); }
+.ledger dl { margin:0; padding:6px 20px 16px; }
+.ledger .row { display:flex; justify-content:space-between; align-items:baseline;
+               gap:18px; padding:11px 0; border-bottom:1px solid var(--border); }
+.ledger .row:last-child { border-bottom:0; }
+.ledger dt { font-size:14px; color:var(--ink-muted); margin:0; }
+.ledger dd { margin:0; font-size:17px; font-weight:800; letter-spacing:-.01em;
+             font-variant-numeric:tabular-nums; white-space:nowrap; }
+.ledger .row.total dd { color:var(--series-1); font-size:20px; }
+.ledger .foot { padding:12px 20px 16px; font-size:12.5px; color:var(--ink-faint);
+                border-top:1px solid var(--border); background:var(--surface-2); }
 """
 
 PRINT_CSS = """
