@@ -45,6 +45,10 @@ def build(d):
         r for r in d["correlations"]
         if r["census_measure"] == "Median household income" and r["rate"].startswith("Tenant")
     )
+    mi = d["measured"].get("individual")
+    mc = d["measured"].get("corporate")
+    # Prefer the measured share over the modelled one, as elsewhere.
+    annual_share = mi["median_pct_of_annual_rent"] if mi else ind_b["median_as_pct_of_annual_rent"]
 
     p = []
     a = p.append
@@ -76,8 +80,9 @@ def build(d):
            "of cases are about unpaid rent, in the Board's file versus in what tenants report", "b"))
     a(tile(f'{ind["pct_filed_exactly_once"]}%',
            f'of individual landlords filed exactly once; {ind["pct_holds_one_address"]}% own one address', "c"))
-    a(tile(f'{ind_b["median_as_pct_of_annual_rent"]}%',
-           "of a unit's annual rent is what the median landlord is owed once an order lands", "a"))
+    a(tile(f'{annual_share}%',
+           "of a unit's annual rent is owed by the time an order lands, on the typical "
+           "individual owner's case", "a"))
     a("</div>")
 
     # ---- 1. scale ----------------------------------------------------------
@@ -224,10 +229,7 @@ def build(d):
       'means depends entirely on which kind you are.</p>')
     a("<figure>")
     a(sv.grouped_hbar(
-        [{"label": "Share of the money",
-          "values": [num(ind_b["pct_of_estimated_total"]), num(corp_b["pct_of_estimated_total"])],
-          "displays": [f'{ind_b["pct_of_estimated_total"]}%', f'{corp_b["pct_of_estimated_total"]}%']},
-         {"label": "Mean owed, per landlord",
+        [{"label": "Mean owed, per landlord",
           "values": [num(ind_b["mean_per_entity"]), num(corp_b["mean_per_entity"])],
           "displays": [f'${int(num(ind_b["mean_per_entity"])):,}',
                        f'${int(num(corp_b["mean_per_entity"])):,}']},
@@ -239,7 +241,10 @@ def build(d):
                 ("Corporate or institutional", SERIES["corporate"])],
         label_width=190, title="The same total, split by kind of landlord",
         chart_label="Money at stake per landlord by kind"))
-    a(f'<figcaption>Across a whole year a corporate owner is owed about '
+    a(f'<figcaption>Individual owners carry '
+      f'<b>{ind_b["pct_of_estimated_total"]}%</b> of the estimated total and '
+      f'corporate owners <b>{corp_b["pct_of_estimated_total"]}%</b>. Across a whole '
+      f'year a corporate owner is owed about '
       f'<b>{num(corp_b["mean_per_entity"]) / num(ind_b["mean_per_entity"]):.1f} times '
       'as much in total</b>, because it brings many cases. That is the aggregate '
       'view, and it is modelled: it applies one category-wide average to every '
@@ -254,8 +259,6 @@ def build(d):
         'rather than overstates. Method and sample sizes in '
         '<a href="sources.html">sources</a>.'))
 
-    mi = d["measured"].get("individual")
-    mc = d["measured"].get("corporate")
     if mi and mc:
         a("<h3>The same question, measured instead of modelled</h3>")
         a("<p>Orders state the rent inside the daily-rate calculation, so each case's "
@@ -263,7 +266,7 @@ def build(d):
           "against a provincial average. That makes the two kinds of owner directly "
           "comparable.</p>")
         a("<figure>")
-        a(sv.grouped_hbar(
+        a(sv.paired_rows(
             [{"label": "Months of rent owed",
               "values": [num(mi["median_months"]), num(mc["median_months"])],
               "displays": [f'{mi["median_months"]} mo', f'{mc["median_months"]} mo']},
@@ -271,7 +274,7 @@ def build(d):
               "values": [num(mi["median_amount"]), num(mc["median_amount"])],
               "displays": [f'${int(num(mi["median_amount"])):,}',
                            f'${int(num(mc["median_amount"])):,}']},
-             {"label": "Share of the unit's annual rent",
+             {"label": "Share of annual rent",
               "values": [num(mi["median_pct_of_annual_rent"]),
                          num(mc["median_pct_of_annual_rent"])],
               "displays": [f'{mi["median_pct_of_annual_rent"]}%',

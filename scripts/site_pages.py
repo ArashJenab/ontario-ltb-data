@@ -522,7 +522,7 @@ def build_index(d):
 
     if mi and mc:
         a("<figure>")
-        a(sv.grouped_hbar(
+        a(sv.paired_rows(
             [{"label": "Months of rent owed",
               "values": [num(mi["median_months"]), num(mc["median_months"])],
               "displays": [f'{mi["median_months"]} mo', f'{mc["median_months"]} mo']},
@@ -530,7 +530,7 @@ def build_index(d):
               "values": [num(mi["median_amount"]), num(mc["median_amount"])],
               "displays": [f'${int(num(mi["median_amount"])):,}',
                            f'${int(num(mc["median_amount"])):,}']},
-             {"label": "Share of the unit's annual rent",
+             {"label": "Share of annual rent",
               "values": [num(mi["median_pct_of_annual_rent"]),
                          num(mc["median_pct_of_annual_rent"])],
               "displays": [f'{mi["median_pct_of_annual_rent"]}%',

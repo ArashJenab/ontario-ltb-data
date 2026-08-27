@@ -344,3 +344,60 @@ CHART_CSS = """
 .chart rect, .chart circle { transition: fill-opacity .12s ease; }
 .chart rect:hover, .chart circle:hover { fill-opacity: .82; }
 """
+
+
+def paired_rows(rows, series, label_width=210, bar_height=15, row_gap=17,
+                title=None, chart_label="Paired comparison"):
+    """Two values per row, each ROW scaled to its own maximum.
+
+    For comparing the same two entities across measures that do not share a
+    unit (months, dollars, percentages). Putting those on one axis is the
+    dual-axis mistake in another guise: the smallest-unit measure becomes an
+    invisible sliver against the largest. Here each row is its own scale, every
+    bar is directly labelled, and no shared axis is drawn, so nothing invites a
+    cross-row comparison of lengths.
+
+    rows: [{"label", "values": [a, b], "displays": [da, db]}]
+    """
+    margin = _value_margin([d for r in rows for d in r["displays"]])
+    plot_x = label_width
+    plot_w = max(60.0, W - label_width - margin)
+    legend_svg, legend_rows = _legend(series, plot_x, (26 if not title else 46) - 12, W)
+    top = (26 if not title else 46) + (legend_rows - 1) * 16
+    band = len(series) * bar_height + (len(series) - 1) * GAP
+    height = top + len(rows) * (band + row_gap) + 24
+    allowance = label_width - 12
+
+    out = [_open(W, height, chart_label)]
+    if title:
+        out.append(f'<text x="1" y="16" class="c-title">{esc(title)}</text>')
+    out.append(legend_svg)
+
+    y = top
+    for row in rows:
+        row_max = max(row["values"]) or 1
+        out.append(_label(plot_x - 10, y + band / 2 + 4, row["label"], allowance))
+        for i, (series_label, var) in enumerate(series):
+            value = row["values"][i]
+            width = max(2.0, plot_w * (value / row_max))
+            by = y + i * (bar_height + GAP)
+            display = row["displays"][i]
+            out.append(
+                f'<rect x="{plot_x}" y="{by:.1f}" width="{width:.1f}" '
+                f'height="{bar_height}" rx="{BAR_RADIUS}" fill="var({var})">'
+                f'<title>{esc(row["label"])}, {esc(series_label)}: '
+                f"{esc(display)}</title></rect>"
+            )
+            out.append(
+                f'<text x="{plot_x + width + 8:.1f}" y="{by + bar_height - 2:.1f}" '
+                f'class="c-value">{esc(display)}</text>'
+            )
+        y += band + row_gap
+
+    out.append(
+        f'<text x="1" y="{height - 6}" class="c-note">'
+        "Each row is scaled to its own largest value; the rows use different units "
+        "and are not comparable to each other.</text>"
+    )
+    out.append("</svg>")
+    return "".join(out)
