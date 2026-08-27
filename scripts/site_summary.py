@@ -26,7 +26,8 @@ def build(d):
         if r["census_measure"] == "Median household income"
         and r["rate"].startswith("Landlord")
     )
-    repeat_share = round(100 - num(one_case["pct_of_tenants"]), 1)
+    once_pct = round(num(one_case["pct_of_tenants"]))
+    repeat_share = 100 - once_pct
     repeat_cases = round(100 - num(one_case["pct_of_cases"]), 1)
     corp_multiple = num(corp_b["mean_per_entity"]) / num(ind_b["mean_per_entity"])
 
@@ -106,7 +107,7 @@ def build(d):
         "",
         "## 4. Recurrence, and process",
         "",
-        f"**{one_case['pct_of_tenants']}% of tenants appear in exactly one case.** "
+        f"**{once_pct}% of tenants appear in exactly one case.** "
         f"The {repeat_share}% who recur account for {repeat_cases}% of cases and are "
         f"taken to the Board for breaching a settlement at **{l4['ratio']} times** the "
         f"rate of one-time tenants ({l4['pct_of_repeat_tenant_cases']}% of their "

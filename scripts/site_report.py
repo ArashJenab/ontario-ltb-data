@@ -23,7 +23,11 @@ def build(d):
     one_case = d["repeat"][0]
     same_addr = next(r for r in d["repeat"] if "same address" in r["cases_against_this_tenant"])
     diff_addr = next(r for r in d["repeat"] if "different address" in r["cases_against_this_tenant"])
-    repeat_share = round(100 - num(one_case["pct_of_tenants"]), 1)
+    # A share derived from a count of ~37,000 does not carry two decimals;
+    # quoting 89.99% implies a precision the underlying name matching does
+    # not have. Rounded for prose; the CSV keeps the raw value.
+    once_pct = round(num(one_case["pct_of_tenants"]))
+    repeat_share = 100 - once_pct
     repeat_cases = round(100 - num(one_case["pct_of_cases"]), 1)
 
     stable = [
@@ -284,7 +288,7 @@ def build(d):
                for r in d["repeat"] if not r["cases_against_this_tenant"].startswith("--")],
               label_width=240, title="Tenants by number of cases against them",
               chart_label="Distribution of cases per tenant"))
-    a(f'<figcaption><b>{one_case["pct_of_tenants"]}% of tenants appear exactly '
+    a(f'<figcaption><b>{once_pct}% of tenants appear exactly '
       f'once.</b> The {repeat_share}% who recur account for {repeat_cases}% of all '
       f'cases. Of those repeat tenants, <b>{same_addr["pct_of_tenants"]}% recur at '
       f'the same address</b> (one tenancy generating more than one case) and '

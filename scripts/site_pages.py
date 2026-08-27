@@ -280,7 +280,7 @@ def build_onepager(d):
     a(f'<p><b>1. The scale is ordinary; the distribution is not.</b> About '
       f'{ontario["pct_of_renter_households"]}% of Ontario renter households have a '
       f'landlord case filed against them each year, roughly half the United States '
-      f'rate of {us["pct_of_renter_households"]}%. But {one_case["pct_of_tenants"]}% '
+      f'rate of {us["pct_of_renter_households"]}%. But {round(num(one_case["pct_of_tenants"]))}% '
       'of tenants appear exactly once, and most landlords do too. This is a system '
       'that touches a lot of people once, not a small group repeatedly.</p>')
     a(f'<p><b>2. Individual landlords are not small versions of corporate ones.</b> '
@@ -299,7 +299,7 @@ def build_onepager(d):
       'the landlord sold or wanted the unit, mostly end without an order and leave no '
       'record at all.</p>')
     a(f'<p><b>4. A small recurring group behaves differently.</b> The '
-      f'{round(100 - num(one_case["pct_of_tenants"]), 1)}% of tenants who appear more '
+      f'{100 - round(num(one_case["pct_of_tenants"]))}% of tenants who appear more '
       f'than once are taken to the Board for breaching a settlement at '
       f'{l4["ratio"]} times the rate of one-time tenants '
       f'({l4["pct_of_repeat_tenant_cases"]}% against '

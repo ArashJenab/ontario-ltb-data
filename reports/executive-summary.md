@@ -35,7 +35,7 @@ This cuts both ways. The Board's file understates how often tenants lose housing
 
 ## 4. Recurrence, and process
 
-**89.99% of tenants appear in exactly one case.** The 10.0% who recur account for 19.0% of cases and are taken to the Board for breaching a settlement at **3.44 times** the rate of one-time tenants (29.8% of their cases against 8.7%). Most recur at the same address rather than moving on.
+**90% of tenants appear in exactly one case.** The 10% who recur account for 19.0% of cases and are taken to the Board for breaching a settlement at **3.44 times** the rate of one-time tenants (29.8% of their cases against 8.7%). Most recur at the same address rather than moving on.
 
 **18.4% of landlord-filed orders are made without a hearing, against 2.1% of tenant-filed ones.** Much of that gap is procedurally expected, since an application to enforce something already agreed may proceed without a fresh hearing, but the size of it is a fact about the system worth knowing.
 
