@@ -29,3 +29,8 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Raw Census Profile download (~68MB zipped, all of Canada) — regenerated on
+# demand by fetch_fsa_census_profile.py; only the Ontario extract
+# data/fsa_census_profile.csv is kept in the repo.
+data/raw_statcan_98401X2021013/

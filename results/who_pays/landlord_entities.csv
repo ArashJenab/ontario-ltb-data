@@ -1,0 +1,3 @@
+landlord_kind,entities,pct_of_entities,cases,pct_of_cases,filed_exactly_once,pct_filed_exactly_once,holds_one_address,pct_holds_one_address,mean_cases_per_entity,max_cases_per_entity
+individual,9291,67.3,11860,37.7,7970,85.8,8464,91.1,1.28,64
+corporate,4517,32.7,19603,62.3,2768,61.3,2845,63.0,4.34,1057

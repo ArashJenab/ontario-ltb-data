@@ -1,0 +1,7 @@
+reason,pct_of_ltb_landlord_cases,pct_of_tenant_reported_evictions,source_ltb,source_survey
+Behind on rent,63.4,8,"L1 share of landlord-filed cases, this export",Canadian Housing Survey 2021
+Every other reason combined,36.6,92,"all non-L1 landlord-filed cases, this export",Canadian Housing Survey 2021
+Landlord sold the property,,37,not separately recorded; bundled inside L2,Canadian Housing Survey 2021
+Landlord wanted the unit,,26,not separately recorded; bundled inside L2,Canadian Housing Survey 2021
+Conflict with the landlord,,13,not separately recorded; bundled inside L2,Canadian Housing Survey 2021
+"Demolition, conversion or repairs",,10,not separately recorded; bundled inside L2,Canadian Housing Survey 2021

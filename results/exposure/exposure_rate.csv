@@ -1,0 +1,6 @@
+route,cases_per_year,renter_households,pct_of_renter_households,one_in,note
+"This export, landlord-filed cases, annualised",77602,1724970,4.5,22,"31,466 cases over 148 days x 2.466"
+"This export, distinct rental units, annualised",70275,1724970,4.07,25,"counts each address once, so a unit with two cases counts once"
+"Tribunals Ontario, landlord applications received 2024-25",72836,1724970,4.22,24,"the Board's own published intake, an independent route to the same figure"
+"United States, eviction filings 2024 (Eviction Lab)",,,8.0,12,benchmark: filings per 100 renter households across tracked US cities
+"Canada, renters actually evicted (CMHC/CHS, formal + informal)",,,1.0,100,an application is not an eviction; most L1 cases end with the tenant paying

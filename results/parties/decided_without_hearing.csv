@@ -1,0 +1,16 @@
+scope,orders,ex_parte,pct_ex_parte
+all landlord-filed orders,34422,6345,18.4
+all tenant-filed orders,6043,126,2.1
+L4 - Breached a settlement or order,5158,3189,61.8
+L1 - Non-payment of rent,21023,2447,11.6
+L3 - Tenant gave notice but stayed,808,660,81.7
+T2 - Tenant rights,2863,96,3.4
+L2 - End tenancy (other reasons),5271,34,0.6
+T6 - Maintenance,1113,19,1.7
+T1 - Rent rebate or money owed to tenant,1360,8,0.6
+L10 - Collect money from a former tenant,949,7,0.7
+L9 - Collect rent during tenancy,390,6,1.5
+T5 - Bad-faith notice to terminate,551,3,0.5
+C1 - Co-op non-payment,222,2,0.9
+A2 - Application about a mobile home site,270,1,0.4
+L5 - Above-guideline rent increase,551,0,0.0

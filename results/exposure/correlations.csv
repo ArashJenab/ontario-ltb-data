@@ -1,0 +1,13 @@
+rate,census_measure,n_fsas,pearson_r,spearman_rho
+"Landlord cases per 1,000 renter households",Median household income,371,-0.052,-0.119
+"Landlord cases per 1,000 renter households",% of tenants in core housing need,371,0.292,0.258
+"Landlord cases per 1,000 renter households",% of tenants paying 30%+ on shelter,371,-0.08,-0.086
+"Landlord cases per 1,000 renter households",% of households renting,371,-0.029,-0.011
+"Landlord cases per 1,000 renter households",Average monthly rent,371,-0.089,-0.137
+"Landlord cases per 1,000 renter households",Annual rent as % of median income,371,-0.062,-0.006
+Tenant cases per landlord case (who can use the Board),Median household income,371,0.294,0.292
+Tenant cases per landlord case (who can use the Board),% of tenants in core housing need,371,-0.205,-0.206
+Tenant cases per landlord case (who can use the Board),% of tenants paying 30%+ on shelter,371,0.258,0.259
+Tenant cases per landlord case (who can use the Board),% of households renting,371,-0.206,-0.276
+Tenant cases per landlord case (who can use the Board),Average monthly rent,371,0.344,0.304
+Tenant cases per landlord case (who can use the Board),Annual rent as % of median income,371,0.134,0.024

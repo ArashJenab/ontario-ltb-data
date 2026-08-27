@@ -1,0 +1,3 @@
+landlord_kind,entities_owed_money,estimated_total,pct_of_estimated_total,mean_per_entity,median_per_entity,p90_per_entity,median_as_months_of_rent,median_as_pct_of_annual_rent
+individual,7952,41295272,33.4,5193,5226,6088,3.7,30.9
+corporate,4082,82182501,66.6,20133,5226,29511,3.7,30.9
