@@ -81,6 +81,14 @@ def load():
         path = burden_dir / filename
         d[key] = read(path) if path.exists() else None
 
+    # Measured per-case figures, keyed by landlord kind, when the extraction
+    # has run. These supersede the modelled ones wherever both exist: the model
+    # applied one category mean to every landlord, so it could not detect a
+    # difference in case size between kinds of owner even in principle.
+    d["measured"] = (
+        {r["landlord_kind"]: r for r in d["burden_kinds"]} if d["burden_kinds"] else {}
+    )
+
     d["by_kind"] = {r["landlord_kind"]: r for r in d["entities"]}
     d["burden_by_kind"] = {r["landlord_kind"]: r for r in d["burden"]}
     # Summarise the FULL order list, not the deduplicated one: the pages quote

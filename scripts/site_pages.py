@@ -137,10 +137,21 @@ FIGURE_PROVENANCE = [
      "classification, not a legal one. Individual owners filing through a "
      "numbered company are counted as corporate, so the individual share is a "
      "floor."),
-    ("$123.5M at stake; $5,226 median per landlord",
+    ("$123.5M at stake province-wide",
      "Sample of order PDFs, extrapolated",
      "Estimate, not a census. cases x found-rate x mean amount, per category. "
-     "Orders stating no amount count as zero."),
+     "Orders stating no amount count as zero, so it understates. Good for a total, "
+     "useless for per-case comparison between kinds of landlord."),
+    ("Individual owners: $7,229 median, 4.04 months, 33.6% of annual rent",
+     "5,000 order PDFs read individually",
+     "Measured, not modelled. Median of the 780 orders naming both a rent and an "
+     "amount for an individual owner. Means carry bootstrap intervals. Supersedes "
+     "the modelled per-case figure, which could not vary by kind of owner."),
+    ("Landlords represented at 73.6%, tenants at 7.6%",
+     "The same 5,000 orders",
+     "Counted from the sentence naming who attended, present in 2,961 of them. "
+     "Orders without that sentence are excluded rather than scored as a no-show, so "
+     "these are rates among orders that say."),
     ("31% of a unit's annual rent",
      "The above, divided by census average rent",
      "Combines an estimate with a 2021 rent figure. Directionally solid, not "
@@ -255,6 +266,9 @@ def build_onepager(d):
     l4 = next(r for r in d["repeat_mix"] if r["code"] == "L4")
     ll_hearing, tt_hearing = d["hearing"][0], d["hearing"][1]
     one_case = d["repeat"][0]
+    mi = d["measured"].get("individual")
+    mc = d["measured"].get("corporate")
+    att = {r["party"]: r for r in d["attendance"]} if d.get("attendance") else None
 
     p = []
     a = p.append
@@ -283,15 +297,28 @@ def build_onepager(d):
       f'rate of {us["pct_of_renter_households"]}%. But {round(num(one_case["pct_of_tenants"]))}% '
       'of tenants appear exactly once, and most landlords do too. This is a system '
       'that touches a lot of people once, not a small group repeatedly.</p>')
-    a(f'<p><b>2. Individual landlords are not small versions of corporate ones.</b> '
-      f'{int(num(ind["entities"])):,} individual owners bring {ind["pct_of_cases"]}% '
-      f'of cases; {ind["pct_filed_exactly_once"]}% file exactly once and '
-      f'{ind["pct_holds_one_address"]}% own a single address. The median amount owed, '
-      f'${int(num(ind_b["median_per_entity"])):,}, is '
-      f'{ind_b["median_as_months_of_rent"]} months of rent, or '
-      f'{ind_b["median_as_pct_of_annual_rent"]}% of that unit\'s annual gross revenue '
-      'before mortgage, tax or repairs. For a portfolio owner the same sum is one '
-      'line item.</p>')
+    if mi and mc:
+        a(f'<p><b>2. Individual landlords are not small versions of corporate ones. '
+          f'Their cases are bigger.</b> {int(num(ind["entities"])):,} individual '
+          f'owners bring {ind["pct_of_cases"]}% of cases; '
+          f'{ind["pct_filed_exactly_once"]}% file exactly once and '
+          f'{ind["pct_holds_one_address"]}% own a single address. Read from the '
+          f'orders themselves, the median individual owner is owed '
+          f'<b>${int(num(mi["median_amount"])):,} after {mi["median_months"]} months '
+          f'without rent</b>, which is {mi["median_pct_of_annual_rent"]}% of that '
+          f'unit\'s annual gross revenue before mortgage, tax or repairs. The '
+          f'corporate median is ${int(num(mc["median_amount"])):,} after '
+          f'{mc["median_months"]} months, or {mc["median_pct_of_annual_rent"]}%. The '
+          '95% intervals on the two means do not overlap.</p>')
+    else:
+        a(f'<p><b>2. Individual landlords are not small versions of corporate ones.</b> '
+          f'{int(num(ind["entities"])):,} individual owners bring {ind["pct_of_cases"]}% '
+          f'of cases; {ind["pct_filed_exactly_once"]}% file exactly once and '
+          f'{ind["pct_holds_one_address"]}% own a single address. The median amount '
+          f'owed, ${int(num(ind_b["median_per_entity"])):,}, is '
+          f'{ind_b["median_as_months_of_rent"]} months of rent, or '
+          f'{ind_b["median_as_pct_of_annual_rent"]}% of that unit\'s annual gross '
+          'revenue before mortgage, tax or repairs.</p>')
     a(f'<p><b>3. The Board\'s file is not a picture of eviction.</b> '
       f'{arrears["pct_of_ltb_landlord_cases"]}% of landlord cases are about unpaid '
       f'rent, against {arrears["pct_of_tenant_reported_evictions"]}% of the evictions '
@@ -309,7 +336,15 @@ def build_onepager(d):
       f'{ll_hearing["pct_ex_parte"]}% of landlord-filed orders are made without a '
       f'hearing, against {tt_hearing["pct_ex_parte"]}% of tenant-filed ones. Much of '
       'that gap is procedurally expected, but the size of it is a fact about the '
-      'system worth knowing.</p>')
+      'system worth knowing.')
+    if att:
+        a(f' Where a hearing did happen, landlords attended '
+          f'{att["landlord"]["pct_attended"]}% of them and were represented at '
+          f'{att["landlord"]["pct_represented"]}%; tenants attended '
+          f'{att["tenant"]["pct_attended"]}% and were represented at '
+          f'<b>{att["tenant"]["pct_represented"]}%</b>. That one cuts against the '
+          'landlord side of this ledger, and is here for that reason.')
+    a("</p>")
     a("</figure>")
 
     a("<h2>What is not in the data, and could be</h2>")
@@ -378,6 +413,11 @@ def build_index(d):
         r for r in d["correlations"]
         if r["census_measure"] == "Median household income" and r["rate"].startswith("Landlord")
     )
+    mi = d["measured"].get("individual")
+    mc = d["measured"].get("corporate")
+    # Prefer the measured share of annual rent over the modelled one.
+    annual_share = mi["median_pct_of_annual_rent"] if mi else ind_b["median_as_pct_of_annual_rent"]
+    months_owed = mi["median_months"] if mi else ind_b["median_as_months_of_rent"]
 
     p = []
     a = p.append
@@ -395,7 +435,7 @@ def build_index(d):
       f'bring {ind["pct_of_cases"]}% of all landlord cases, and for '
       f'{ind["pct_filed_exactly_once"]}% of them it happens once and never again. By '
       f'the time an order arrives the typical one is owed '
-      f'<b>{ind_b["median_as_months_of_rent"]} months of rent on their only '
+      f'<b>{months_owed} months of rent on their only '
       f'property</b>. On the other side, the evictions tenants most often actually '
       'experience barely appear in this record at all.</div>')
     a(f'<div class="window"><b>{s["files"]:,} cases</b> over {s["days"]} days '
@@ -409,9 +449,9 @@ def build_index(d):
       '<a href="sources.html">Sources</a></div>')
 
     a('<div class="tiles">')
-    a(tile(f'{ind_b["median_as_pct_of_annual_rent"]}%',
+    a(tile(f'{annual_share}%',
            "of a unit's annual rent is owed by the time an order lands, on the "
-           "typical case", "a"))
+           "typical individual owner's case", "a"))
     a(tile(f'{ind["pct_holds_one_address"]}%',
            "of individual landlords at the Board own exactly one address", "a"))
     a(tile(f'1 in {ontario["one_in"]}',
@@ -428,20 +468,37 @@ def build_index(d):
       'across about 12,000 separate landlords, and two thirds of them are people, '
       'not companies. Set out per landlord, the same money looks entirely '
       'different.</p>')
-    a(ledger(
-        "The typical individual owner's case",
-        [("Rent owed by the time an order issues",
-          f'{ind_b["median_as_months_of_rent"]} months'),
-         ("As a sum", f'${int(num(ind_b["median_per_entity"])):,}'),
-         ("Share of that unit's annual gross revenue, before mortgage, tax or repairs",
-          f'{ind_b["median_as_pct_of_annual_rent"]}%', True),
-         ("Share of individual owners who hold any other address",
-          f'{100 - num(ind["pct_holds_one_address"]):.1f}%'),
-         ("Share who appear at the Board more than once",
-          f'{100 - num(ind["pct_filed_exactly_once"]):.1f}%')],
-        foot="Median case, individual owners only. The dollar figure is an estimate "
-             "from a sample of order PDFs; the ownership figures are exact counts of "
-             'the full export. <a href="sources.html">How each was produced</a>.'))
+    if mi:
+        a(ledger(
+            "The typical individual owner's case, read from the orders themselves",
+            [("Rent on the unit", f'${int(num(mi["median_rent"])):,}/month'),
+             ("Rent owed by the time an order issues", f'{mi["median_months"]} months'),
+             ("As a sum", f'${int(num(mi["median_amount"])):,}'),
+             ("Share of that unit's annual gross revenue, before mortgage, tax or repairs",
+              f'{mi["median_pct_of_annual_rent"]}%', True),
+             ("Share of individual owners who hold any other address",
+              f'{100 - num(ind["pct_holds_one_address"]):.1f}%'),
+             ("Share who appear at the Board more than once",
+              f'{100 - num(ind["pct_filed_exactly_once"]):.1f}%')],
+            foot=f'Median of {int(num(mi["n"])):,} orders in which both the rent and '
+                 'the amount were stated, read individually rather than modelled from '
+                 'a category average. Ownership figures are exact counts of the full '
+                 'export. <a href="sources.html">How each was produced</a>.'))
+    else:
+        a(ledger(
+            "The typical individual owner's case",
+            [("Rent owed by the time an order issues",
+              f'{ind_b["median_as_months_of_rent"]} months'),
+             ("As a sum", f'${int(num(ind_b["median_per_entity"])):,}'),
+             ("Share of that unit's annual gross revenue, before mortgage, tax or repairs",
+              f'{ind_b["median_as_pct_of_annual_rent"]}%', True),
+             ("Share of individual owners who hold any other address",
+              f'{100 - num(ind["pct_holds_one_address"]):.1f}%'),
+             ("Share who appear at the Board more than once",
+              f'{100 - num(ind["pct_filed_exactly_once"]):.1f}%')],
+            foot="Median case, individual owners only. The dollar figure is an "
+                 "estimate from a sample of order PDFs; the ownership figures are "
+                 'exact counts. <a href="sources.html">How each was produced</a>.'))
     a("<figure>")
     a(sv.grouped_hbar(
         [{"label": "Share of all cases",
@@ -460,10 +517,56 @@ def build_index(d):
     a(f'<figcaption>For an organisation this is a recurring process, '
       f'{corp["mean_cases_per_entity"]} cases each on average and spread across a '
       'portfolio. The typical individual owner brings one, at the single address '
-      'they have, and is never seen again. <b>The same dollar loss is a line item to '
-      'one of them and roughly a third of a year\'s revenue to the '
-      'other.</b></figcaption>')
+      'they have, and is never seen again.</figcaption>')
     a("</figure>")
+
+    if mi and mc:
+        a("<figure>")
+        a(sv.grouped_hbar(
+            [{"label": "Months of rent owed",
+              "values": [num(mi["median_months"]), num(mc["median_months"])],
+              "displays": [f'{mi["median_months"]} mo', f'{mc["median_months"]} mo']},
+             {"label": "Amount owed",
+              "values": [num(mi["median_amount"]), num(mc["median_amount"])],
+              "displays": [f'${int(num(mi["median_amount"])):,}',
+                           f'${int(num(mc["median_amount"])):,}']},
+             {"label": "Share of the unit's annual rent",
+              "values": [num(mi["median_pct_of_annual_rent"]),
+                         num(mc["median_pct_of_annual_rent"])],
+              "displays": [f'{mi["median_pct_of_annual_rent"]}%',
+                           f'{mc["median_pct_of_annual_rent"]}%']}],
+            series=[("Individual owners", SERIES["individual"]),
+                    ("Corporate or institutional", SERIES["corporate"])],
+            label_width=210,
+            title="The median case, measured from the orders",
+            chart_label="Measured burden per case by kind of landlord"))
+        a(f'<figcaption><b>An individual owner\'s case is not a smaller version of a '
+          f'corporate one. It is larger, and it has run longer.</b> The median '
+          f'individual owner is owed ${int(num(mi["median_amount"])):,} against '
+          f'${int(num(mc["median_amount"])):,}, after '
+          f'{mi["median_months"]} months without rent against '
+          f'{mc["median_months"]}, and that is '
+          f'{mi["median_pct_of_annual_rent"]}% of the unit\'s annual gross revenue '
+          f'against {mc["median_pct_of_annual_rent"]}%. On the mean, '
+          f'${int(num(mi["mean_amount"])):,} against '
+          f'${int(num(mc["mean_amount"])):,}, the 95% intervals do not overlap '
+          f'(${int(num(mi["mean_amount_ci_low"])):,} to '
+          f'${int(num(mi["mean_amount_ci_high"])):,} against '
+          f'${int(num(mc["mean_amount_ci_low"])):,} to '
+          f'${int(num(mc["mean_amount_ci_high"])):,}), so this is a real difference '
+          f'rather than sampling noise. Part of it is that individual owners rent '
+          f'costlier units (${int(num(mi["median_rent"])):,} against '
+          f'${int(num(mc["median_rent"])):,} a month), but the months figure controls '
+          'for that and the gap survives.</figcaption>')
+        a('<details><summary>Why this corrects an earlier figure on this site</summary>'
+          '<p style="font-size:13px">An earlier version reported that the typical '
+          'case was about the same size for both kinds of owner. That came from a '
+          'model which applied one category-wide average to every landlord, so it '
+          'could not detect a difference in case size between kinds of owner even in '
+          'principle. Reading the orders individually shows there is one. The '
+          'measured figures supersede the modelled ones wherever both exist.</p>'
+          "</details>")
+        a("</figure>")
 
     if d.get("burden_bands"):
         bands = d["burden_bands"]
@@ -562,7 +665,43 @@ def build_index(d):
       'it barely contains.</figcaption>')
     a("</figure>")
 
-    # ---- 3. the map --------------------------------------------------------
+    # ---- 3. who turns up ---------------------------------------------------
+    if d.get("attendance"):
+        att = {r["party"]: r for r in d["attendance"]}
+        ll, tt = att["landlord"], att["tenant"]
+        a("<h2>Who turns up, and who has help</h2>")
+        a("<p>Orders name who attended the hearing and who appeared for them, so both "
+          "can be counted directly rather than inferred.</p>")
+        a("<figure>")
+        a(sv.grouped_hbar(
+            [{"label": "Attended the hearing",
+              "values": [num(ll["pct_attended"]), num(tt["pct_attended"])],
+              "displays": [f'{ll["pct_attended"]}%', f'{tt["pct_attended"]}%']},
+             {"label": "Had a representative",
+              "values": [num(ll["pct_represented"]), num(tt["pct_represented"])],
+              "displays": [f'{ll["pct_represented"]}%', f'{tt["pct_represented"]}%']}],
+            series=[("Landlord side", SERIES["landlord"]),
+                    ("Tenant side", SERIES["tenant"])],
+            label_width=200, title="Presence at the hearing, by side",
+            chart_label="Attendance and representation by side"))
+        a(f'<figcaption>Landlords appear at '
+          f'{ll["pct_attended"]}% of hearings and bring a paralegal, agent or lawyer '
+          f'to {ll["pct_represented"]}% of them. Tenants appear at '
+          f'{tt["pct_attended"]}% and are represented at <b>{tt["pct_represented"]}%</b>. '
+          f'Among those who do turn up, {ll["pct_represented_of_those_attending"]}% of '
+          f'landlords have someone acting for them against '
+          f'{tt["pct_represented_of_those_attending"]}% of tenants. Read from '
+          f'{int(num(ll["orders_with_a_hearing_line"])):,} orders that name who '
+          'attended; orders without that sentence are excluded rather than counted as '
+          'a no-show.</figcaption>')
+        a("</figure>")
+        a('<div class="finding">This one cuts cleanly against the landlord side of '
+          'the ledger and belongs here for that reason. Whatever else is true about '
+          'who bears the financial loss, <b>the party facing loss of housing is the '
+          'one more likely to be absent and far less likely to have anyone speaking '
+          'for them</b>.</div>')
+
+    # ---- 4. the map --------------------------------------------------------
     a("<h2>Where it concentrates</h2>")
     a('<a class="preview-link wide" href="map.html">'
       '<img src="docs/map-preview.png" loading="lazy" '

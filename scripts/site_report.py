@@ -239,22 +239,129 @@ def build(d):
                 ("Corporate or institutional", SERIES["corporate"])],
         label_width=190, title="The same total, split by kind of landlord",
         chart_label="Money at stake per landlord by kind"))
-    a(f'<figcaption>A corporate owner is owed about '
+    a(f'<figcaption>Across a whole year a corporate owner is owed about '
       f'<b>{num(corp_b["mean_per_entity"]) / num(ind_b["mean_per_entity"]):.1f} times '
-      f'as much on average</b>, because it brings more cases, not larger ones. The '
-      f'typical case is about the same size on both sides: '
-      f'<b>${int(num(ind_b["median_per_entity"])):,}</b>, which is '
-      f'<b>{ind_b["median_as_months_of_rent"]} months of rent</b> or '
-      f'<b>{ind_b["median_as_pct_of_annual_rent"]}% of that unit\'s annual gross '
-      f'revenue</b> before mortgage, tax or repairs. For an owner with one unit that '
-      'is the whole of it; for a portfolio it is one line item.</figcaption>')
+      'as much in total</b>, because it brings many cases. That is the aggregate '
+      'view, and it is modelled: it applies one category-wide average to every '
+      'landlord. What it cannot see is whether an individual case differs by kind of '
+      'owner. Reading the orders themselves shows it does, and not in the direction '
+      'the model implies.</figcaption>')
     a("</figure>")
     a(source_note(
-        'Dollar figures are estimates, not a census: they extrapolate a sample of '
-        'order PDFs as <i>cases x found-rate x mean amount</i>, per category. Orders '
-        'stating no amount are counted as zero, which understates rather than '
-        'overstates. Method and sample sizes in '
+        'These aggregate dollar figures are estimates, not a census: they extrapolate '
+        'a sample of order PDFs as <i>cases x found-rate x mean amount</i>, per '
+        'category. Orders stating no amount are counted as zero, which understates '
+        'rather than overstates. Method and sample sizes in '
         '<a href="sources.html">sources</a>.'))
+
+    mi = d["measured"].get("individual")
+    mc = d["measured"].get("corporate")
+    if mi and mc:
+        a("<h3>The same question, measured instead of modelled</h3>")
+        a("<p>Orders state the rent inside the daily-rate calculation, so each case's "
+          "arrears can be expressed in months of that unit's own rent rather than "
+          "against a provincial average. That makes the two kinds of owner directly "
+          "comparable.</p>")
+        a("<figure>")
+        a(sv.grouped_hbar(
+            [{"label": "Months of rent owed",
+              "values": [num(mi["median_months"]), num(mc["median_months"])],
+              "displays": [f'{mi["median_months"]} mo', f'{mc["median_months"]} mo']},
+             {"label": "Amount owed",
+              "values": [num(mi["median_amount"]), num(mc["median_amount"])],
+              "displays": [f'${int(num(mi["median_amount"])):,}',
+                           f'${int(num(mc["median_amount"])):,}']},
+             {"label": "Share of the unit's annual rent",
+              "values": [num(mi["median_pct_of_annual_rent"]),
+                         num(mc["median_pct_of_annual_rent"])],
+              "displays": [f'{mi["median_pct_of_annual_rent"]}%',
+                           f'{mc["median_pct_of_annual_rent"]}%']}],
+            series=[("Individual owners", SERIES["individual"]),
+                    ("Corporate or institutional", SERIES["corporate"])],
+            label_width=210, title="The median case, read from the orders",
+            chart_label="Measured burden per case by kind of landlord"))
+        a(f'<figcaption><b>An individual owner\'s case is larger than a corporate '
+          f'one, not smaller.</b> Median ${int(num(mi["median_amount"])):,} against '
+          f'${int(num(mc["median_amount"])):,}, after {mi["median_months"]} months '
+          f'without rent against {mc["median_months"]}, amounting to '
+          f'{mi["median_pct_of_annual_rent"]}% of that unit\'s annual gross revenue '
+          f'against {mc["median_pct_of_annual_rent"]}%. The mean amounts are '
+          f'${int(num(mi["mean_amount"])):,} and ${int(num(mc["mean_amount"])):,} '
+          f'with non-overlapping 95% intervals, so the difference is real rather than '
+          f'sampling noise. Individual owners do rent costlier units '
+          f'(${int(num(mi["median_rent"])):,} against '
+          f'${int(num(mc["median_rent"])):,} a month), but the months figure controls '
+          'for that and the gap survives it.</figcaption>')
+        a(data_table(
+            ["", "Individual", "Corporate"],
+            [["Orders measured", f'{int(num(mi["n"])):,}', f'{int(num(mc["n"])):,}'],
+             ["Median months owed", mi["median_months"], mc["median_months"]],
+             ["Median amount", f'${int(num(mi["median_amount"])):,}',
+              f'${int(num(mc["median_amount"])):,}'],
+             ["Mean amount", f'${int(num(mi["mean_amount"])):,}',
+              f'${int(num(mc["mean_amount"])):,}'],
+             ["95% interval on the mean",
+              f'${int(num(mi["mean_amount_ci_low"])):,} to ${int(num(mi["mean_amount_ci_high"])):,}',
+              f'${int(num(mc["mean_amount_ci_low"])):,} to ${int(num(mc["mean_amount_ci_high"])):,}'],
+             ["Median rent on the unit", f'${int(num(mi["median_rent"])):,}',
+              f'${int(num(mc["median_rent"])):,}'],
+             ["Share of annual rent", f'{mi["median_pct_of_annual_rent"]}%',
+              f'{mc["median_pct_of_annual_rent"]}%']]))
+        a("</figure>")
+        a('<div class="finding"><b>This corrects an earlier figure.</b> A previous '
+          'version of this report said the typical case was about the same size for '
+          'both kinds of owner. That came from the model above, which assigns one '
+          'category-wide average to every landlord and therefore cannot detect a '
+          'difference in case size between kinds of owner even in principle. The '
+          'measured figures supersede it.</div>')
+
+    if d.get("burden_bands"):
+        bands = d["burden_bands"]
+        over_six = sum(num(b["pct_of_orders"], 0) for b in bands
+                       if b["band"] in ("6 to 12 months", "Over 12 months"))
+        a("<h3>How long the landlord went unpaid</h3>")
+        a("<figure>")
+        a(sv.hbar([{"label": b["band"], "value": num(b["pct_of_orders"]),
+                    "display": f'{b["pct_of_orders"]}%', "color": SERIES["individual"]}
+                   for b in bands],
+                  label_width=170,
+                  title="Rent owed when the order issued, in months of that unit's rent",
+                  chart_label="Distribution of months of rent owed"))
+        a(f'<figcaption><b>{over_six:.0f}% of orders are for more than six months of '
+          'rent</b> on a single unit, and the tail runs past a year. The short tail '
+          'matters too and points the other way: the smallest band is a tenancy '
+          'ending over less than one month\'s rent.</figcaption>')
+        a(data_table(["Months owed", "Orders", "Share"],
+                     [[b["band"], f'{int(num(b["orders"])):,}', f'{b["pct_of_orders"]}%']
+                      for b in bands]))
+        a("</figure>")
+
+    if d.get("attendance"):
+        att = {r["party"]: r for r in d["attendance"]}
+        ll, tt = att["landlord"], att["tenant"]
+        a("<h3>Who turns up, and who has help</h3>")
+        a("<figure>")
+        a(sv.grouped_hbar(
+            [{"label": "Attended the hearing",
+              "values": [num(ll["pct_attended"]), num(tt["pct_attended"])],
+              "displays": [f'{ll["pct_attended"]}%', f'{tt["pct_attended"]}%']},
+             {"label": "Had a representative",
+              "values": [num(ll["pct_represented"]), num(tt["pct_represented"])],
+              "displays": [f'{ll["pct_represented"]}%', f'{tt["pct_represented"]}%']}],
+            series=[("Landlord side", SERIES["landlord"]),
+                    ("Tenant side", SERIES["tenant"])],
+            label_width=200, title="Presence at the hearing, by side",
+            chart_label="Attendance and representation by side"))
+        a(f'<figcaption>Landlords appear at {ll["pct_attended"]}% of hearings and are '
+          f'represented at {ll["pct_represented"]}%. Tenants appear at '
+          f'{tt["pct_attended"]}% and are represented at '
+          f'<b>{tt["pct_represented"]}%</b>. Among those who do attend, '
+          f'{ll["pct_represented_of_those_attending"]}% of landlords have someone '
+          f'acting for them against {tt["pct_represented_of_those_attending"]}% of '
+          f'tenants. Read from {int(num(ll["orders_with_a_hearing_line"])):,} orders '
+          'naming who attended; orders without that sentence are excluded rather than '
+          'scored as a no-show.</figcaption>')
+        a("</figure>")
 
     a("<h3>How concentrated the filing is</h3>")
     a("<figure>")

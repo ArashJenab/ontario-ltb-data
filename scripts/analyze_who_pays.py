@@ -294,6 +294,14 @@ def _write_readme(entity_rows, mix_rows, conc_rows, burden_rows, entities,
         f"| 90th percentile | {fmt_money(ind_b['p90_per_entity'])} | {fmt_money(corp_b['p90_per_entity'])} |",
         f"| Median per landlord | {fmt_money(ind_b['median_per_entity'])} | {fmt_money(corp_b['median_per_entity'])} |",
         "",
+        "> **Superseded in part.** `results/burden/` reads the rent and amount out "
+        "of individual orders instead of applying a category average, and finds that "
+        "an individual owner's median case is *larger* than a corporate one "
+        "($7,229 against $5,108, after 4.04 months against 3.14). The model below "
+        "cannot see that difference by construction, because it gives every landlord "
+        "in a category the same per-case average. Prefer the measured figures for "
+        "anything per-case; the model remains the basis for province-wide totals.",
+        "",
         "**The two medians are identical, and that is an artifact, not a finding.** "
         "Under this model every landlord whose only case is one L1 receives the same "
         "estimate, and the median landlord of both kinds is exactly that. The median "
@@ -303,15 +311,16 @@ def _write_readme(entity_rows, mix_rows, conc_rows, burden_rows, entities,
         "as much on average, because it brings many cases, not because its cases are "
         "individually larger.",
         "",
-        "That is the whole point. The typical *case* is about the same size on both "
-        f"sides. At Ontario's household-weighted average rent of {fmt_money(rent)}/month "
-        f"(2021 census), the median owner's {fmt_money(ind_b['median_per_entity'])} is "
+        "The model gives every landlord in a category the same per-case average, so "
+        "the only thing it can vary between kinds of owner is how many cases each "
+        "brings. Do not read a per-case conclusion out of it. What it does support: "
+        f"at Ontario's household-weighted average rent of {fmt_money(rent)}/month "
+        "(2021 census), a case of this typical size is "
         f"**{ind_b['median_as_months_of_rent']} months of rent**, or "
-        f"**{fmt_pct(ind_b['median_as_pct_of_annual_rent'])} of that unit's annual gross "
-        "revenue** before mortgage, tax or repairs. What differs is what that case "
-        f"represents: for {fmt_pct(ind['pct_holds_one_address'])} of individual owners "
-        "it is their only unit and, on this evidence, a one-time event; for a corporate "
-        "owner it is one line item among many, spread across a portfolio.",
+        f"**{fmt_pct(ind_b['median_as_pct_of_annual_rent'])} of a unit's annual gross "
+        "revenue** before mortgage, tax or repairs, and that "
+        f"{fmt_pct(ind['pct_holds_one_address'])} of individual owners have no second "
+        "property to spread it across while a corporate owner does.",
         "",
         "## Concentration",
         "",

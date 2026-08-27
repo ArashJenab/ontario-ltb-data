@@ -1,0 +1,3 @@
+landlord_kind,n,median_months,mean_months,mean_months_ci_low,mean_months_ci_high,median_amount,mean_amount,mean_amount_ci_low,mean_amount_ci_high,median_rent,median_pct_of_annual_rent
+individual,780,4.04,4.93,4.67,5.22,7229,9935,9296,10604,1962,33.6
+corporate,1325,3.14,4.15,3.93,4.35,5108,6714,6359,7052,1638,26.2

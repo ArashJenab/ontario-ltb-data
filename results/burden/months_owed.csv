@@ -1,0 +1,5 @@
+scope,n,median_months,mean_months,mean_months_ci_low,mean_months_ci_high,median_amount,mean_amount,mean_amount_ci_low,mean_amount_ci_high,median_monthly_rent
+All landlord money cases,2105,3.45,4.44,4.27,4.62,5791,7908,7578,8229,1731
+L1 - Non-payment of rent,1627,3.7,4.66,4.49,4.85,6305,8412,8034,8809,1731
+L2 - End tenancy (other reasons),80,1.09,2.2,1.64,2.84,1481,3530,2459,4830,1557
+L4 - Breached a settlement or order,398,2.73,3.97,3.57,4.39,4862,6726,6076,7397,1750

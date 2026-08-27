@@ -27,9 +27,11 @@ Estimated total at stake across L1, L2 and L4: **$123.5M**.
 | 90th percentile | $6,088 | $29,511 |
 | Median per landlord | $5,226 | $5,226 |
 
+> **Superseded in part.** `results/burden/` reads the rent and amount out of individual orders instead of applying a category average, and finds that an individual owner's median case is *larger* than a corporate one ($7,229 against $5,108, after 4.04 months against 3.14). The model below cannot see that difference by construction, because it gives every landlord in a category the same per-case average. Prefer the measured figures for anything per-case; the model remains the basis for province-wide totals.
+
 **The two medians are identical, and that is an artifact, not a finding.** Under this model every landlord whose only case is one L1 receives the same estimate, and the median landlord of both kinds is exactly that. The median is therefore uninformative about the difference between them; the mean and the 90th percentile are the columns that carry it. A corporate owner is owed roughly 3.9 times as much on average, because it brings many cases, not because its cases are individually larger.
 
-That is the whole point. The typical *case* is about the same size on both sides. At Ontario's household-weighted average rent of $1,407/month (2021 census), the median owner's $5,226 is **3.7 months of rent**, or **30.9% of that unit's annual gross revenue** before mortgage, tax or repairs. What differs is what that case represents: for 91.1% of individual owners it is their only unit and, on this evidence, a one-time event; for a corporate owner it is one line item among many, spread across a portfolio.
+The model gives every landlord in a category the same per-case average, so the only thing it can vary between kinds of owner is how many cases each brings. Do not read a per-case conclusion out of it. What it does support: at Ontario's household-weighted average rent of $1,407/month (2021 census), a case of this typical size is **3.7 months of rent**, or **30.9% of a unit's annual gross revenue** before mortgage, tax or repairs, and that 91.1% of individual owners have no second property to spread it across while a corporate owner does.
 
 ## Concentration
 

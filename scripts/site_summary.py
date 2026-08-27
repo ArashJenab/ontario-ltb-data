@@ -26,6 +26,9 @@ def build(d):
         if r["census_measure"] == "Median household income"
         and r["rate"].startswith("Landlord")
     )
+    mi = d["measured"].get("individual")
+    mc = d["measured"].get("corporate")
+    att = {r["party"]: r for r in d["attendance"]} if d.get("attendance") else None
     once_pct = round(num(one_case["pct_of_tenants"]))
     repeat_share = 100 - once_pct
     repeat_cases = round(100 - num(one_case["pct_of_cases"]), 1)
@@ -76,15 +79,36 @@ def build(d):
         f"| Share of the money at stake | {ind_b['pct_of_estimated_total']}% | {corp_b['pct_of_estimated_total']}% |",
         f"| Mean owed each | ${int(num(ind_b['mean_per_entity'])):,} | ${int(num(corp_b['mean_per_entity'])):,} |",
         "",
-        f"The median case is about the same size on both sides, roughly "
-        f"${int(num(ind_b['median_per_entity'])):,}. What differs is what it means: "
-        f"**{ind_b['median_as_months_of_rent']} months of rent, or "
-        f"{ind_b['median_as_pct_of_annual_rent']}% of that unit's annual gross "
-        f"revenue** before mortgage, tax or repairs. For "
-        f"{ind['pct_holds_one_address']}% of individual owners, that unit is all they "
-        f"have. A corporate owner is owed roughly {corp_multiple:.1f} times more on "
-        f"average because it brings more cases, not larger ones.",
+        f"Across a year a corporate owner is owed roughly {corp_multiple:.1f} times "
+        f"more in total, because it brings many cases. That is the aggregate view and "
+        f"it is modelled from category averages.",
         "",
+    ]
+    if mi and mc:
+        out += [
+            f"Reading {int(num(mi['n'])) + int(num(mc['n'])):,} orders individually "
+            f"gives the per-case answer the model cannot, and it does not point the "
+            f"way the aggregate implies. **An individual owner's case is larger than a "
+            f"corporate one, not smaller:**",
+            "",
+            "| Median case | Individual owners | Corporate or institutional |",
+            "|---|---:|---:|",
+            f"| Months of rent owed | **{mi['median_months']}** | {mc['median_months']} |",
+            f"| Amount owed | **${int(num(mi['median_amount'])):,}** | ${int(num(mc['median_amount'])):,} |",
+            f"| Share of that unit's annual rent | **{mi['median_pct_of_annual_rent']}%** | {mc['median_pct_of_annual_rent']}% |",
+            f"| Rent on the unit | ${int(num(mi['median_rent'])):,} | ${int(num(mc['median_rent'])):,} |",
+            f"| Orders measured | {int(num(mi['n'])):,} | {int(num(mc['n'])):,} |",
+            "",
+            f"The mean amounts are ${int(num(mi['mean_amount'])):,} and "
+            f"${int(num(mc['mean_amount'])):,}, with 95% intervals that do not "
+            f"overlap, so this is a real difference rather than sampling noise. "
+            f"Individual owners do rent costlier units, but the months figure controls "
+            f"for that and the gap survives it. For "
+            f"{ind['pct_holds_one_address']}% of these owners the unit in question is "
+            f"all they have.",
+            "",
+        ]
+    out += [
         f"The application mix says the same thing from another angle. "
         f"**{l10['pct_individual']}% of applications to collect from a tenant who has "
         f"already left** are brought by individuals: the cases least likely ever to "
@@ -120,6 +144,24 @@ def build(d):
         f"something already agreed may proceed without a fresh hearing, but the size "
         f"of it is a fact about the system worth knowing.",
         "",
+    ]
+    if att:
+        out += [
+            f"Where a hearing did happen, orders name who attended. Landlords appear "
+            f"at **{att['landlord']['pct_attended']}%** of them and are represented at "
+            f"**{att['landlord']['pct_represented']}%**. Tenants appear at "
+            f"**{att['tenant']['pct_attended']}%** and are represented at "
+            f"**{att['tenant']['pct_represented']}%**. Among those who do attend, "
+            f"{att['landlord']['pct_represented_of_those_attending']}% of landlords "
+            f"have someone acting for them against "
+            f"{att['tenant']['pct_represented_of_those_attending']}% of tenants. This "
+            f"finding cuts against the landlord side of the ledger and is reported for "
+            f"that reason: whoever bears the financial loss, the party facing loss of "
+            f"housing is the one more likely to be absent and far less likely to have "
+            f"anyone speaking for them.",
+            "",
+        ]
+    out += [
         "## 5. What was tested and not found",
         "",
         f"- **Area income does not explain where landlords file.** Rank correlation "

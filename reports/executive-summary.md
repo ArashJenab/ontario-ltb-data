@@ -23,7 +23,19 @@ For comparison, the United States filing rate is about 8.0% of renter households
 | Share of the money at stake | 33.4% | 66.6% |
 | Mean owed each | $5,193 | $20,133 |
 
-The median case is about the same size on both sides, roughly $5,226. What differs is what it means: **3.7 months of rent, or 30.9% of that unit's annual gross revenue** before mortgage, tax or repairs. For 91.1% of individual owners, that unit is all they have. A corporate owner is owed roughly 3.9 times more on average because it brings more cases, not larger ones.
+Across a year a corporate owner is owed roughly 3.9 times more in total, because it brings many cases. That is the aggregate view and it is modelled from category averages.
+
+Reading 2,105 orders individually gives the per-case answer the model cannot, and it does not point the way the aggregate implies. **An individual owner's case is larger than a corporate one, not smaller:**
+
+| Median case | Individual owners | Corporate or institutional |
+|---|---:|---:|
+| Months of rent owed | **4.04** | 3.14 |
+| Amount owed | **$7,229** | $5,108 |
+| Share of that unit's annual rent | **33.6%** | 26.2% |
+| Rent on the unit | $1,962 | $1,638 |
+| Orders measured | 780 | 1,325 |
+
+The mean amounts are $9,935 and $6,714, with 95% intervals that do not overlap, so this is a real difference rather than sampling noise. Individual owners do rent costlier units, but the months figure controls for that and the gap survives it. For 91.1% of these owners the unit in question is all they have.
 
 The application mix says the same thing from another angle. **77.0% of applications to collect from a tenant who has already left** are brought by individuals: the cases least likely ever to be recovered. The reverse also holds and belongs in the record, because an analysis that only reports one direction is not evidence: above-guideline rent increases are **77.5% corporate**.
 
@@ -38,6 +50,8 @@ This cuts both ways. The Board's file understates how often tenants lose housing
 **90% of tenants appear in exactly one case.** The 10% who recur account for 19.0% of cases and are taken to the Board for breaching a settlement at **3.44 times** the rate of one-time tenants (29.8% of their cases against 8.7%). Most recur at the same address rather than moving on.
 
 **18.4% of landlord-filed orders are made without a hearing, against 2.1% of tenant-filed ones.** Much of that gap is procedurally expected, since an application to enforce something already agreed may proceed without a fresh hearing, but the size of it is a fact about the system worth knowing.
+
+Where a hearing did happen, orders name who attended. Landlords appear at **90.3%** of them and are represented at **73.6%**. Tenants appear at **52.2%** and are represented at **7.6%**. Among those who do attend, 81.4% of landlords have someone acting for them against 14.6% of tenants. This finding cuts against the landlord side of the ledger and is reported for that reason: whoever bears the financial loss, the party facing loss of housing is the one more likely to be absent and far less likely to have anyone speaking for them.
 
 ## 5. What was tested and not found
 
