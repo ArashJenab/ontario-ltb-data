@@ -188,8 +188,8 @@ footer a { color:var(--ink-muted); }
 <figcaption><b>The record is close to inverted relative to lived experience.</b> Non-payment dominates the Board because a landlord needs an order to recover money. The reasons tenants most often give, that the landlord sold or wanted the unit, usually end with the tenant leaving on a notice and produce no record at all. So the file understates how often tenants lose housing <i>and</i> is not evidence about the no-fault evictions it barely contains.</figcaption>
 </figure>
 <h2>Where it concentrates</h2>
-<a class="preview-link wide" href="map.html"><img src="docs/map-preview.png" loading="lazy" alt="Interactive map of Ontario rental dispute rates by postal area"><div class="preview-caption"><span>All 520 postal areas, normalised by renter households</span><span>Open the map</span></div></a>
-<p class="src">Rates are per renter household rather than per resident: an area that is 80% renters would otherwise look busier than one that is 20% renters with nothing else differing. A <a href="city-map.html">municipality view</a> of the same data is available for anyone who does not think in postal codes.</p>
+<a class="preview-link wide" href="map.html"><img src="docs/map-preview.png" loading="lazy" alt="Interactive map of Ontario rental dispute rates by postal area"><div class="preview-caption"><span>All 520 postal areas, raw counts or per 10,000 residents</span><span>Open the map</span></div></a>
+<p class="src">The map currently normalises by <b>population</b>, which is a weaker denominator than the one used elsewhere on this site: an area that is 80% renters will look busier than one that is 20% renters with nothing else differing. Per-renter-household rates are in <code>results/exposure/fsa_access_income.csv</code> and are what section 7 of the report uses; moving the map onto them is outstanding work. A <a href="city-map.html">municipality view</a> of the same data is available for anyone who does not think in postal codes.</p>
 <h2>What was tested and not found</h2>
 <p>Reporting only the things that came out is how an analysis stops being evidence. These were tested and did not.</p>
 <figure>
@@ -202,7 +202,7 @@ footer a { color:var(--ink-muted); }
 <a class="file-row" href="report.html"><span class="name">Full report</span><span class="desc">Nine sections, every chart, sources beside each number</span></a>
 <a class="file-row" href="onepager.html"><span class="name">One-page briefing</span><span class="desc">Print-ready summary for a constituency office</span></a>
 <a class="file-row" href="sources.html"><span class="name">Sources and provenance</span><span class="desc">Every source, its licence, and which figure came from where</span></a>
-<a class="file-row" href="map.html"><span class="name">Map by postal area</span><span class="desc">520 areas, rates per renter household, zoomable and offline-capable</span></a>
+<a class="file-row" href="map.html"><span class="name">Map by postal area</span><span class="desc">520 areas, raw counts or per 10,000 residents, zoomable and works offline</span></a>
 <a class="file-row" href="city-map.html"><span class="name">Map by municipality</span><span class="desc">The same data rolled up to recognisable city names</span></a>
 <a class="file-row" href="https://github.com/ArashJenab/ontario-ltb-data"><span class="name">Source repository</span><span class="desc">All data, scripts, and per-analysis methodology notes</span></a>
 </div><footer>

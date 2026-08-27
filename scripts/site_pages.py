@@ -568,11 +568,14 @@ def build_index(d):
       '<img src="docs/map-preview.png" loading="lazy" '
       'alt="Interactive map of Ontario rental dispute rates by postal area">'
       '<div class="preview-caption">'
-      '<span>All 520 postal areas, normalised by renter households</span>'
+      '<span>All 520 postal areas, raw counts or per 10,000 residents</span>'
       '<span>Open the map</span></div></a>')
-    a('<p class="src">Rates are per renter household rather than per resident: an '
-      'area that is 80% renters would otherwise look busier than one that is 20% '
-      'renters with nothing else differing. A '
+    a('<p class="src">The map currently normalises by <b>population</b>, which is a '
+      'weaker denominator than the one used elsewhere on this site: an area that is '
+      '80% renters will look busier than one that is 20% renters with nothing else '
+      'differing. Per-renter-household rates are in '
+      '<code>results/exposure/fsa_access_income.csv</code> and are what section 7 of '
+      'the report uses; moving the map onto them is outstanding work. A '
       '<a href="city-map.html">municipality view</a> of the same data is available '
       'for anyone who does not think in postal codes.</p>')
 
@@ -607,7 +610,7 @@ def build_index(d):
         ("sources.html", "Sources and provenance",
          "Every source, its licence, and which figure came from where"),
         ("map.html", "Map by postal area",
-         "520 areas, rates per renter household, zoomable and offline-capable"),
+         "520 areas, raw counts or per 10,000 residents, zoomable and works offline"),
         ("city-map.html", "Map by municipality",
          "The same data rolled up to recognisable city names"),
         ("https://github.com/ArashJenab/ontario-ltb-data", "Source repository",

@@ -24,7 +24,7 @@ No earlier period is published anywhere, so no trend can be measured yet. `scrip
 
 **The two sides do not get the same process.** **18.4%** of landlord-filed orders are made without a hearing, against **2.1%** of tenant-filed ones.
 
-**Some things were tested and not found.** Area income barely predicts where landlords file (rank correlation −0.119, about 1% of the variation). There is no gendered pairing between the sides. The serial-tenant claim is not supported at this timescale, and the apparent top of that list turns out to be legal clinics named in the tenant field.
+**Some things were tested and not found.** Area income barely predicts where landlords file (rank correlation -0.119, about 1% of the variation). There is no gendered pairing between the sides. The serial-tenant claim is not supported at this timescale, and the apparent top of that list turns out to be legal clinics named in the tenant field.
 
 ## What's here
 
@@ -33,7 +33,7 @@ No earlier period is published anywhere, so no trend can be measured yet. `scrip
 | **[`report.html`](report.html)** | The main artifact. Nine sections, eleven charts, sources beside each number. |
 | **[`onepager.html`](onepager.html)** | Print-ready one-page briefing. |
 | **[`sources.html`](sources.html)** | Every source, its licence, its period, and which figure came from where. |
-| **[`map.html`](map.html)** / **[`city-map.html`](city-map.html)** | Interactive choropleths by postal FSA (520 areas) or municipality. Self-contained, work offline. |
+| **[`map.html`](map.html)** / **[`city-map.html`](city-map.html)** | Interactive choropleths by postal FSA (520 areas) or municipality. Self-contained, work offline. Note these still normalise by **population**, not renter households; the renter-household rates the report uses are in `results/exposure/`, and moving the maps onto them is outstanding. |
 | **[`results/`](results/)** | One folder per analysis, each with its CSVs, its exact numbers, the command that built it, and its caveats. |
 | **[`data/`](data/)** | Source data and every derived dataset, each documented. |
 | **[`scripts/`](scripts/)** | The full pipeline in Python, reproducible end to end. |
