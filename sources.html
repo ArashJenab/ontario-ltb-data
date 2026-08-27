@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources and provenance | Ontario LTB Data</title>
+<meta name="description" content="Every source behind the Ontario LTB analysis, its licence, the period it covers, and which figure came from where.">
+<style>
+:root {
+  --bg:#eef1f5; --surface:#ffffff; --surface-2:#f7f8fb;
+  --ink:#1a2130; --ink-muted:#5c6675; --ink-faint:#8b93a1;
+  --border:#dde1e8; --border-strong:#c7cdd7; --grid:#e4e8ee;
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a;
+  --warn-bg:#fff6e8; --warn-border:#f0c98a; --warn-ink:#7a4e10;
+  --shadow:0 1px 2px rgba(20,24,32,.06), 0 8px 24px rgba(20,24,32,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#0f1319; --surface:#171c25; --surface-2:#12161d;
+    --ink:#e8ecf3; --ink-muted:#9aa4b4; --ink-faint:#6b7484;
+    --border:#262d3a; --border-strong:#333c4c; --grid:#262d3a;
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+    --warn-bg:#241d10; --warn-border:#5c4a20; --warn-ink:#e9c98d;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#0f1319; --surface:#171c25; --surface-2:#12161d;
+  --ink:#e8ecf3; --ink-muted:#9aa4b4; --ink-faint:#6b7484;
+  --border:#262d3a; --border-strong:#333c4c; --grid:#262d3a;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+  --warn-bg:#241d10; --warn-border:#5c4a20; --warn-ink:#e9c98d;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; background:var(--bg); color:var(--ink); }
+body {
+  font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; line-height:1.6;
+  display:flex; justify-content:center;
+  padding:clamp(20px,5vw,64px) clamp(16px,4vw,40px);
+}
+.page { width:100%; max-width:860px; }
+.eyebrow { font-size:12px; font-weight:700; letter-spacing:.09em;
+           text-transform:uppercase; color:var(--ink-faint); }
+h1 { margin:10px 0 0; font-size:clamp(28px,4.6vw,42px); font-weight:700;
+     letter-spacing:-.015em; line-height:1.12; text-wrap:balance; }
+h2 { margin:56px 0 6px; font-size:clamp(20px,2.6vw,25px); font-weight:700;
+     letter-spacing:-.01em; line-height:1.25; text-wrap:balance; }
+h3 { margin:34px 0 4px; font-size:17px; font-weight:700; }
+.dek { margin:16px 0 0; font-size:17.5px; color:var(--ink-muted); }
+p { margin:14px 0; }
+a { color:var(--series-1); }
+.lede { margin-top:26px; padding:20px 22px; background:var(--surface);
+        border:1px solid var(--border); border-left:3px solid var(--series-1);
+        border-radius:10px; font-size:16.5px; box-shadow:var(--shadow); }
+.window { margin:22px 0 0; padding:14px 18px; background:var(--warn-bg);
+          border:1px solid var(--warn-border); border-radius:10px;
+          font-size:14px; color:var(--warn-ink); }
+.window b { color:var(--warn-ink); }
+.tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:30px 0 0; }
+@media (max-width:820px){ .tiles{ grid-template-columns:repeat(2,1fr);} }
+@media (max-width:420px){ .tiles{ grid-template-columns:1fr;} }
+.tile { background:var(--surface); border:1px solid var(--border);
+        border-radius:12px; padding:16px 16px 18px; box-shadow:var(--shadow); }
+.tile .n { font-size:27px; font-weight:800; letter-spacing:-.02em;
+           font-variant-numeric:tabular-nums; line-height:1.1; }
+.tile .t { margin-top:7px; font-size:13px; line-height:1.45; color:var(--ink-muted); }
+.n.a { color:var(--series-1); } .n.b { color:var(--series-2); } .n.c { color:var(--series-3); }
+figure { margin:26px 0 0; padding:20px 22px 16px; background:var(--surface);
+         border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); }
+figcaption { margin-top:12px; padding-top:12px; border-top:1px solid var(--border);
+             font-size:13px; color:var(--ink-muted); }
+figcaption b { color:var(--ink); }
+details { margin-top:10px; font-size:13px; }
+summary { cursor:pointer; color:var(--ink-muted); font-weight:600; }
+table { border-collapse:collapse; width:100%; margin:12px 0 0; font-size:13.5px; }
+th,td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--border); }
+th { font-size:12px; text-transform:uppercase; letter-spacing:.04em;
+     color:var(--ink-faint); font-weight:700; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.src { font-size:12.5px; color:var(--ink-faint); margin-top:10px; }
+.src a { color:var(--ink-muted); }
+footer { margin-top:60px; padding-top:22px; border-top:1px solid var(--border);
+         font-size:12.5px; line-height:1.7; color:var(--ink-faint); }
+footer a { color:var(--ink-muted); }
+.nav { display:flex; flex-wrap:wrap; gap:12px; margin-top:24px; }
+.nav a { display:inline-block; padding:11px 18px; border-radius:9px;
+         font-weight:700; font-size:14.5px; text-decoration:none;
+         background:var(--surface); color:var(--ink);
+         border:1px solid var(--border-strong); }
+.nav a.primary { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.finding { margin-top:18px; padding:16px 18px; background:var(--surface-2);
+           border:1px solid var(--border); border-radius:10px; font-size:15px; }
+.finding b { color:var(--ink); }
+
+.chart { width: 100%; height: auto; display: block; }
+.c-title { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.c-label { font-size: 12.5px; fill: var(--ink-muted); }
+.c-value { font-size: 12.5px; font-weight: 700; fill: var(--ink);
+           font-variant-numeric: tabular-nums; }
+.c-inbar { font-size: 11.5px; font-weight: 700; fill: #ffffff; }
+.c-legend { font-size: 12px; fill: var(--ink-muted); }
+.c-note { font-size: 11.5px; fill: var(--ink-faint); }
+.c-axis { font-size: 11px; fill: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.c-axistitle { font-size: 11.5px; fill: var(--ink-muted); }
+.c-point { font-size: 11.5px; font-weight: 700; fill: var(--ink); }
+.c-grid { stroke: var(--grid); stroke-width: 1; }
+.chart rect, .chart circle { transition: fill-opacity .12s ease; }
+.chart rect:hover, .chart circle:hover { fill-opacity: .82; }
+
+@media print {
+  body { background:#fff; color:#000; padding:0; display:block; }
+  .page { max-width:none; }
+  .no-print { display:none !important; }
+  figure, .tile, .lede, .window, .finding {
+    box-shadow:none; border:1px solid #ccc; break-inside:avoid; }
+  h2 { break-after:avoid; }
+  a { color:#000; text-decoration:none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="eyebrow">Provenance</div>
+<h1>Every source, and which number came from where</h1>
+<p class="dek">This analysis uses only published data. Nothing here is scraped, private, or purchased. This page exists so any figure on the site can be traced to a named source, its licence, and the period it covers.</p>
+<div class="nav no-print"><a href="report.html">Back to the report</a><a href="index.html">Home</a></div>
+<h2>The sources</h2>
+<figure>
+<h3 style="margin-top:0">LTB Order Catalogue</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">Ontario Landlord and Tenant Board, via data.ontario.ca</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://data.ontario.ca/dataset/ltb-order-catalogue">https://data.ontario.ca/dataset/ltb-order-catalogue&hellip;</a></td></tr><tr><td>Licence</td><td><a href="https://www.ontario.ca/page/open-government-licence-ontario">Open Government Licence, Ontario</a></td></tr><tr><td>Period</td><td>One rolling current-year file. The copy analysed here covers 2026-01-02 to 2026-05-29.</td></tr><tr><td>Supplies</td><td>Every case count, application type, party name, address and order date. The dollar amounts are read from the order PDFs this file links to.</td></tr><tr><td>Caveat</td><td>No earlier period is published. The repository snapshots every fetch so a historical series accumulates from here.</td></tr></tbody></table></div>
+</figure>
+<figure>
+<h3 style="margin-top:0">Census Profile 2021, Forward Sortation Areas (98-401-X2021013)</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">Statistics Canada</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://www150.statcan.gc.ca/n1/en/catalogue/98-401-X2021013">https://www150.statcan.gc.ca/n1/en/catalogue/98-401-X2021013&hellip;</a></td></tr><tr><td>Licence</td><td><a href="https://www.statcan.gc.ca/en/reference/licence">Statistics Canada Open Licence</a></td></tr><tr><td>Period</td><td>2021 Census; income refers to calendar year 2020.</td></tr><tr><td>Supplies</td><td>Renter-household counts (the denominator for every rate), median household income, average and median rent, share of tenants in core housing need, and share paying 30%+ of income on shelter, for all 521 Ontario postal areas.</td></tr><tr><td>Caveat</td><td>Renter households summed across Ontario FSAs come to 1,725,025 against a province-level 1,724,970, a 55-household gap that is census random rounding, and the check that both are the same measure.</td></tr></tbody></table></div>
+</figure>
+<figure>
+<h3 style="margin-top:0">Census population by FSA (98-10-0019-01) and by municipality (98-10-0002-01)</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">Statistics Canada</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=9810001901">https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=9810001901&hellip;</a></td></tr><tr><td>Licence</td><td><a href="https://www.statcan.gc.ca/en/reference/licence">Statistics Canada Open Licence</a></td></tr><tr><td>Period</td><td>2021 Census.</td></tr><tr><td>Supplies</td><td>Population denominators for the per-resident view on the maps, kept for continuity alongside the renter-household rate.</td></tr><tr><td>Caveat</td><td>A per-resident rate largely measures how many renters an area has. The renter-household rate is the defensible one and is what the report uses.</td></tr></tbody></table></div>
+</figure>
+<figure>
+<h3 style="margin-top:0">Cartographic Boundary Files, 2021</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">Statistics Canada</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/index2021-eng.cfm">https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-l&hellip;</a></td></tr><tr><td>Licence</td><td><a href="https://www.statcan.gc.ca/en/reference/licence">Statistics Canada Open Licence</a></td></tr><tr><td>Period</td><td>2021 Census geography.</td></tr><tr><td>Supplies</td><td>The postal-area and municipality polygons the maps are drawn on.</td></tr></tbody></table></div>
+</figure>
+<figure>
+<h3 style="margin-top:0">Tribunals Ontario Annual Report 2024-25</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">Tribunals Ontario</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://tribunalsontario.ca/documents/TO/Tribunals_Ontario_2024-2025_Annual_Report.html">https://tribunalsontario.ca/documents/TO/Tribunals_Ontario_2024-2025_Annua&hellip;</a></td></tr><tr><td>Licence</td><td>Government of Ontario, published report</td></tr><tr><td>Period</td><td>Fiscal year April 2024 to March 2025.</td></tr><tr><td>Supplies</td><td>The Board's own intake: 87,993 applications received, of which 72,836 filed by landlords. Used as an independent check on this analysis's annualised figures.</td></tr><tr><td>Caveat</td><td>A different year from the order export, which is why the two are reported as separate routes to the same quantity rather than combined.</td></tr></tbody></table></div>
+</figure>
+<figure>
+<h3 style="margin-top:0">Canadian Housing Survey 2021: Evictions in Canada</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">Statistics Canada</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://www150.statcan.gc.ca/n1/pub/11-627-m/11-627-m2022046-eng.htm">https://www150.statcan.gc.ca/n1/pub/11-627-m/11-627-m2022046-eng.htm&hellip;</a></td></tr><tr><td>Licence</td><td><a href="https://www.statcan.gc.ca/en/reference/licence">Statistics Canada Open Licence</a></td></tr><tr><td>Period</td><td>2021 survey cycle, national.</td></tr><tr><td>Supplies</td><td>The reasons renters give for being forced to move: sale of the property 37%, landlord's own use 26%, conflict 13%, demolition or repairs 10%, behind on rent 8%.</td></tr><tr><td>Caveat</td><td>National, not Ontario-only. Used to compare the <i>shape</i> of recorded reasons against reported ones, not to produce an Ontario count.</td></tr></tbody></table></div>
+</figure>
+<figure>
+<h3 style="margin-top:0">Towards Understanding the Magnitude of Evictions in Canada</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">Canada Mortgage and Housing Corporation, July 2025</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://assets.cmhc-schl.gc.ca/sites/cmhc/professional/housing-markets-data-and-research/housing-research/research-reports/2025/towards-understanding-magnitude-evictions-en.pdf">https://assets.cmhc-schl.gc.ca/sites/cmhc/professional/housing-markets-dat&hellip;</a></td></tr><tr><td>Licence</td><td>CMHC research publication</td></tr><tr><td>Period</td><td>Canadian Housing Survey 2021 and 2022 reference years.</td></tr><tr><td>Supplies</td><td>That about 1.0% of Canadian renters are evicted in a year counting both formal and informal evictions. This is the figure that separates 'a case was filed' from 'someone lost their home'.</td></tr><tr><td>Caveat</td><td>CMHC notes the survey excludes people living in shelters and institutions, so it undercounts.</td></tr></tbody></table></div>
+</figure>
+<figure>
+<h3 style="margin-top:0">Eviction Tracking System, 2024</h3>
+<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">The Eviction Lab, Princeton University</p>
+<div class="scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Link</td><td><a href="https://evictionlab.org/ets-report-2024/">https://evictionlab.org/ets-report-2024/&hellip;</a></td></tr><tr><td>Licence</td><td>Eviction Lab terms of use</td></tr><tr><td>Period</td><td>Calendar 2024, tracked United States cities.</td></tr><tr><td>Supplies</td><td>The international benchmark: about 8 eviction filings per 100 renter households.</td></tr><tr><td>Caveat</td><td>United States court procedure differs from Ontario's, so this is a rough scale comparison, not a like-for-like rate.</td></tr></tbody></table></div>
+</figure>
+<h2>Figure by figure</h2>
+<p>What each headline number rests on, and how far it can be pushed.</p>
+<figure>
+<div class="scroll"><table><thead><tr><th>Figure</th><th>Source</th><th>How solid</th></tr></thead><tbody><tr><td>1 in 24 renter households per year</td><td>This export, annualised; cross-checked against Tribunals Ontario intake</td><td>Exact count of cases, divided by a census denominator. The annualisation assumes the rest of the year resembles the 148 days observed.</td></tr><tr><td>63.4% of Board cases are about unpaid rent</td><td>This export</td><td>Exact count. No estimation.</td></tr><tr><td>8% of evictions tenants report are about unpaid rent</td><td>Canadian Housing Survey 2021</td><td>Survey estimate, national.</td></tr><tr><td>9,291 individual landlords, 85.8% filed once</td><td>This export</td><td>Exact count, but the individual/corporate split is a name-based classification, not a legal one. Individual owners filing through a numbered company are counted as corporate, so the individual share is a floor.</td></tr><tr><td>$123.5M at stake; $5,226 median per landlord</td><td>Sample of order PDFs, extrapolated</td><td>Estimate, not a census. cases x found-rate x mean amount, per category. Orders stating no amount count as zero.</td></tr><tr><td>31% of a unit's annual rent</td><td>The above, divided by census average rent</td><td>Combines an estimate with a 2021 rent figure. Directionally solid, not precise.</td></tr><tr><td>Breach of settlement 3.4x more common among repeat tenants</td><td>This export</td><td>Exact count within the window. Name matching merges people who share a name.</td></tr><tr><td>18.4% of landlord orders made without a hearing</td><td>This export</td><td>Exact count of the document-type field.</td></tr><tr><td>Rank correlation -0.119 between filing rate and area income</td><td>This export joined to the 2021 Census</td><td>Area-level association. Says nothing about any individual household.</td></tr><tr><td>2.0 men per woman among individual landlords</td><td>First-name dictionary lookup</td><td>Weak instrument. Resolves 65% of landlord names, and the misses are not random across communities.</td></tr></tbody></table></div>
+</figure>
+<h2>The two kinds of number on this site</h2>
+<div class="finding"><b>Exact counts.</b> Case volumes, application types, party classifications, geography and ex parte rates are counted from the complete public export. No sampling, no modelling. They are exact for the window 2026-01-02 to 2026-05-29 and are labelled as annualised wherever they are projected to a year.</div>
+<div class="finding"><b>Estimates.</b> Every dollar figure. The export lists case metadata but not the amount each order states, so amounts come from downloading and reading order PDFs individually. Those are samples with a stated method, and they are presented as ranges or with their sample size attached. They should be read as order-of-magnitude.</div>
+<h2>Known limits</h2>
+<figure>
+<div class="scroll"><table><thead><tr><th>Limit</th><th>What it means for the numbers</th></tr></thead><tbody><tr><td>A 148-day window</td><td>Not a full year and not all time. Seasonality cannot be separated from trend, and nothing here shows whether things are getting better or worse.</td></tr><tr><td>Orders are not cases</td><td>37,401 orders cover 37,401 distinct cases, because review and amended orders repeat a file. Counts on this site are of cases unless stated.</td></tr><tr><td>An application is not an eviction</td><td>Most non-payment cases end with the tenant paying and staying. Filing rates and eviction rates are different quantities and are labelled separately.</td></tr><tr><td>Name-based classification</td><td>Whether a landlord is 'corporate' and whether a party is a person are inferred from name text, not from a registry.</td></tr><tr><td>Name matching merges and splits</td><td>Two landlords sharing a canonical name are merged; one landlord using two spellings is double-counted. Concentration figures are approximate at the margin.</td></tr><tr><td>Area-level correlation</td><td>Associations between an area's case rate and its census profile say nothing about any individual household or landlord in it.</td></tr><tr><td>Gender inference</td><td>A dictionary lookup on first names that resolves some naming traditions far better than others. Always reported with its coverage.</td></tr></tbody></table></div>
+</figure><footer>
+
+Built from the <a href="https://data.ontario.ca/dataset/ltb-order-catalogue">Ontario
+LTB Order Catalogue</a> (Open Government Licence, Ontario) and the 2021 Census
+(Statistics Canada Open Licence). Full provenance for every figure:
+<a href="sources.html">sources</a>. Code is <a href="LICENSE">MIT-licensed</a>; the
+underlying government data keeps its own licence terms. Figures here are derived from
+public data and are not official statistics of either agency.
+<p style="margin:10px 0 0">This is an independent analysis developed using data published by the Government of Ontario. It is not an official publication of, and is not affiliated with or endorsed by, the Government of Ontario or the Landlord and Tenant Board.</p>
+<p style="margin:10px 0 0">Page built 2026-08-27.</p>
+</footer>
+</div>
+</body>
+</html>

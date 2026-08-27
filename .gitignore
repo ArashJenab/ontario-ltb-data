@@ -34,3 +34,7 @@ Thumbs.db
 # demand by fetch_fsa_census_profile.py; only the Ontario extract
 # data/fsa_census_profile.csv is kept in the repo.
 data/raw_statcan_98401X2021013/
+
+# Layout-check screenshots from scripts/check_pages.py — regenerated on demand,
+# and full-page renders of every page in both themes add up quickly.
+docs/checks/
