@@ -72,11 +72,14 @@ SOURCES = [
         "licence_url": "",
         "window": "Fiscal year April 2024 to March 2025.",
         "supplies": "The Board's own intake: 87,993 applications received, of which "
-                    "72,836 filed by landlords. Used as an independent check on this "
-                    "analysis's annualised figures.",
-        "note": "A different year from the order export, which is why the two are "
-                "reported as separate routes to the same quantity rather than "
-                "combined.",
+                    "72,836 were filed by landlords. Used as an independent check on "
+                    "this analysis's annualised figures.",
+        "note": "Two caveats. It is a different fiscal year from the order export, "
+                "which is why the two are reported as separate routes to the same "
+                "quantity rather than averaged. And the per-party figures count "
+                "Tribunals Ontario Portal filings only (72,836 + 8,267 + 387 = "
+                "81,490, against a stated total of 87,993), so the landlord figure "
+                "is a floor and the rate derived from it is conservative.",
     },
     {
         "name": "Canadian Housing Survey 2021: Evictions in Canada",

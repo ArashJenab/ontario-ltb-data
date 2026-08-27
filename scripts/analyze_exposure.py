@@ -46,11 +46,21 @@ CENSUS_PATH = BASE / "data" / "fsa_census_profile.csv"
 # is census random rounding, which is the check that both are the same measure.
 ONTARIO_RENTER_HOUSEHOLDS = 1_724_970
 
-# Tribunals Ontario 2024-25 Annual Report: applications received by the LTB in
-# the fiscal year, and the landlord-filed subset.
+# Tribunals Ontario 2024-25 Annual Report:
+#   "the LTB received a total of 87,993 applications"
+#   "Landlords filed 72,836 applications, while tenants filed 8,267 applications
+#    through the Tribunals Ontario Portal. Additionally, 387 co-op applications
+#    were filed using the Portal."
 # https://tribunalsontario.ca/documents/TO/Tribunals_Ontario_2024-2025_Annual_Report.html
+#
+# Note the two do not reconcile: 72,836 + 8,267 + 387 = 81,490 against a total of
+# 87,993, because the per-party figures count Portal filings only. So 72,836 is a
+# FLOOR on landlord applications, not the full count, and the exposure rate derived
+# from it is correspondingly conservative.
 TO_APPLICATIONS_RECEIVED = 87_993
-TO_LANDLORD_APPLICATIONS = 72_836
+TO_LANDLORD_APPLICATIONS = 72_836  # Portal filings only; a floor
+TO_TENANT_APPLICATIONS = 8_267
+TO_PORTAL_TOTAL = 81_490
 
 # Eviction Lab (Princeton), Eviction Tracking System, 2024: eviction filings per
 # 100 renter households across tracked United States cities.
@@ -172,7 +182,7 @@ def main():
         (
             "Tribunals Ontario, landlord applications received 2024-25",
             TO_LANDLORD_APPLICATIONS,
-            "the Board's own published intake, an independent route to the same figure",
+            "the Board's own published intake; Portal filings only, so a floor",
         ),
     ]
     rate_rows = [
