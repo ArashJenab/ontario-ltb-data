@@ -1,54 +1,70 @@
 # -*- coding: utf-8 -*-
 """
-The report page: every finding, every chart, sources next to the numbers.
+The report page.
 
-Imported by build_site.py, which owns the data loading and the page chrome.
-Kept separate only because one file holding both the shell and nine sections
-of prose becomes unnavigable.
+Structured as an argument, not a list of analyses. The previous version ran
+nine numbered sections each headed by the name of a technique, showed a chart,
+and moved on, which read as a report written to have been written. Each section
+here is instead a question a person would actually ask, answered in one bold
+sentence before any chart appears, and closed with what it means. A reader who
+reads only the bold lines should come away with the whole argument.
+
+The argument: the Board's caseload is ordinary in size, and almost nothing else
+about it works the way people assume. Filing is not eviction. The landlords
+bringing cases are mostly not companies. The losses fall on whoever cannot
+spread them. The tenants who most need the Board lose in it. And the record
+itself is a biased sample of the problem it gets used to describe.
 """
 import svgchart as sv
 from build_site import SERIES, data_table, num, source_note, tile
+
+
+def section(a, question, answer):
+    """A heading that asks something, and the answer before any chart."""
+    a(f"<h2>{question}</h2>")
+    a(f'<p class="answer">{answer}</p>')
+
+
+def means(a, text):
+    a(f'<div class="means"><b>What this means.</b> {text}</div>')
 
 
 def build(d):
     s = d["summary"]
     ind, corp = d["by_kind"]["individual"], d["by_kind"]["corporate"]
     ind_b, corp_b = d["burden_by_kind"]["individual"], d["burden_by_kind"]["corporate"]
-    ontario = d["exposure"][2]
-    us = d["exposure"][3]
-    evicted = d["exposure"][4]
+    ontario, us, evicted = d["exposure"][2], d["exposure"][3], d["exposure"][4]
     arrears, other = d["reasons"][0], d["reasons"][1]
     l4 = next(r for r in d["repeat_mix"] if r["code"] == "L4")
+    l10 = next(r for r in d["mix"] if r["code"] == "L10")
+    l5 = next(r for r in d["mix"] if r["code"] == "L5")
     ll_hearing, tt_hearing = d["hearing"][0], d["hearing"][1]
     one_case = d["repeat"][0]
     same_addr = next(r for r in d["repeat"] if "same address" in r["cases_against_this_tenant"])
     diff_addr = next(r for r in d["repeat"] if "different address" in r["cases_against_this_tenant"])
-    # A share derived from a count of ~37,000 does not carry two decimals;
-    # quoting 89.99% implies a precision the underlying name matching does
-    # not have. Rounded for prose; the CSV keeps the raw value.
     once_pct = round(num(one_case["pct_of_tenants"]))
     repeat_share = 100 - once_pct
     repeat_cases = round(100 - num(one_case["pct_of_cases"]), 1)
+
+    mi = d["measured"].get("individual")
+    mc = d["measured"].get("corporate")
+    annual_share = mi["median_pct_of_annual_rent"] if mi else ind_b["median_as_pct_of_annual_rent"]
+    byfiler = d.get("attendance_by_filer")
+    outcomes = {r["filed_by"]: r for r in d["outcomes"]} if d.get("outcomes") else None
 
     stable = [
         r for r in d["fsa"]
         if num(r["landlord_filed"], 0) >= 100 and r["tenant_per_landlord_ratio"] != ""
     ]
     stable.sort(key=lambda r: num(r["tenant_per_landlord_ratio"]))
-    ratios = [num(r["tenant_per_landlord_ratio"]) for r in stable]
-    p10, p90 = ratios[int(0.10 * len(ratios))], ratios[int(0.90 * len(ratios))]
     income_corr = next(
         r for r in d["correlations"]
         if r["census_measure"] == "Median household income" and r["rate"].startswith("Landlord")
     )
-    access_corr = next(
-        r for r in d["correlations"]
-        if r["census_measure"] == "Median household income" and r["rate"].startswith("Tenant")
-    )
-    mi = d["measured"].get("individual")
-    mc = d["measured"].get("corporate")
-    # Prefer the measured share over the modelled one, as elsewhere.
-    annual_share = mi["median_pct_of_annual_rent"] if mi else ind_b["median_as_pct_of_annual_rent"]
+
+    def att(filer, party, key):
+        row = next(r for r in byfiler if r["filed_by"] == filer and r["party"] == party)
+        return num(row[key])
 
     p = []
     a = p.append
@@ -56,17 +72,34 @@ def build(d):
     # ---- header ------------------------------------------------------------
     a('<div class="eyebrow">Open data &middot; Ontario</div>')
     a("<h1>What Ontario's rental disputes actually cost, and who pays</h1>")
-    a('<p class="dek">A ledger of Ontario\'s Landlord and Tenant Board built only '
-      'from public records: the Board\'s own order export and the 2021 Census. It '
-      'counts what the record contains, says plainly what it leaves out, and reports '
-      'the findings that cut in both directions.</p>')
-    a(f'<div class="window"><b>Read this first.</b> This export covers '
+    a('<p class="dek">Built from two public sources: the Landlord and Tenant '
+      "Board's own order export, and the 2021 Census. Where the export stops, this "
+      'reads the orders themselves.</p>')
+
+    a('<div class="thesis">'
+      '<p><b>The short version.</b> Ontario\'s rental dispute caseload is ordinary in '
+      'size by international standards. Almost nothing else about it works the way it '
+      'is usually described.</p>'
+      '<ul>'
+      '<li><b>Filing is not eviction.</b> About a quarter of landlord applications end '
+      'a tenancy outright. Half of all termination orders say the tenancy ends '
+      '<i>unless the tenant pays</i>.</li>'
+      '<li><b>Most landlords here are not companies.</b> Two thirds are individuals, '
+      'and most of them own one unit and appear once.</li>'
+      '<li><b>The losses land on whoever cannot spread them.</b> The typical '
+      "individual owner's case is bigger than a corporate one, not smaller.</li>"
+      '<li><b>Tenants who bring their own case usually lose it</b>, and almost never '
+      'have anyone representing them.</li>'
+      '<li><b>The record is a biased sample</b> of the thing it gets used to describe.'
+      '</li></ul></div>')
+
+    a(f'<div class="window"><b>Before any number below.</b> This export covers '
       f'<b>{s["first_date"]} to {s["last_date"]}</b>: {s["days"]} days, not a full '
       f'year and not all time. It holds {s["orders"]:,} orders across {s["files"]:,} '
       f'distinct cases, because review and amended orders repeat a case. Annual '
       f'figures are that window multiplied by {s["annualisation_factor"]:.3f}. '
-      'Ontario publishes one rolling current-year file, so no earlier period exists '
-      'to compare against.</div>')
+      'Ontario publishes one rolling current-year file, so there is no earlier period '
+      'to compare against and no trend can be measured yet.</div>')
     a('<div class="nav no-print">'
       '<a class="primary" href="map.html">Explore the map</a>'
       '<a href="sources.html">Every source</a>'
@@ -74,32 +107,27 @@ def build(d):
 
     a('<div class="tiles">')
     a(tile(f'1 in {ontario["one_in"]}',
-           "Ontario renter households have a landlord case filed against them each year", "a"))
-    a(tile(f'{arrears["pct_of_ltb_landlord_cases"]}% vs {arrears["pct_of_tenant_reported_evictions"]}%',
-           "of cases are about unpaid rent, in the Board's file versus in what tenants report", "b"))
-    a(tile(f'{ind["pct_filed_exactly_once"]}%',
-           f'of individual landlords filed exactly once; {ind["pct_holds_one_address"]}% own one address', "c"))
+           "renter households have a case filed against them each year", "a"))
+    if outcomes:
+        a(tile(f'{outcomes["landlord"]["voidable_share_of_terminations"]}%',
+               "of termination orders let the tenant pay and stay", "c"))
+        a(tile(f'{outcomes["tenant"]["dismissed"]}%',
+               "of cases a tenant brings are dismissed, against "
+               f'{outcomes["landlord"]["dismissed"]}% of a landlord\'s', "b"))
     a(tile(f'{annual_share}%',
-           "of a unit's annual rent is owed by the time an order lands, on the typical "
-           "individual owner's case", "a"))
+           "of a unit's annual rent is owed by the time an order lands", "a"))
     a("</div>")
 
-    # ---- 1. scale ----------------------------------------------------------
-    a("<h2>1. How big is this, next to the whole rental picture?</h2>")
-    a("<p>The commonest objection to any analysis of the Board is that its numbers "
-      "sound large in isolation. They need a denominator. Ontario has "
-      "<b>1,724,970 renter households</b>. Three independent routes to the annual "
-      "number of landlord-filed cases agree:</p>")
-    short_route = {
-        0: "This export, cases, annualised",
-        1: "This export, distinct units",
-        2: "The Board's own intake, 2024-25",
-    }
-    rows = [{"label": short_route[i],
-             "value": num(r["pct_of_renter_households"]),
-             "display": f'{r["pct_of_renter_households"]}%',
-             "color": SERIES["landlord"]}
-            for i, r in enumerate(d["exposure"][:3])]
+    # ---- 1 -----------------------------------------------------------------
+    section(a, "How many people does this actually affect?",
+            "About <b>1 in 24 Ontario renter households</b> has a case filed against "
+            "it each year. That is roughly half the United States rate. The scale is "
+            "unremarkable; what happens inside it is not.")
+    rows = [{"label": lab, "value": num(r["pct_of_renter_households"]),
+             "display": f'{r["pct_of_renter_households"]}%', "color": SERIES["landlord"]}
+            for lab, r in zip(("This export, cases, annualised",
+                               "This export, distinct units",
+                               "The Board's own intake, 2024-25"), d["exposure"][:3])]
     rows += [
         {"label": "United States filing rate, 2024", "value": num(us["pct_of_renter_households"]),
          "display": f'{us["pct_of_renter_households"]}%', "color": SERIES["tenant"]},
@@ -109,96 +137,78 @@ def build(d):
     a("<figure>")
     a(sv.hbar(rows, label_width=250, title="Share of renter households per year",
               chart_label="Cases per year as a share of renter households"))
-    a('<figcaption><b>Roughly 1 in 24 renter households a year.</b> The first three '
-      "bars are one quantity measured three ways, including the Board's own "
-      'published intake for a different year, which is why they can be trusted. Two '
-      "comparisons keep it honest: the United States rate is about twice Ontario's, "
-      'so this is a normal-sized eviction system by international standards; and only '
-      'about 1% of renters are actually evicted in a year, because <b>an application '
-      'is not an eviction</b> and most non-payment cases end with the tenant paying '
-      'and staying.</figcaption>')
+    a('<figcaption>The first three bars are one quantity measured three ways, '
+      "including the Board's own published intake for a different year. They agree, "
+      'which is why the figure can be relied on.</figcaption>')
     a(data_table(["Route", "Cases/year", "Share", "1 in"],
                  [[r["route"], r["cases_per_year"] or "not applicable",
                    f'{r["pct_of_renter_households"]}%', r["one_in"]] for r in d["exposure"]]))
     a("</figure>")
+    means(a, "This is not a system in crisis by volume, and anyone arguing from "
+             "sheer case counts is arguing weakly. The problems below are about who "
+             "the system lands on and what it does to them, not about how many "
+             "cases it hears.")
 
-    # ---- 2. what the record misses ----------------------------------------
-    a("<h2>2. What the record contains, and what it misses</h2>")
-    a("<p>The Board's file and tenants' own accounts describe different populations. "
-      "Statistics Canada asks renters why they were forced to move; the answers "
-      "barely overlap with what the Board hears.</p>")
+    # ---- 2 -----------------------------------------------------------------
+    if outcomes:
+        ll, tt = outcomes["landlord"], outcomes["tenant"]
+        section(a, "When a landlord files, what actually happens?",
+                f"<b>{ll['any_termination']}% of landlord applications end in a "
+                f"termination order, but {ll['voidable_share_of_terminations']}% of "
+                "those are voidable</b>: the tenancy ends <i>unless</i> the tenant "
+                "pays a stated sum by a stated date. Net, about a quarter of "
+                "applications end a tenancy outright.")
+        a("<figure>")
+        a(sv.hbar(
+            # "Not classified" is a limit on the measurement, not a result, so it
+            # is drawn recessive rather than competing with the real categories.
+            [{"label": lab, "value": num(ll[key]), "display": f'{ll[key]}%',
+              "color": "--ink-faint" if key == "other" else SERIES["landlord"]}
+             for key, lab in (("terminated", "Terminated"),
+                              ("terminated_voidable", "Terminated, tenant can pay to stay"),
+                              ("money_only", "Ordered to pay, tenancy continues"),
+                              ("dismissed", "Dismissed"),
+                              ("withdrawn", "Withdrawn"),
+                              ("other", "Not classified"))],
+            label_width=270, title="How a landlord-filed application ends",
+            chart_label="Disposition of landlord-filed applications"))
+        a(f'<figcaption>Read from {int(num(ll["orders"])):,} orders individually. '
+          f'A further {ll["on_consent"]}% of all landlord applications were decided '
+          'on consent, meaning the parties settled and asked the Board to record '
+          'it; that cuts across the categories above rather than being one of '
+          'them.</figcaption>')
+        a("</figure>")
+        means(a, "The disposition is not in the open-data export, and until this was "
+                 "measured the honest answer to \"how often does filing end a "
+                 "tenancy?\" was that nobody outside the Board knew. It is now "
+                 "roughly one in four. <b>Any figure that treats filings, or even "
+                 "terminations, as a count of evictions is overstating it, and this "
+                 "is by how much.</b>")
+
+    # ---- 3 -----------------------------------------------------------------
+    section(a, "Who are these landlords?",
+            f"<b>Two thirds are individuals, not companies.</b> "
+            f"{int(num(ind['entities'])):,} individual owners bring "
+            f"{ind['pct_of_cases']}% of cases, and for "
+            f"{ind['pct_filed_exactly_once']}% of them it happens once and never "
+            f"again. {ind['pct_holds_one_address']}% own a single address.")
     a("<figure>")
     a(sv.grouped_hbar(
-        [{"label": "Behind on rent",
-          "values": [num(arrears["pct_of_ltb_landlord_cases"]),
-                     num(arrears["pct_of_tenant_reported_evictions"])],
-          "displays": [f'{arrears["pct_of_ltb_landlord_cases"]}%',
-                       f'{arrears["pct_of_tenant_reported_evictions"]}%']},
-         {"label": "Every other reason",
-          "values": [num(other["pct_of_ltb_landlord_cases"]),
-                     num(other["pct_of_tenant_reported_evictions"])],
-          "displays": [f'{other["pct_of_ltb_landlord_cases"]}%',
-                       f'{other["pct_of_tenant_reported_evictions"]}%']}],
-        series=[("In the Board's orders", SERIES["record"]),
-                ("In what tenants report", SERIES["reported"])],
-        label_width=190, title="Why the tenancy ended",
-        chart_label="Reasons recorded at the Board versus reasons tenants report"))
-    a('<figcaption><b>The record is close to inverted relative to lived '
-      'experience.</b> Non-payment dominates the Board because a landlord needs an '
-      'order to recover money. The reasons tenants most often give, that the '
-      'landlord sold (37%), wanted the unit (26%), or was renovating (10%), usually '
-      'end with the tenant leaving on a notice, producing no order and no record. '
-      "This cuts both ways: the Board's file understates how often tenants lose "
-      'housing, <b>and</b> it is not evidence about the frequency of the no-fault '
-      'evictions it barely contains.</figcaption>')
-    a(data_table(["Reason", "Share of Board cases", "Share of evictions tenants report"],
-                 [[r["reason"],
-                   f'{r["pct_of_ltb_landlord_cases"]}%' if r["pct_of_ltb_landlord_cases"]
-                   else "not separately recorded",
-                   f'{r["pct_of_tenant_reported_evictions"]}%'] for r in d["reasons"]]))
-    a("</figure>")
-    a(source_note(
-        'Board figures from this export. Tenant-reported figures from Statistics '
-        'Canada, <a href="https://www150.statcan.gc.ca/n1/pub/11-627-m/'
-        '11-627-m2022046-eng.htm">Canadian Housing Survey 2021</a>. L2 bundles '
-        'own-use, renovation and conduct applications into one code, so the Board '
-        'side cannot be split further without reading the orders themselves.'))
-
-    # ---- 3. who the landlords are -----------------------------------------
-    a("<h2>3. Who is actually bringing these cases</h2>")
-    a('<p>"Landlords" is not one group. Separating the people who own a rental unit '
-      'from the organisations that own portfolios changes what the aggregate '
-      'numbers mean.</p>')
-    a("<figure>")
-    a(sv.grouped_hbar(
-        [{"label": "Share of all cases",
-          "values": [num(ind["pct_of_cases"]), num(corp["pct_of_cases"])],
-          "displays": [f'{ind["pct_of_cases"]}%', f'{corp["pct_of_cases"]}%']},
-         {"label": "Filed exactly once",
-          "values": [num(ind["pct_filed_exactly_once"]), num(corp["pct_filed_exactly_once"])],
-          "displays": [f'{ind["pct_filed_exactly_once"]}%', f'{corp["pct_filed_exactly_once"]}%']},
-         {"label": "Hold a single address",
-          "values": [num(ind["pct_holds_one_address"]), num(corp["pct_holds_one_address"])],
-          "displays": [f'{ind["pct_holds_one_address"]}%', f'{corp["pct_holds_one_address"]}%']}],
+        [{"label": lab,
+          "values": [num(ind[key]), num(corp[key])],
+          "displays": [f'{ind[key]}%', f'{corp[key]}%']}
+         for key, lab in (("pct_of_cases", "Share of all cases"),
+                          ("pct_filed_exactly_once", "Filed exactly once"),
+                          ("pct_holds_one_address", "Own a single address"))],
         series=[(f'Individual owners ({int(num(ind["entities"])):,})', SERIES["individual"]),
                 (f'Corporate or institutional ({int(num(corp["entities"])):,})', SERIES["corporate"])],
         label_width=190, title="Two different kinds of landlord",
         chart_label="Individual versus corporate landlords"))
-    a(f'<figcaption>For <b>{ind["pct_filed_exactly_once"]}% of individual owners this '
-      f'is a single event at their only property</b>. For the corporate side it is a '
-      f'recurring process: {corp["mean_cases_per_entity"]} cases each on average '
-      f'against {ind["mean_cases_per_entity"]} for individuals. That difference is '
-      'what an aggregate dollar figure hides.</figcaption>')
-    a(data_table(
-        ["", "Individual", "Corporate"],
-        [["Landlords", f'{int(num(ind["entities"])):,}', f'{int(num(corp["entities"])):,}'],
-         ["Share of cases", f'{ind["pct_of_cases"]}%', f'{corp["pct_of_cases"]}%'],
-         ["Filed exactly once", f'{ind["pct_filed_exactly_once"]}%', f'{corp["pct_filed_exactly_once"]}%'],
-         ["Hold one address", f'{ind["pct_holds_one_address"]}%', f'{corp["pct_holds_one_address"]}%'],
-         ["Mean cases each", ind["mean_cases_per_entity"], corp["mean_cases_per_entity"]]]))
+    a(f'<figcaption>For an organisation this is a process: '
+      f'{corp["mean_cases_per_entity"]} cases each on average, across a portfolio. '
+      'The typical individual owner brings one, at the one address they have, and is '
+      'never seen again.</figcaption>')
     a("</figure>")
-
-    a("<h3>What each kind comes to the Board for</h3>")
     a("<figure>")
     a(sv.split_bar(
         [{"label": f'{r["code"]} · {r["meaning"]}',
@@ -206,64 +216,27 @@ def build(d):
          for r in d["mix"]],
         series=[("Individual owners", SERIES["individual"]),
                 ("Corporate or institutional", SERIES["corporate"])],
-        label_width=290, title="Who files which kind of application",
+        label_width=290, title="Who brings which kind of case",
         chart_label="Application type split by kind of landlord"))
-    a('<figcaption>Read this in both directions. Individual owners dominate the '
-      'categories about recovering money from someone who has already gone (L10, '
-      '77%) and about a tenant who gave notice and stayed (L3, 69%). Corporate '
-      'owners dominate above-guideline rent increases (L5, 78%). Neither pattern '
-      'is flattering to a simple story about either side.</figcaption>')
-    a(data_table(["Code", "Meaning", "Cases", "Individual", "Corporate"],
-                 [[r["code"], r["meaning"], f'{int(num(r["cases"])):,}',
-                   f'{r["pct_individual"]}%', f'{r["pct_corporate"]}%'] for r in d["mix"]],
-                 numeric_from=2))
+    a(f'<figcaption>Individual owners dominate the categories where the money is '
+      f'already gone: {l10["pct_individual"]}% of applications to collect from a '
+      f'tenant who has already left. Corporate owners dominate above-guideline rent '
+      f'increases, {l5["pct_corporate"]}%.</figcaption>')
     a("</figure>")
+    means(a, '"Landlords" is not one interest group, and a policy aimed at the '
+             "corporate landlord hits nine thousand people who own one unit. The "
+             "reverse holds too: a policy aimed at protecting small owners does "
+             "nothing about above-guideline rent increases, which are almost "
+             "entirely a corporate instrument.")
 
-    # ---- 4. the burden -----------------------------------------------------
-    a("<h2>4. What it costs, per landlord rather than in total</h2>")
-    a(f'<p>The estimated total at stake across non-payment, other-eviction and '
-      f'breach-of-settlement cases is <b>${num(ind_b["estimated_total"]) / 1e6 + num(corp_b["estimated_total"]) / 1e6:.0f}M</b>. '
-      'On its own that number invites the reading that a class of landlords received '
-      'a windfall. It is spread across about 12,000 separate landlords, and what it '
-      'means depends entirely on which kind you are.</p>')
-    a("<figure>")
-    a(sv.grouped_hbar(
-        [{"label": "Mean owed, per landlord",
-          "values": [num(ind_b["mean_per_entity"]), num(corp_b["mean_per_entity"])],
-          "displays": [f'${int(num(ind_b["mean_per_entity"])):,}',
-                       f'${int(num(corp_b["mean_per_entity"])):,}']},
-         {"label": "90th percentile",
-          "values": [num(ind_b["p90_per_entity"]), num(corp_b["p90_per_entity"])],
-          "displays": [f'${int(num(ind_b["p90_per_entity"])):,}',
-                       f'${int(num(corp_b["p90_per_entity"])):,}']}],
-        series=[("Individual owners", SERIES["individual"]),
-                ("Corporate or institutional", SERIES["corporate"])],
-        label_width=190, title="The same total, split by kind of landlord",
-        chart_label="Money at stake per landlord by kind"))
-    a(f'<figcaption>Individual owners carry '
-      f'<b>{ind_b["pct_of_estimated_total"]}%</b> of the estimated total and '
-      f'corporate owners <b>{corp_b["pct_of_estimated_total"]}%</b>. Across a whole '
-      f'year a corporate owner is owed about '
-      f'<b>{num(corp_b["mean_per_entity"]) / num(ind_b["mean_per_entity"]):.1f} times '
-      'as much in total</b>, because it brings many cases. That is the aggregate '
-      'view, and it is modelled: it applies one category-wide average to every '
-      'landlord. What it cannot see is whether an individual case differs by kind of '
-      'owner. Reading the orders themselves shows it does, and not in the direction '
-      'the model implies.</figcaption>')
-    a("</figure>")
-    a(source_note(
-        'These aggregate dollar figures are estimates, not a census: they extrapolate '
-        'a sample of order PDFs as <i>cases x found-rate x mean amount</i>, per '
-        'category. Orders stating no amount are counted as zero, which understates '
-        'rather than overstates. Method and sample sizes in '
-        '<a href="sources.html">sources</a>.'))
-
+    # ---- 4 -----------------------------------------------------------------
     if mi and mc:
-        a("<h3>The same question, measured instead of modelled</h3>")
-        a("<p>Orders state the rent inside the daily-rate calculation, so each case's "
-          "arrears can be expressed in months of that unit's own rent rather than "
-          "against a provincial average. That makes the two kinds of owner directly "
-          "comparable.</p>")
+        section(a, "What does a case cost the landlord who brings it?",
+                f"<b>The median individual owner is owed "
+                f"${int(num(mi['median_amount'])):,} after {mi['median_months']} "
+                f"months without rent</b>, which is {mi['median_pct_of_annual_rent']}% "
+                "of that unit's annual gross revenue before mortgage, tax or repairs. "
+                "That is larger than the corporate median, not smaller.")
         a("<figure>")
         a(sv.paired_rows(
             [{"label": "Months of rent owed",
@@ -282,15 +255,9 @@ def build(d):
                     ("Corporate or institutional", SERIES["corporate"])],
             label_width=210, title="The median case, read from the orders",
             chart_label="Measured burden per case by kind of landlord"))
-        a(f'<figcaption><b>An individual owner\'s case is larger than a corporate '
-          f'one, not smaller.</b> Median ${int(num(mi["median_amount"])):,} against '
-          f'${int(num(mc["median_amount"])):,}, after {mi["median_months"]} months '
-          f'without rent against {mc["median_months"]}, amounting to '
-          f'{mi["median_pct_of_annual_rent"]}% of that unit\'s annual gross revenue '
-          f'against {mc["median_pct_of_annual_rent"]}%. The mean amounts are '
-          f'${int(num(mi["mean_amount"])):,} and ${int(num(mc["mean_amount"])):,} '
-          f'with non-overlapping 95% intervals, so the difference is real rather than '
-          f'sampling noise. Individual owners do rent costlier units '
+        a(f'<figcaption>Mean amounts ${int(num(mi["mean_amount"])):,} against '
+          f'${int(num(mc["mean_amount"])):,}, with 95% intervals that do not overlap, '
+          f'so the difference is real. Individual owners do rent costlier units '
           f'(${int(num(mi["median_rent"])):,} against '
           f'${int(num(mc["median_rent"])):,} a month), but the months figure controls '
           'for that and the gap survives it.</figcaption>')
@@ -310,18 +277,11 @@ def build(d):
              ["Share of annual rent", f'{mi["median_pct_of_annual_rent"]}%',
               f'{mc["median_pct_of_annual_rent"]}%']]))
         a("</figure>")
-        a('<div class="finding"><b>This corrects an earlier figure.</b> A previous '
-          'version of this report said the typical case was about the same size for '
-          'both kinds of owner. That came from the model above, which assigns one '
-          'category-wide average to every landlord and therefore cannot detect a '
-          'difference in case size between kinds of owner even in principle. The '
-          'measured figures supersede it.</div>')
 
     if d.get("burden_bands"):
         bands = d["burden_bands"]
         over_six = sum(num(b["pct_of_orders"], 0) for b in bands
                        if b["band"] in ("6 to 12 months", "Over 12 months"))
-        a("<h3>How long the landlord went unpaid</h3>")
         a("<figure>")
         a(sv.hbar([{"label": b["band"], "value": num(b["pct_of_orders"]),
                     "display": f'{b["pct_of_orders"]}%', "color": SERIES["individual"]}
@@ -330,102 +290,127 @@ def build(d):
                   title="Rent owed when the order issued, in months of that unit's rent",
                   chart_label="Distribution of months of rent owed"))
         a(f'<figcaption><b>{over_six:.0f}% of orders are for more than six months of '
-          'rent</b> on a single unit, and the tail runs past a year. The short tail '
-          'matters too and points the other way: the smallest band is a tenancy '
-          'ending over less than one month\'s rent.</figcaption>')
+          'rent</b> on a single unit. The short tail points the other way and matters '
+          "too: the smallest band is a tenancy ending over less than one month's "
+          'rent.</figcaption>')
         a(data_table(["Months owed", "Orders", "Share"],
                      [[b["band"], f'{int(num(b["orders"])):,}', f'{b["pct_of_orders"]}%']
                       for b in bands]))
         a("</figure>")
+    means(a, "A dollar figure means nothing without knowing what it is a fraction "
+             "of. The same loss is a line item to a portfolio owner and a third of "
+             "the year's revenue to someone with one unit, and it is the second "
+             "group that brings most of these cases.")
 
-    byfiler = d.get("attendance_by_filer")
-    if byfiler:
-        def cell(filer, party, key):
-            row = next(r for r in byfiler
-                       if r["filed_by"] == filer and r["party"] == party)
-            return num(row[key])
-
-        heard = int(num(byfiler[0]["orders_naming_attendance"]))
-        a("<h3>Who turns up, and who has help</h3>")
-        a("<p>Split by who brought the application. Without that split the answer is "
-          "mostly an artifact: in a landlord-filed case the tenant is the respondent "
-          "by construction, so a landlord-money-only sample cannot say anything "
-          "general about attendance.</p>")
+    # ---- 5 -----------------------------------------------------------------
+    if outcomes and byfiler:
+        tt = outcomes["tenant"]
+        ll = outcomes["landlord"]
+        section(a, "And when a tenant files?",
+                f"<b>{tt['dismissed']}% of the cases a tenant brings are dismissed, "
+                f"against {ll['dismissed']}% of a landlord's.</b> Tenants are also "
+                f"represented at {att('tenant', 'tenant', 'pct_represented'):.0f}% of "
+                "the hearings they themselves bring.")
+        a("<figure>")
+        a(sv.grouped_hbar(
+            [{"label": lab, "values": [num(ll[key]), num(tt[key])],
+              "displays": [f'{ll[key]}%', f'{tt[key]}%']}
+             for key, lab in (("dismissed", "Dismissed"),
+                              ("money_only", "Ordered to pay"),
+                              ("remedy_ordered", "Other side ordered to act"),
+                              ("withdrawn", "Withdrawn"))],
+            series=[("When a landlord filed", SERIES["landlord"]),
+                    ("When a tenant filed", SERIES["tenant"])],
+            label_width=210, title="How the application ends, by who brought it",
+            chart_label="Disposition by who filed"))
+        a('<figcaption>A tenant who brings a case is more likely to leave with '
+          'nothing than with anything.</figcaption>')
+        a("</figure>")
         a("<figure>")
         a(sv.grouped_hbar(
             [{"label": f'{filer.title()} filed: {party}',
-              "values": [cell(filer, party, "pct_attended"),
-                         cell(filer, party, "pct_represented")],
-              "displays": [f'{cell(filer, party, "pct_attended")}%',
-                           f'{cell(filer, party, "pct_represented")}%']}
+              "values": [att(filer, party, "pct_attended"),
+                         att(filer, party, "pct_represented")],
+              "displays": [f'{att(filer, party, "pct_attended"):.1f}%',
+                           f'{att(filer, party, "pct_represented"):.1f}%']}
              for filer in ("landlord", "tenant") for party in ("landlord", "tenant")],
             series=[("Attended the hearing", SERIES["landlord"]),
                     ("Had a representative", SERIES["tenant"])],
             label_width=210, title="Presence at the hearing, by who filed",
             chart_label="Attendance and representation by party and by filer"))
-        a(f'<figcaption><b>Part of the attendance gap is structural.</b> Tenants '
-          f'attend {cell("tenant", "tenant", "pct_attended")}% of the hearings they '
-          f'bring against {cell("landlord", "tenant", "pct_attended")}% of those '
-          f'brought against them; the applicant turns up to their own case. '
-          f'<b>Representation does not behave that way.</b> Bringing their own case, '
-          f'tenants are represented {cell("tenant", "tenant", "pct_represented")}% of '
-          f'the time, against {cell("tenant", "landlord", "pct_represented")}% for '
-          f'landlords who are merely responding to it. Read from orders naming who '
-          'attended; those without that sentence are excluded rather than scored as a '
-          'no-show.</figcaption>')
+        a(f'<figcaption>Part of the attendance gap is structural, since the applicant '
+          f'turns up to their own case: tenants attend '
+          f'{att("tenant", "tenant", "pct_attended"):.1f}% of hearings they bring '
+          f'against {att("landlord", "tenant", "pct_attended"):.1f}% of those brought '
+          'against them. Representation does not behave that way. Bringing their own '
+          f'case, tenants are represented '
+          f'{att("tenant", "tenant", "pct_represented"):.1f}% of the time against '
+          f'{att("tenant", "landlord", "pct_represented"):.1f}% for landlords who are '
+          'only responding to it.</figcaption>')
         a(data_table(
             ["Filed by", "Party", "Attended", "Represented", "Of those attending"],
             [[r["filed_by"].title(), r["party"].title(), f'{r["pct_attended"]}%',
               f'{r["pct_represented"]}%', f'{r["pct_represented_of_attending"]}%']
              for r in byfiler], numeric_from=2))
         a("</figure>")
-        a('<div class="finding"><b>This corrects an earlier figure.</b> A previous '
-          'version reported these rates from a sample of L1, L2 and L4 orders only, '
-          'where the landlord is the applicant in every case, and presented the '
-          'result as a fact about hearings generally. The figures above come from a '
-          f'sample drawn across every application type ({heard:,} of them naming who '
-          'attended), and are split by who filed.</div>')
+        means(a, "Both halves of this report point the same way from opposite "
+                 "directions. The individual landlord carries a loss they cannot "
+                 "spread; the tenant walks into a hearing without anyone acting for "
+                 "them and usually loses. <b>Neither is the villain in the other's "
+                 "story. Both are the people least equipped for the system they are "
+                 "in.</b>")
 
-    a("<h3>How concentrated the filing is</h3>")
+    # ---- 6 -----------------------------------------------------------------
+    section(a, "Is this record a fair picture of eviction in Ontario?",
+            f"<b>No.</b> Unpaid rent is {arrears['pct_of_ltb_landlord_cases']}% of "
+            f"what the Board hears but only "
+            f"{arrears['pct_of_tenant_reported_evictions']}% of the evictions tenants "
+            "report to Statistics Canada. The most common real reasons barely appear "
+            "here at all.")
     a("<figure>")
-    a(sv.hbar([{"label": f'Top {int(num(r["top_n_landlords"])):,} landlords '
-                         f'({r["pct_of_all_landlords"]}% of them)',
-                "value": num(r["pct_of_all_cases"]),
-                "display": f'{r["pct_of_all_cases"]}%',
-                "color": SERIES["landlord"]}
-               for r in d["concentration"]],
-              label_width=290, max_value=100,
-              title="Share of all landlord cases brought by the busiest filers",
-              chart_label="Concentration of filings among landlords"))
-    a('<figcaption>Filing is concentrated but not extremely so: the busiest 100 '
-      'landlords bring about a third of all cases, while most landlords appear once '
-      'and never again. No landlord is named anywhere in this analysis; the question '
-      'is the shape of the distribution, not who is in it.</figcaption>')
+    a(sv.grouped_hbar(
+        [{"label": "Behind on rent",
+          "values": [num(arrears["pct_of_ltb_landlord_cases"]),
+                     num(arrears["pct_of_tenant_reported_evictions"])],
+          "displays": [f'{arrears["pct_of_ltb_landlord_cases"]}%',
+                       f'{arrears["pct_of_tenant_reported_evictions"]}%']},
+         {"label": "Every other reason",
+          "values": [num(other["pct_of_ltb_landlord_cases"]),
+                     num(other["pct_of_tenant_reported_evictions"])],
+          "displays": [f'{other["pct_of_ltb_landlord_cases"]}%',
+                       f'{other["pct_of_tenant_reported_evictions"]}%']}],
+        series=[("In the Board's orders", SERIES["record"]),
+                ("In what tenants report", SERIES["reported"])],
+        label_width=190, title="Why the tenancy ended",
+        chart_label="Reasons recorded at the Board versus reasons tenants report"))
+    a('<figcaption>Non-payment dominates the Board because a landlord needs an order '
+      'to recover money. The reasons tenants most often give, that the landlord sold '
+      '(37%) or wanted the unit (26%), usually end with the tenant leaving on a '
+      'notice and produce no order at all.</figcaption>')
+    a(data_table(["Reason", "Share of Board cases", "Share of evictions tenants report"],
+                 [[r["reason"],
+                   f'{r["pct_of_ltb_landlord_cases"]}%' if r["pct_of_ltb_landlord_cases"]
+                   else "not separately recorded",
+                   f'{r["pct_of_tenant_reported_evictions"]}%'] for r in d["reasons"]]))
     a("</figure>")
+    means(a, "This cuts against both sides and is the most misused fact here. The "
+             "Board's file <b>understates</b> how often tenants lose housing, "
+             "<b>and</b> it is not evidence about how common no-fault evictions are, "
+             "because it barely contains them. Anyone using this dataset as an "
+             "eviction census, in either direction, is using it wrongly.")
+    a(source_note(
+        'Board figures from this export. Tenant-reported figures from Statistics '
+        'Canada, <a href="https://www150.statcan.gc.ca/n1/pub/11-627-m/'
+        '11-627-m2022046-eng.htm">Canadian Housing Survey 2021</a>. L2 bundles '
+        'own-use, renovation and conduct applications into one code, so the Board '
+        'side cannot be split further without reading the orders.'))
 
-    # ---- 5. repeat parties -------------------------------------------------
-    a("<h2>5. How often the same tenant comes back</h2>")
-    a("<p>A common claim on the landlord side is that a small group of tenants "
-      "cycles through the system. It is testable, and the answer is partly yes and "
-      "smaller than the claim.</p>")
-    a("<figure>")
-    a(sv.hbar([{"label": f'{r["cases_against_this_tenant"]} case'
-                         f'{"" if r["cases_against_this_tenant"] == "1" else "s"} '
-                         f'against them',
-                "value": num(r["pct_of_tenants"]),
-                "display": f'{r["pct_of_tenants"]}%',
-                "color": SERIES["tenant"]}
-               for r in d["repeat"] if not r["cases_against_this_tenant"].startswith("--")],
-              label_width=240, title="Tenants by number of cases against them",
-              chart_label="Distribution of cases per tenant"))
-    a(f'<figcaption><b>{once_pct}% of tenants appear exactly '
-      f'once.</b> The {repeat_share}% who recur account for {repeat_cases}% of all '
-      f'cases. Of those repeat tenants, <b>{same_addr["pct_of_tenants"]}% recur at '
-      f'the same address</b> (one tenancy generating more than one case) and '
-      f'{diff_addr["pct_of_tenants"]}% ({int(num(diff_addr["tenants"])):,} people) '
-      'appear at a different address.</figcaption>')
-    a("</figure>")
-
+    # ---- 7 -----------------------------------------------------------------
+    section(a, "Do the same people keep coming back?",
+            f"<b>Mostly no. {once_pct}% of tenants appear exactly once.</b> The "
+            f"{repeat_share}% who recur account for {repeat_cases}% of cases, and "
+            f"they differ in one specific way: they are taken to the Board for "
+            f"breaching a settlement at {l4['ratio']} times the rate.")
     a("<figure>")
     a(sv.grouped_hbar(
         [{"label": f'{r["code"]} · {r["meaning"]}',
@@ -436,191 +421,92 @@ def build(d):
                 ("Tenants with exactly one case", SERIES["landlord"])],
         label_width=290, title="What each group is taken to the Board for",
         chart_label="Case mix for repeat versus one-time tenants"))
-    a(f'<figcaption><b>The clearest difference is breaching a settlement.</b> That is '
-      f'{l4["pct_of_repeat_tenant_cases"]}% of repeat-tenant cases against '
-      f'{l4["pct_of_one_time_tenant_cases"]}% of one-time-tenant cases, a '
-      f'<b>{l4["ratio"]}-fold</b> difference. The large one-time group is '
-      'overwhelmingly a straightforward payment problem; the small recurring group is '
-      'disproportionately people who agreed terms and did not keep them.</figcaption>')
+    a(f'<figcaption>The one-time group is overwhelmingly a straightforward payment '
+      f'problem. The recurring group is disproportionately people who agreed terms '
+      f'and did not keep them. Of the repeaters, {same_addr["pct_of_tenants"]}% recur '
+      f'at the same address and {diff_addr["pct_of_tenants"]}% at a different '
+      'one.</figcaption>')
     a(data_table(["Code", "Meaning", "Repeat tenants", "One-time tenants", "Ratio"],
                  [[r["code"], r["meaning"], f'{r["pct_of_repeat_tenant_cases"]}%',
                    f'{r["pct_of_one_time_tenant_cases"]}%', f'{r["ratio"]}x']
                   for r in d["repeat_mix"]], numeric_from=2))
     a("</figure>")
-    a(f'<div class="finding"><b>What this does not show.</b> {s["days"]} days is too '
-      'short a window to detect someone who moves once a year, so the '
-      '"different address" figure is a floor on recurrence across tenancies, not a '
-      'measurement of it. It is also inflated in the other direction, because '
-      'matching is on name text and two different people sharing a common name are '
-      'merged. Both errors are real and they push opposite ways. A longer window '
-      'would settle it, and the only way to get one is to keep snapshotting this '
-      'export, which the repository already does on every fetch.</div>')
+    means(a, f"There is a real recurring group and it is small. It is not the "
+             f"explanation for the caseload: nine in ten tenants here are having one "
+             f"bad year, not running a strategy. {s['days']} days is also too short "
+             "a window to catch someone who moves annually, so the cross-address "
+             "figure is a floor rather than a measurement.")
 
-    # ---- 6. process --------------------------------------------------------
-    a("<h2>6. How many are decided without a hearing</h2>")
-    a("<figure>")
-    a(sv.hbar([{"label": r["scope"].replace("all ", "").replace(" orders", ""),
-                "value": num(r["pct_ex_parte"]),
-                "display": f'{r["pct_ex_parte"]}%',
-                "color": SERIES["tenant"] if "tenant-filed" in r["scope"] else SERIES["landlord"]}
-               for r in d["hearing"]],
-              label_width=290, title="Share of orders made without the other side present",
-              chart_label="Ex parte order rates"))
-    a(f'<figcaption><b>{ll_hearing["pct_ex_parte"]}% of landlord-filed orders are made '
-      f'without a hearing, against {tt_hearing["pct_ex_parte"]}% of tenant-filed '
-      'ones.</b> The concentration in L4 and L3 is procedurally expected rather than '
-      'sinister: both are applications to enforce something already agreed or already '
-      'noticed, and the Act allows them to proceed without a fresh hearing. The figure '
-      'worth carrying is the gap between the two sides.</figcaption>')
-    a(data_table(["Scope", "Orders", "Without a hearing", "Share"],
-                 [[r["scope"], f'{int(num(r["orders"])):,}', f'{int(num(r["ex_parte"])):,}',
-                   f'{r["pct_ex_parte"]}%'] for r in d["hearing"]]))
-    a("</figure>")
-
-    # ---- 7. income and access ---------------------------------------------
-    a("<h2>7. Is any of this about income?</h2>")
-    a("<p>This gets asserted confidently in both directions. Joining every postal "
-      "area's case rate to its census profile settles it, and the answer is mostly "
-      "no.</p>")
-    a(f'<div class="finding"><b>How often landlords file is close to unrelated to how '
-      f'rich an area is</b>: rank correlation {income_corr["spearman_rho"]} '
-      f'against median household income across {income_corr["n_fsas"]} postal areas, '
-      f'which is about {abs(float(income_corr["spearman_rho"])) ** 2 * 100:.0f}% of the '
-      'variation between them. Rental disputes are not concentrated in poor postal '
-      'codes in any strong sense, and a claim in either direction that they are is '
-      'not supported by this data.</div>')
-    a(f'<p>One narrower thing is related to income: whether tenants themselves ever '
-      f'use the Board. Tenant-filed cases per landlord-filed case correlate with '
-      f'median income at {access_corr["spearman_rho"]}, consistent across three '
-      f'separate census measures. Real, and still small at about '
-      f'{abs(float(access_corr["spearman_rho"])) ** 2 * 100:.0f}% of the variation.</p>')
-    a("<figure>")
-    a(sv.scatter(
-        [{"x": num(r["median_household_income"]), "y": num(r["tenant_per_landlord_ratio"]),
-          "label": r["fsa"]}
-         for r in stable if r["median_household_income"]],
-        x_label="Median household income in the area",
-        y_label="Tenant cases per landlord case",
-        title="Where tenants bring their own case",
-        highlight={stable[0]["fsa"], stable[-1]["fsa"], stable[-2]["fsa"]},
-        chart_label="Tenant filing ratio against area median income"))
-    a(f'<figcaption>Each dot is a postal area with at least 100 landlord cases. The '
-      f'upward trend is real and weak. Between the 10th and 90th percentile of these '
-      f'{len(stable)} areas the ratio runs {p10:.3f} to {p90:.3f}, a '
-      f'<b>{p90 / p10:.0f}-fold spread</b>. The percentile range is quoted rather '
-      'than the extremes because the lowest area has almost no tenant filings at all '
-      'and dividing by it would produce an arbitrarily large multiple.</figcaption>')
-    a(data_table(
-        ["", "Area", "Landlord cases", "Tenant cases", "Ratio"],
-        [["lowest", r["fsa"], r["landlord_filed"], r["tenant_filed"],
-          r["tenant_per_landlord_ratio"]] for r in stable[:5]]
-        + [["highest", r["fsa"], r["landlord_filed"], r["tenant_filed"],
-            r["tenant_per_landlord_ratio"]] for r in stable[-5:]],
-        label="Show the most and least active areas"))
-    a("</figure>")
-
-    # ---- 8. gender ---------------------------------------------------------
-    a("<h2>8. Who the parties are</h2>")
-    a("<p>First names carry a signal about gender. It is a weak instrument and is "
-      "reported here only alongside how much of each group it actually resolves.</p>")
+    # ---- 8 -----------------------------------------------------------------
+    section(a, "Is any of this about income, or gender?",
+            "<b>Income, almost not at all.</b> How often landlords file is close to "
+            f"unrelated to how rich an area is (rank correlation "
+            f"{income_corr['spearman_rho']}, about 1% of the variation). Gender shows "
+            "one consistent pattern and several nulls.")
     a("<figure>")
     a(sv.hbar([{"label": r["role"], "value": num(r["men_per_woman"]),
                 "display": f'{r["men_per_woman"]}x',
-                "color": SERIES["landlord"] if "landlord" in r["role"].lower() else SERIES["tenant"]}
+                "color": (SERIES["landlord"] if "landlord" in r["role"].lower()
+                          else SERIES["tenant"])}
                for r in d["gender"]],
-              label_width=250, title="Gender balance by role, resolved names only",
+              label_width=250, max_value=2.4, title="Men per woman, by role",
               chart_label="Inferred gender balance by role"))
-    a('<figcaption>Individual landlords who bring cases skew male about two to one. '
-      'Tenants named in those cases are even. Tenants who bring their own case are '
-      'slightly more often women than men. The landlord-by-tenant crosstab shows no '
-      "interaction at all: a landlord's gender does not predict their tenant's."
-      '</figcaption>')
+    a('<figcaption>Individual landlords who file skew about two to one male, '
+      'consistently across every application type. Tenants named in cases are even. '
+      'Tenants who bring their own case are slightly more often women. Inferred from '
+      'first names, which resolves 65% of landlord and 78% of tenant names, and the '
+      'misses are not random across communities.</figcaption>')
     a(data_table(["Role", "Men", "Women", "Men per woman", "Names resolved"],
                  [[r["role"], f'{int(num(r["men"])):,}', f'{int(num(r["women"])):,}',
                    r["men_per_woman"], f'{r["coverage_pct"]}%'] for r in d["gender"]]))
     a("</figure>")
-    codes = [r for r in d["gender_by_application"] if r["tenant_men_per_woman"] != ""]
-    tenant_codes = [r for r in codes if r["filed_by"] == "tenant"]
-    landlord_codes = [r for r in codes if r["filed_by"] == "landlord"]
-    if tenant_codes and landlord_codes:
-        a("<h3>The part of this that is actually interesting</h3>")
-        a("<p>The aggregate above hides it. Split by what the case is about, the two "
-          "sides move in opposite directions.</p>")
-        a("<figure>")
-        a(sv.hbar(
-            [{"label": f'{r["code"]} · {r["meaning"]}',
-              "value": num(r["tenant_pct_women"]),
-              "display": f'{r["tenant_pct_women"]}%',
-              "color": SERIES["tenant"] if r["filed_by"] == "tenant" else SERIES["landlord"]}
-             for r in sorted(codes, key=lambda r: -num(r["tenant_pct_women"]))],
-            label_width=290, max_value=60,
-            title="Share of the tenants involved who are women, by case type",
-            chart_label="Share of tenants who are women by application type"))
-        a('<figcaption>Orange bars are applications a tenant brought; blue are ones '
-          'brought against them. <b>Tenants are taken to the Board at parity but '
-          'bring their own cases more often when they are women.</b> Maintenance is '
-          '53.9% women, bad-faith notice 53.1%, tenant rights 52.7%, against 49% or '
-          'below for the applications filed against tenants. Scale starts at zero and '
-          'tops at 60% so the differences are visible; they are real but small, and '
-          'none of them is far from even.</figcaption>')
-        a(data_table(
-            ["Code", "Meaning", "Filed by", "Landlord M:F", "Tenants M:F", "% women"],
-            [[r["code"], r["meaning"], r["filed_by"],
-              r["landlord_men_per_woman"] or "thin base",
-              r["tenant_men_per_woman"], f'{r["tenant_pct_women"]}%'] for r in codes],
-            numeric_from=3))
-        a("</figure>")
-        a('<div class="finding"><b>Individual landlords skew about two men to one '
-          'woman in every category</b>, from 1.58 to 2.19, barely varying by what the '
-          'case is about. That reads as a fact about who owns rental property rather '
-          'than about how anyone behaves.</div>')
+    means(a, "The gender difference is in who owns rental property and who reaches "
+             "for the Board, not in who behaves how. Nobody in this data is "
+             "\"crazier\" than anybody else, and the income result should stop a "
+             "common argument in both directions: rental disputes are not "
+             "concentrated in poor postal codes in any strong sense.")
 
-    if d.get("gender_by_recurrence") and d.get("gender_by_household"):
-        a("<h3>Two more things that turned out to be nothing</h3>")
-        a("<figure>")
-        a(sv.hbar(
-            [{"label": f'Tenants with {r["group"]}', "value": num(r["men_per_woman"]),
-              "display": r["men_per_woman"], "color": SERIES["tenant"]}
-             for r in d["gender_by_recurrence"]]
-            + [{"label": f'Tenancies with {r["household"]}',
-                "value": num(r["men_per_woman"]), "display": r["men_per_woman"],
-                "color": SERIES["tenant"]}
-               for r in d["gender_by_household"]],
-            label_width=250, max_value=1.3,
-            title="Men per woman, by recurrence and by household size",
-            chart_label="Gender by recurrence and household size"))
-        a('<figcaption>Tenants who come back more than once are not meaningfully more '
-          'male than those who appear once (1.09 against 1.03), and a one-adult '
-          'tenancy is not more male than a two-adult one (1.01 against 1.05). Both '
-          'were worth testing and neither found anything. Whatever explains '
-          'recurrence, it is not this.</figcaption>')
-        a("</figure>")
-
-    a('<div class="finding"><b>Why the coverage column is there.</b> The name '
-      'dictionary resolves Anglo and European given names far better than others, so '
-      'the misses are not random: communities whose names it does not carry are '
-      'under-represented in the resolved base. The direction of the landlord finding '
-      'survives any plausible assumption about the missing third, but the ratios '
-      'should not be read past one decimal place, and none of this is a statement '
-      'about any named community.</div>')
-
-    # ---- 9. nulls ----------------------------------------------------------
-    a("<h2>9. What was tested and not found</h2>")
-    a("<p>Reporting only the things that came out is how an analysis stops being "
-      "evidence. These were tested and did not.</p>")
+    # ---- 9 -----------------------------------------------------------------
+    section(a, "What was tested and found to be nothing?",
+            "Reporting only what came out is how an analysis stops being evidence. "
+            "These were tested and did not.")
     a("<figure>")
     a(f'<p><b>Area income does not explain where landlords file.</b> Rank correlation '
-      f'{income_corr["spearman_rho"]} across {income_corr["n_fsas"]} areas. There is '
-      'no strong geography-of-poverty story in the filing rate.</p>')
-    a('<p><b>There is no gendered pairing between the sides.</b> Male landlords and '
-      'female landlords face essentially the same gender mix of tenants.</p>')
-    a(f'<p><b>The serial-tenant claim is not supported at this timescale.</b> Only '
-      f'{diff_addr["pct_of_tenants"]}% of repeat tenants, and about 2.7% of all '
-      f'tenants, appear at more than one address in {s["days"]} days, and the '
-      'apparent top of that list is legal clinics and support agencies named in the '
-      'tenant field rather than tenants. A multi-year window is needed for a real '
-      'test; what the data does support is the settlement-breach difference in '
-      'section 5.</p>')
+      f'{income_corr["spearman_rho"]} across {income_corr["n_fsas"]} postal areas.</p>')
+    a('<p><b>No gendered pairing between the sides.</b> Male and female landlords face '
+      'essentially the same gender mix of tenants.</p>')
+    a('<p><b>Repeat tenants are not more male</b> than one-time tenants (1.09 against '
+      '1.03), and a one-adult tenancy is not more male than a two-adult one.</p>')
+    a(f'<p><b>The serial-tenant claim is not supported at this timescale.</b> About '
+      f'2.7% of tenants appear at more than one address in {s["days"]} days, and the '
+      'apparent top of that list turns out to be legal clinics named in the tenant '
+      'field rather than tenants.</p>')
     a("</figure>")
+
+    # ---- 10 ----------------------------------------------------------------
+    section(a, "So what should change?",
+            "Three gaps, all cheap to close, all in data the province already holds.")
+    a("<figure>")
+    a(data_table(["Gap", "What it costs", "Why it is cheap"],
+                 [["Only a rolling current-year file is published",
+                   "No trend can be measured. Nobody, inside or outside government, "
+                   "can say whether this is improving or deteriorating.",
+                   "The file already exists; keeping the previous ones is a "
+                   "retention policy, not a project."],
+                  ["Amounts are not in the export",
+                   "Every dollar figure on this site required downloading and "
+                   "reading order PDFs one at a time.",
+                   "The Board holds these figures in the order it already wrote."],
+                  ["No disposition field",
+                   "Until this report, nobody outside the Board could say how often "
+                   "filing ends a tenancy. It is about one in four.",
+                   "It is stated in the operative paragraph of every order."]],
+                 numeric_from=99))
+    a("</figure>")
+    a('<div class="means"><b>The point.</b> Nothing in this report needed data the '
+      'province does not already hold, and none of it needed access anyone else '
+      'lacks. It took a few days with public tools. That a private analysis had to '
+      'read ten thousand PDFs to establish how often an eviction application ends a '
+      'tenancy is the finding underneath all the other findings.</div>')
 
     return "\n".join(p)

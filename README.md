@@ -20,6 +20,10 @@ No earlier period is published anywhere, so no trend can be measured yet. `scrip
 
 **Per case, though, the individual owner is hit harder.** Reading 5,000 order PDFs individually rather than modelling from category averages: the median individual owner is owed **$7,229 after 4.04 months without rent, which is 33.6% of that unit's annual gross revenue** before mortgage, tax or repairs. The corporate median is $5,108 after 3.14 months, or 26.2%. The 95% intervals on the two means do not overlap, so this is a real difference. Individual owners do rent costlier units ($1,962/month against $1,638), but the months figure controls for that and the gap survives. **23% of all orders are for more than six months of rent on a single unit.**
 
+**Filing is not eviction, and now there is a number for it.** The disposition is not in the export, so this reads it out of the orders: **48.1% of landlord applications end in a termination order, but 47.0% of those are voidable** (the tenancy ends unless the tenant pays by a date). Net, about a quarter end a tenancy outright. For non-payment specifically, 49.8% end in termination and 75.8% of those are voidable.
+
+**A tenant who brings a case usually loses it.** **43.9%** of tenant-filed applications are dismissed against **7.1%** of landlord-filed, a six-fold gap. Another 19.5% end with the landlord ordered to do something, 6.1% with a payment.
+
 **The record is not a picture of eviction.** Non-payment is **63.4%** of the Board's landlord cases but only **8%** of the evictions tenants report to Statistics Canada. The reasons tenants most often give, that the landlord sold (37%) or wanted the unit (26%), usually end with the tenant leaving on a notice and leave no record. This cuts both ways: the file understates how often tenants lose housing, *and* it is not evidence about the frequency of the no-fault evictions it barely contains.
 
 **A small group of tenants does behave differently.** 90% of tenants appear in exactly one case. The 10% who recur account for 19% of cases, and are taken to the Board for **breaching a settlement at 3.4x the rate** of one-time tenants. Most recur at the same address rather than moving on.
@@ -34,7 +38,7 @@ No earlier period is published anywhere, so no trend can be measured yet. `scrip
 
 | | |
 |---|---|
-| **[`report.html`](report.html)** | The main artifact. Nine sections, eleven charts, sources beside each number. |
+| **[`report.html`](report.html)** | The main artifact. Ten questions, each answered in a sentence before its chart, with what it means afterwards. |
 | **[`onepager.html`](onepager.html)** | Print-ready one-page briefing. |
 | **[`sources.html`](sources.html)** | Every source, its licence, its period, and which figure came from where. |
 | **[`map.html`](map.html)** | One interactive choropleth with three toggles: postal area (520) or municipality (577); per 1,000 renter households, per 10,000 residents, or raw count; total, landlord-filed or tenant-filed. Opens on the renter-household rate. Self-contained, works offline. `city-map.html` is now a redirect to it. |

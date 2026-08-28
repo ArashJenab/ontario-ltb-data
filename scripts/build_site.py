@@ -87,6 +87,14 @@ def load():
     # Attendance comes from the all-category sample, not the burden one. The
     # burden sample is L1/L2/L4 only, where the landlord is the applicant in
     # every order, so it cannot say anything about attendance in general.
+    outcomes_dir = RESULTS / "outcomes"
+    for key, filename in (
+        ("outcomes", "outcome_by_side.csv"),
+        ("outcomes_by_category", "outcome_by_category.csv"),
+    ):
+        path = outcomes_dir / filename
+        d[key] = read(path) if path.exists() else None
+
     process_dir = RESULTS / "process"
     for key, filename in (
         ("attendance", "attendance_overall.csv"),
@@ -207,6 +215,21 @@ footer a { color:var(--ink-muted); }
 .finding { margin-top:18px; padding:16px 18px; background:var(--surface-2);
            border:1px solid var(--border); border-radius:10px; font-size:15px; }
 .finding b { color:var(--ink); }
+/* The report's argument spine: a question, its answer before any chart, and
+   what it means afterwards. These three carry the reading if nothing else is
+   read, so they are set apart from the body rather than blended into it. */
+.answer { margin:10px 0 0; font-size:17px; line-height:1.55; color:var(--ink); }
+.answer b { font-weight:700; }
+.means { margin-top:20px; padding:16px 20px; border-left:3px solid var(--series-3);
+         background:var(--surface-2); border-radius:0 10px 10px 0;
+         font-size:15px; line-height:1.6; color:var(--ink-muted); }
+.means b { color:var(--ink); }
+.thesis { margin-top:26px; padding:22px 24px; background:var(--surface);
+          border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); }
+.thesis p { margin:0 0 12px; font-size:16.5px; }
+.thesis ul { margin:0; padding-left:20px; }
+.thesis li { margin:7px 0; font-size:15.5px; line-height:1.55; color:var(--ink-muted); }
+.thesis li b { color:var(--ink); }
 .ledger { margin-top:22px; background:var(--surface); border:1px solid var(--border);
           border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
 .ledger h4 { margin:0; padding:16px 20px 12px; font-size:15px; font-weight:700;
