@@ -66,6 +66,10 @@ def load():
         "repeat_mix": read(RESULTS / "parties" / "repeat_case_mix.csv"),
         "hearing": read(RESULTS / "parties" / "decided_without_hearing.csv"),
         "gender": read(RESULTS / "parties" / "gender_summary.csv"),
+        "gender_crosstab": read(RESULTS / "parties" / "gender_crosstab.csv"),
+        "gender_by_application": read(RESULTS / "parties" / "gender_by_application.csv"),
+        "gender_by_recurrence": read(RESULTS / "parties" / "gender_by_recurrence.csv"),
+        "gender_by_household": read(RESULTS / "parties" / "gender_by_household.csv"),
         "household": read(RESULTS / "parties" / "household_size.csv"),
     }
     # The burden analysis depends on a long PDF extraction run, so the site

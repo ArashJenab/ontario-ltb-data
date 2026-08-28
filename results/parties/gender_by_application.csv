@@ -1,0 +1,12 @@
+code,meaning,filed_by,landlord_resolved,landlord_men_per_woman,tenant_resolved,tenant_men_per_woman,tenant_pct_women
+L1,Non-payment of rent,landlord,3986,2.15,21140,1.03,49.2
+L2,End tenancy (other reasons),landlord,1780,1.83,5402,1.06,48.6
+L4,Breached a settlement or order,landlord,737,2.06,4165,1.02,49.5
+T2,Tenant rights,tenant,1253,1.91,2711,0.9,52.7
+T1,Rent rebate or money owed to tenant,tenant,603,1.97,1103,0.99,50.1
+T6,Maintenance,tenant,420,1.58,1068,0.85,53.9
+L3,Tenant gave notice but stayed,landlord,354,2.19,836,1.17,46.2
+T5,Bad-faith notice to terminate,tenant,302,1.9,618,0.88,53.1
+L9,Collect rent during tenancy,landlord,87,,413,1.12,47.2
+A2,Application about a mobile home site,,49,,217,1.28,43.8
+L5,Above-guideline rent increase,landlord,96,,221,0.91,52.5

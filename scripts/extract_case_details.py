@@ -43,9 +43,23 @@ BASE = Path(__file__).resolve().parent.parent
 OUT_DIR = BASE / "results" / "case_details"
 DATA_PATH = BASE / "data" / "ltb_open_data_export.json"
 
-# Landlord money categories. These are the ones where an amount and a rent are
-# both plausibly stated, and they are what the burden figures rest on.
-CATEGORIES = ("L1", "L2", "L4")
+# The default frame: the landlord money categories, where an amount and a rent
+# are both plausibly stated. Proportional allocation within these three makes an
+# unweighted mean over the sample a population mean *for landlord money cases*,
+# which is the question the burden figures answer.
+MONEY_CATEGORIES = ("L1", "L2", "L4")
+
+# --categories all widens the frame to every application type, weighted by how
+# common each is across the whole caseload. Needed for any question about
+# process rather than money: attendance and representation cannot be read off a
+# landlord-money-only sample, because in a tenant-filed case the tenant is the
+# applicant and the roles invert. Sampling only L1/L2/L4 and reporting
+# "tenants attend 52%" would be measuring one side of the docket and calling it
+# the whole.
+ALL_CATEGORIES = (
+    "L1", "L2", "L4", "T2", "T1", "T6", "L10", "L3", "L5", "T5", "L9", "A2",
+    "T3", "L8", "A1", "C1", "C2", "C4", "T7", "T4",
+)
 
 SEED = 20260827
 
@@ -143,13 +157,18 @@ def parse_args():
                         help="concurrent downloads (kept low deliberately)")
     parser.add_argument("--delay", type=float, default=1.0,
                         help="seconds each worker waits after a fresh download")
+    parser.add_argument("--categories", choices=["money", "all"], default="money",
+                        help="'money': L1/L2/L4 only, for the burden figures. "
+                             "'all': every application type, weighted by how common "
+                             "each is, for questions about process.")
     parser.add_argument("--outdir", default=None)
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    out_dir = BASE / "results" / (args.outdir or "case_details")
+    default_dir = "case_details" if args.categories == "money" else "case_details_all"
+    out_dir = BASE / "results" / (args.outdir or default_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     ea.PDF_DIR.mkdir(exist_ok=True)
     random.seed(SEED)
@@ -165,7 +184,8 @@ def main():
     url_field = ea.load_field_name(fields, ea.URL_FIELD_PREFIX)
     address_field = ea.load_address_field(fields)
 
-    pools = {c: [] for c in CATEGORIES}
+    categories = MONEY_CATEGORIES if args.categories == "money" else ALL_CATEGORIES
+    pools = {c: [] for c in categories}
     for record in data["records"]:
         code = record[index[apps_field]]
         if code in pools:
@@ -173,17 +193,19 @@ def main():
 
     # Proportional allocation: the sample should mirror the real category mix
     # so an unweighted mean over it is already a population mean.
-    population = {c: len(pools[c]) for c in CATEGORIES}
+    population = {c: len(pools[c]) for c in categories if pools[c]}
     total_population = sum(population.values())
     allocation = {
         c: min(len(pools[c]), round(args.n * population[c] / total_population))
-        for c in CATEGORIES
+        for c in population
     }
+    # Largest-remainder would be tidier, but rounding drift of a few documents
+    # across twenty categories does not move any figure derived from this.
     print(f"Pool sizes: {population}")
     print(f"Sampling {sum(allocation.values())} documents: {allocation}")
 
     sample = []
-    for code in CATEGORIES:
+    for code in allocation:
         for record in random.sample(pools[code], allocation[code]):
             sample.append((code, record))
     random.shuffle(sample)

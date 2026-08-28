@@ -519,6 +519,63 @@ def build(d):
                  [[r["role"], f'{int(num(r["men"])):,}', f'{int(num(r["women"])):,}',
                    r["men_per_woman"], f'{r["coverage_pct"]}%'] for r in d["gender"]]))
     a("</figure>")
+    codes = [r for r in d["gender_by_application"] if r["tenant_men_per_woman"] != ""]
+    tenant_codes = [r for r in codes if r["filed_by"] == "tenant"]
+    landlord_codes = [r for r in codes if r["filed_by"] == "landlord"]
+    if tenant_codes and landlord_codes:
+        a("<h3>The part of this that is actually interesting</h3>")
+        a("<p>The aggregate above hides it. Split by what the case is about, the two "
+          "sides move in opposite directions.</p>")
+        a("<figure>")
+        a(sv.hbar(
+            [{"label": f'{r["code"]} · {r["meaning"]}',
+              "value": num(r["tenant_pct_women"]),
+              "display": f'{r["tenant_pct_women"]}%',
+              "color": SERIES["tenant"] if r["filed_by"] == "tenant" else SERIES["landlord"]}
+             for r in sorted(codes, key=lambda r: -num(r["tenant_pct_women"]))],
+            label_width=290, max_value=60,
+            title="Share of the tenants involved who are women, by case type",
+            chart_label="Share of tenants who are women by application type"))
+        a('<figcaption>Orange bars are applications a tenant brought; blue are ones '
+          'brought against them. <b>Tenants are taken to the Board at parity but '
+          'bring their own cases more often when they are women.</b> Maintenance is '
+          '53.9% women, bad-faith notice 53.1%, tenant rights 52.7%, against 49% or '
+          'below for the applications filed against tenants. Scale starts at zero and '
+          'tops at 60% so the differences are visible; they are real but small, and '
+          'none of them is far from even.</figcaption>')
+        a(data_table(
+            ["Code", "Meaning", "Filed by", "Landlord M:F", "Tenants M:F", "% women"],
+            [[r["code"], r["meaning"], r["filed_by"],
+              r["landlord_men_per_woman"] or "thin base",
+              r["tenant_men_per_woman"], f'{r["tenant_pct_women"]}%'] for r in codes],
+            numeric_from=3))
+        a("</figure>")
+        a('<div class="finding"><b>Individual landlords skew about two men to one '
+          'woman in every category</b>, from 1.58 to 2.19, barely varying by what the '
+          'case is about. That reads as a fact about who owns rental property rather '
+          'than about how anyone behaves.</div>')
+
+    if d.get("gender_by_recurrence") and d.get("gender_by_household"):
+        a("<h3>Two more things that turned out to be nothing</h3>")
+        a("<figure>")
+        a(sv.hbar(
+            [{"label": f'Tenants with {r["group"]}', "value": num(r["men_per_woman"]),
+              "display": r["men_per_woman"], "color": SERIES["tenant"]}
+             for r in d["gender_by_recurrence"]]
+            + [{"label": f'Tenancies with {r["household"]}',
+                "value": num(r["men_per_woman"]), "display": r["men_per_woman"],
+                "color": SERIES["tenant"]}
+               for r in d["gender_by_household"]],
+            label_width=250, max_value=1.3,
+            title="Men per woman, by recurrence and by household size",
+            chart_label="Gender by recurrence and household size"))
+        a('<figcaption>Tenants who come back more than once are not meaningfully more '
+          'male than those who appear once (1.09 against 1.03), and a one-adult '
+          'tenancy is not more male than a two-adult one (1.01 against 1.05). Both '
+          'were worth testing and neither found anything. Whatever explains '
+          'recurrence, it is not this.</figcaption>')
+        a("</figure>")
+
     a('<div class="finding"><b>Why the coverage column is there.</b> The name '
       'dictionary resolves Anglo and European given names far better than others, so '
       'the misses are not random: communities whose names it does not carry are '

@@ -7,7 +7,7 @@ is "where did that number come from" - so every figure on the site is traced
 here to a named source, its licence, and the window it covers.
 """
 import svgchart as sv
-from build_site import BUILT, SERIES, num, table, tile
+from build_site import BUILT, SERIES, data_table, num, table, tile
 
 # Every external source, in the order a reader would want them.
 SOURCES = [
@@ -718,7 +718,54 @@ def build_index(d):
       '<a href="city-map.html">municipality view</a> of the same data is available '
       'for anyone who does not think in postal codes.</p>')
 
-    # ---- 4. nulls ----------------------------------------------------------
+    # ---- 5. who the parties are --------------------------------------------
+    codes = [r for r in d["gender_by_application"] if r["tenant_men_per_woman"] != ""]
+    if d.get("gender") and codes:
+        a("<h2>Who the parties are</h2>")
+        a("<p>First names carry a signal about gender. It is a weak instrument, so it "
+          "is reported only alongside how much of each group it resolves, and the "
+          "interesting part is not the headline but the split by case type.</p>")
+        a("<figure>")
+        a(sv.hbar([{"label": r["role"], "value": num(r["men_per_woman"]),
+                    "display": f'{r["men_per_woman"]}x',
+                    "color": (SERIES["landlord"] if "landlord" in r["role"].lower()
+                              else SERIES["tenant"])}
+                   for r in d["gender"]],
+                  label_width=250, title="Men per woman, by role",
+                  chart_label="Inferred gender balance by role"))
+        a('<figcaption><b>Individual landlords who bring cases skew about two to one '
+          'male. Tenants named in those cases are even. Tenants who bring their own '
+          'case are slightly more often women than men.</b> So the difference is not '
+          'in who ends up at the Board, it is in who runs a rental business and who '
+          'reaches for the Board when something is wrong.</figcaption>')
+        a(data_table(["Role", "Men", "Women", "Men per woman", "Names resolved"],
+                     [[r["role"], f'{int(num(r["men"])):,}', f'{int(num(r["women"])):,}',
+                       r["men_per_woman"], f'{r["coverage_pct"]}%'] for r in d["gender"]]))
+        a("</figure>")
+        a("<figure>")
+        a(sv.hbar(
+            [{"label": f'{r["code"]} · {r["meaning"]}',
+              "value": num(r["tenant_pct_women"]),
+              "display": f'{r["tenant_pct_women"]}%',
+              "color": SERIES["tenant"] if r["filed_by"] == "tenant" else SERIES["landlord"]}
+             for r in sorted(codes, key=lambda r: -num(r["tenant_pct_women"]))],
+            label_width=290, max_value=60,
+            title="Share of the tenants involved who are women, by case type",
+            chart_label="Share of tenants who are women by application type"))
+        a('<figcaption>Orange is an application a tenant brought; blue is one brought '
+          'against them. Maintenance cases are 53.9% women, bad-faith notice 53.1%, '
+          'tenant rights 52.7%, against 49% or below for everything filed against '
+          'tenants. Real, consistent, and small: nothing here is far from even. The '
+          'axis tops at 60% so the differences are visible at all.</figcaption>')
+        a("</figure>")
+        a('<div class="finding"><b>The coverage caveat matters more than the finding.</b> '
+          'The dictionary resolves Anglo and European given names far better than '
+          'others, so the third of landlord names it cannot read are not a random '
+          'third. The direction survives any plausible assumption about them; the '
+          'exact ratios should not be quoted past one decimal, and none of this is a '
+          'statement about any named community.</div>')
+
+    # ---- 6. nulls ----------------------------------------------------------
     a("<h2>What was tested and not found</h2>")
     a("<p>Reporting only the things that came out is how an analysis stops being "
       "evidence. These were tested and did not.</p>")

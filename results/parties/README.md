@@ -96,6 +96,40 @@ Individual landlords who bring cases are **2.0 men per woman**. Tenants named in
 
 Based on 8,611 pairs where both sides resolved.
 
+### Gender by what the case is about
+
+The aggregate hides the only part of this that is interesting. Split by application type (rows with at least 100 resolved tenant names):
+
+| Code | Meaning | Filed by | Individual landlord, M:F | Tenants, M:F | Tenants who are women |
+|---|---|---|---:|---:|---:|
+| L1 | Non-payment of rent | landlord | 2.15 | 1.03 | 49.2% |
+| L2 | End tenancy (other reasons) | landlord | 1.83 | 1.06 | 48.6% |
+| L4 | Breached a settlement or order | landlord | 2.06 | 1.02 | 49.5% |
+| T2 | Tenant rights | tenant | 1.91 | 0.9 | 52.7% |
+| T1 | Rent rebate or money owed to tenant | tenant | 1.97 | 0.99 | 50.1% |
+| T6 | Maintenance | tenant | 1.58 | 0.85 | 53.9% |
+| L3 | Tenant gave notice but stayed | landlord | 2.19 | 1.17 | 46.2% |
+| T5 | Bad-faith notice to terminate | tenant | 1.9 | 0.88 | 53.1% |
+| L9 | Collect rent during tenancy | landlord | thin | 1.12 | 47.2% |
+| A2 | Application about a mobile home site |  | thin | 1.28 | 43.8% |
+| L5 | Above-guideline rent increase | landlord | thin | 0.91 | 52.5% |
+
+Two patterns, pointing in different directions:
+
+* **Individual landlords skew about two men to one woman in every category.** It barely varies by what the case is about, which suggests it is a fact about who owns rental property rather than about how anyone behaves.
+* **Tenants are taken to the Board at parity, but bring their own cases more often when they are women.** Tenants named in landlord applications run 1.02 to 1.06 men per woman, essentially even. Tenant-filed applications run the other way: maintenance 0.85 (53.9% women), bad-faith notice to terminate 0.88, tenant rights 0.90.
+
+### Gender by recurrence and by household
+
+| Group | Men per woman | Resolved names |
+|---|---:|---:|
+| Tenants with one case | 1.03 | 25,875 |
+| Tenants with more than one case | 1.09 | 3,002 |
+| Tenancies with one named adult | 1.01 | 16,005 |
+| Tenancies with two named adults | 1.05 | 13,296 |
+
+Both are null results and are reported as such. Tenants who come back more than once are not meaningfully more male than those who appear once (1.09 against 1.03), and a one-adult tenancy is not more male than a two-adult one (1.01 against 1.05). Whatever explains recurrence, it is not this.
+
 ### Why this is reported with a coverage column
 
 The dictionary resolves 64.8% of individual landlord first names and 77.6% of tenant first names. **The misses are not random.** It resolves Anglo and European given names far better than others, so communities whose names it does not carry are under-represented in the resolved base. If the gender balance among unresolved names differs from the resolved ones, every ratio above shifts.

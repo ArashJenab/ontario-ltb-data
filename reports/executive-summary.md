@@ -1,6 +1,6 @@
 # What Ontario's rental disputes cost, and who pays
 
-*An open-data analysis. Generated 2026-08-27 by `scripts/build_site.py`.*
+*An open-data analysis. Generated 2026-08-28 by `scripts/build_site.py`.*
 
 **Window.** The Landlord and Tenant Board publishes one rolling current-year file. This analysis covers **2026-01-02 to 2026-05-29**, 148 days, holding 40,844 orders across 37,401 distinct cases. Not a full year and not all time. No earlier period is published anywhere, so no trend can be measured yet. Annual figures below are that window multiplied by 2.466.
 

@@ -262,8 +262,88 @@ def main():
         ],
     )
 
+    # ---- gender by application type ----------------------------------------
+    # Does the kind of case differ by the gender of the person bringing it, or
+    # of the people it is brought against? Reported per code so a reader can see
+    # where the resolved base is thin.
+    landlord_by_code = defaultdict(Counter)
+    tenant_by_code = defaultdict(Counter)
+    for case in cases:
+        if not case["code"]:
+            continue
+        if case["landlord_kind"] == "individual" and case["landlord"]:
+            parties = [
+                party for party in ltbdata.split_parties(case["landlord"])
+                if ltbdata.looks_like_person(party)
+            ]
+            if parties:
+                landlord_by_code[case["code"]][infer_gender(parties[0])] += 1
+        for name in case["tenant_names"]:
+            tenant_by_code[case["code"]][infer_gender(name)] += 1
+
+    code_rows = []
+    for code in sorted(
+        set(landlord_by_code) | set(tenant_by_code),
+        key=lambda c: -(sum(tenant_by_code[c].values())),
+    ):
+        landlord_counts = landlord_by_code[code]
+        tenant_counts = tenant_by_code[code]
+        landlord_resolved = landlord_counts["M"] + landlord_counts["F"]
+        tenant_resolved = tenant_counts["M"] + tenant_counts["F"]
+        if tenant_resolved < 100:
+            continue
+        code_rows.append(
+            {
+                "code": code,
+                "meaning": ltbdata.CATEGORY_LABELS.get(code, ""),
+                "filed_by": ltbdata.FILED_BY.get(code[0], ""),
+                "landlord_resolved": landlord_resolved,
+                "landlord_men_per_woman": (
+                    round(landlord_counts["M"] / landlord_counts["F"], 2)
+                    if landlord_counts["F"] and landlord_resolved >= 100 else ""
+                ),
+                "tenant_resolved": tenant_resolved,
+                "tenant_men_per_woman": (
+                    round(tenant_counts["M"] / tenant_counts["F"], 2)
+                    if tenant_counts["F"] else ""
+                ),
+                "tenant_pct_women": round(100 * tenant_counts["F"] / tenant_resolved, 1),
+            }
+        )
+    _write_csv(OUT_DIR / "gender_by_application.csv", code_rows)
+
+    # ---- gender by recurrence ----------------------------------------------
+    # Is the small group of tenants who come back more male than the rest?
+    recurrence_counts = {"one case": Counter(), "more than one case": Counter()}
+    for name, files in tenant_files.items():
+        bucket = "one case" if len(files) == 1 else "more than one case"
+        recurrence_counts[bucket][infer_gender(name)] += 1
+    recurrence_rows = [
+        {"group": label, **resolved_ratio(counts)}
+        for label, counts in recurrence_counts.items()
+    ]
+    _write_csv(OUT_DIR / "gender_by_recurrence.csv", recurrence_rows)
+
+    # ---- gender by household shape -----------------------------------------
+    # A one-name tenancy is a different household from a two-name one, and the
+    # gender mix of each says something the aggregate hides.
+    household_counts = defaultdict(Counter)
+    for case in landlord_cases:
+        names = case["tenant_names"]
+        if not names or len(names) > 2:
+            continue
+        label = "one named adult" if len(names) == 1 else "two named adults"
+        for name in names:
+            household_counts[label][infer_gender(name)] += 1
+    household_rows = [
+        {"household": label, **resolved_ratio(counts)}
+        for label, counts in sorted(household_counts.items())
+    ]
+    _write_csv(OUT_DIR / "gender_by_household.csv", household_rows)
+
     _write_readme(repeat_rows, mix_rows, ex_rows, gender_rows, crosstab, cross_total,
-                  total_tenants, repeaters, sizes, size_total)
+                  total_tenants, repeaters, sizes, size_total,
+                  code_rows, recurrence_rows, household_rows)
 
     # ---- console -----------------------------------------------------------
     print(f"Tenants named in landlord-filed cases: {fmt_count(total_tenants)}")
@@ -294,7 +374,8 @@ def _write_csv(path, rows):
 
 
 def _write_readme(repeat_rows, mix_rows, ex_rows, gender_rows, crosstab, cross_total,
-                  total_tenants, repeaters, sizes, size_total):
+                  total_tenants, repeaters, sizes, size_total,
+                  code_rows, recurrence_rows, household_rows):
     same_unit = next(r for r in repeat_rows if "same address" in str(r["cases_against_this_tenant"]))
     moved = next(r for r in repeat_rows if "different address" in str(r["cases_against_this_tenant"]))
     repeat_share = 100 * len(repeaters) / total_tenants
@@ -437,6 +518,51 @@ def _write_readme(repeat_rows, mix_rows, ex_rows, gender_rows, crosstab, cross_t
     lines += [
         "",
         f"Based on {fmt_count(cross_total)} pairs where both sides resolved.",
+        "",
+        "### Gender by what the case is about",
+        "",
+        "The aggregate hides the only part of this that is interesting. Split by "
+        "application type (rows with at least 100 resolved tenant names):",
+        "",
+        "| Code | Meaning | Filed by | Individual landlord, M:F | Tenants, M:F | Tenants who are women |",
+        "|---|---|---|---:|---:|---:|",
+    ] + [
+        f"| {row['code']} | {row['meaning']} | {row['filed_by']} "
+        f"| {row['landlord_men_per_woman'] or 'thin'} "
+        f"| {row['tenant_men_per_woman']} | {row['tenant_pct_women']}% |"
+        for row in code_rows
+    ] + [
+        "",
+        "Two patterns, pointing in different directions:",
+        "",
+        "* **Individual landlords skew about two men to one woman in every "
+        "category.** It barely varies by what the case is about, which suggests it "
+        "is a fact about who owns rental property rather than about how anyone "
+        "behaves.",
+        "* **Tenants are taken to the Board at parity, but bring their own cases "
+        "more often when they are women.** Tenants named in landlord applications "
+        "run 1.02 to 1.06 men per woman, essentially even. Tenant-filed applications "
+        "run the other way: maintenance 0.85 (53.9% women), bad-faith notice to "
+        "terminate 0.88, tenant rights 0.90.",
+        "",
+        "### Gender by recurrence and by household",
+        "",
+        "| Group | Men per woman | Resolved names |",
+        "|---|---:|---:|",
+    ] + [
+        f"| Tenants with {row['group']} | {row['men_per_woman']} "
+        f"| {fmt_count(row['men'] + row['women'])} |"
+        for row in recurrence_rows
+    ] + [
+        f"| Tenancies with {row['household']} | {row['men_per_woman']} "
+        f"| {fmt_count(row['men'] + row['women'])} |"
+        for row in household_rows
+    ] + [
+        "",
+        "Both are null results and are reported as such. Tenants who come back more "
+        "than once are not meaningfully more male than those who appear once (1.09 "
+        "against 1.03), and a one-adult tenancy is not more male than a two-adult "
+        "one (1.01 against 1.05). Whatever explains recurrence, it is not this.",
         "",
         "### Why this is reported with a coverage column",
         "",
