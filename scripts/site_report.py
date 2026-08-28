@@ -69,7 +69,6 @@ def build(d):
       'to compare against.</div>')
     a('<div class="nav no-print">'
       '<a class="primary" href="map.html">Explore the map</a>'
-      '<a href="city-map.html">By city</a>'
       '<a href="sources.html">Every source</a>'
       '<a href="onepager.html">One-page summary</a></div>')
 

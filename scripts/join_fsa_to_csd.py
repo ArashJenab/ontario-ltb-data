@@ -27,9 +27,18 @@ FSA_GEOJSON = BASE / "data" / "ontario_fsa_simplified.geojson"
 CSD_GEOJSON = BASE / "data" / "ontario_csd_simplified.geojson"
 FSA_COUNTS = BASE / "results" / "applications_by_area" / "fsa_application_counts.csv"
 CSD_POP = BASE / "data" / "csd_population.csv"
+CENSUS_PROFILE = BASE / "data" / "fsa_census_profile.csv"
 OUT_PATH = BASE / "data" / "csd_applications_normalized.csv"
 
 COUNT_FIELDS = ["total_applications", "landlord_filed", "tenant_filed", "coop_filed"]
+
+# Renter households ride through the same area-weighted overlap as the case
+# counts, so the numerator and the denominator are allocated to municipalities
+# by exactly the same rule. Doing it any other way would let the two disagree
+# about where an FSA's people are. Population comes from the CSD table directly
+# and needs no allocation; renter households are not published at CSD level in
+# what this repository already fetches, so they are apportioned instead.
+WEIGHTED_CENSUS_FIELDS = ["households_renter"]
 
 
 def load_fsa_polygons():
@@ -99,8 +108,17 @@ def main():
         for row in csv.DictReader(f):
             fsa_rows[row["fsa"]] = row
 
-    csd_totals = defaultdict(lambda: {"name": None, "fsa_count": 0.0,
-                                       **{k: 0.0 for k in COUNT_FIELDS}})
+    fsa_census = {}
+    if CENSUS_PROFILE.exists():
+        with open(CENSUS_PROFILE, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                fsa_census[row["fsa"]] = row
+
+    csd_totals = defaultdict(
+        lambda: {"name": None, "fsa_count": 0.0,
+                 **{k: 0.0 for k in COUNT_FIELDS},
+                 **{k: 0.0 for k in WEIGHTED_CENSUS_FIELDS}}
+    )
     for fsa, row in fsa_rows.items():
         if fsa not in overlaps:
             continue
@@ -110,6 +128,12 @@ def main():
             t["fsa_count"] += weight
             for k in COUNT_FIELDS:
                 t[k] += int(row[k]) * weight
+            census_row = fsa_census.get(fsa)
+            if census_row:
+                for k in WEIGHTED_CENSUS_FIELDS:
+                    value = census_row.get(k)
+                    if value:
+                        t[k] += float(value) * weight
 
     pop = {}
     with open(CSD_POP, encoding="utf-8") as f:
@@ -123,6 +147,15 @@ def main():
                "population": population}
         for k in COUNT_FIELDS:
             row[k] = round(t[k], 1)
+        renters = t.get("households_renter") or 0.0
+        row["households_renter"] = round(renters)
+        # Per 1,000 renter households rather than per 10,000 residents: an area
+        # that is 80% renters would otherwise look busier than one that is 20%
+        # renters with nothing else differing.
+        for k in ("total_applications", "landlord_filed", "tenant_filed"):
+            row[f"{k}_per_1k_renter"] = (
+                round(t[k] / renters * 1000, 2) if renters >= 100 else None
+            )
         if population:
             for k in COUNT_FIELDS:
                 if k == "coop_filed":
@@ -137,9 +170,11 @@ def main():
 
     rows.sort(key=lambda r: -(r["total_applications_per_10k"] or 0))
 
-    fieldnames = ["csduid", "name", "fsa_count", "population", "total_applications", "landlord_filed",
-                  "tenant_filed", "coop_filed", "total_applications_per_10k", "landlord_filed_per_10k",
-                  "tenant_filed_per_10k"]
+    fieldnames = ["csduid", "name", "fsa_count", "population", "households_renter",
+                  "total_applications", "landlord_filed", "tenant_filed", "coop_filed",
+                  "total_applications_per_10k", "landlord_filed_per_10k",
+                  "tenant_filed_per_10k", "total_applications_per_1k_renter",
+                  "landlord_filed_per_1k_renter", "tenant_filed_per_1k_renter"]
     with open(OUT_PATH, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()

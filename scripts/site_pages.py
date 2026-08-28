@@ -707,16 +707,16 @@ def build_index(d):
       '<img src="docs/map-preview.png" loading="lazy" '
       'alt="Interactive map of Ontario rental dispute rates by postal area">'
       '<div class="preview-caption">'
-      '<span>All 520 postal areas, raw counts or per 10,000 residents</span>'
+      '<span>520 postal areas or 577 municipalities, per renter household</span>'
       '<span>Open the map</span></div></a>')
-    a('<p class="src">The map currently normalises by <b>population</b>, which is a '
-      'weaker denominator than the one used elsewhere on this site: an area that is '
-      '80% renters will look busier than one that is 20% renters with nothing else '
-      'differing. Per-renter-household rates are in '
-      '<code>results/exposure/fsa_access_income.csv</code> and are what section 7 of '
-      'the report uses; moving the map onto them is outstanding work. A '
-      '<a href="city-map.html">municipality view</a> of the same data is available '
-      'for anyone who does not think in postal codes.</p>')
+    a('<p class="src">One map, three toggles: <b>postal area or municipality</b>, '
+      '<b>per 1,000 renter households, per 10,000 residents, or raw count</b>, and '
+      'total against landlord-filed against tenant-filed. It opens on the '
+      'renter-household rate, which is the denominator the rest of this site argues '
+      'from: an area that is 80% renters would otherwise look busier than one that '
+      'is 20% renters with nothing else differing. Areas with too few renter '
+      'households to give a stable rate are left grey rather than given a number '
+      'they cannot support.</p>')
 
     # ---- 5. who the parties are --------------------------------------------
     codes = [r for r in d["gender_by_application"] if r["tenant_men_per_woman"] != ""]
@@ -795,10 +795,8 @@ def build_index(d):
          "Print-ready summary for a constituency office"),
         ("sources.html", "Sources and provenance",
          "Every source, its licence, and which figure came from where"),
-        ("map.html", "Map by postal area",
-         "520 areas, raw counts or per 10,000 residents, zoomable and works offline"),
-        ("city-map.html", "Map by municipality",
-         "The same data rolled up to recognisable city names"),
+        ("map.html", "Interactive map",
+         "520 postal areas or 577 municipalities, per renter household or per resident"),
         ("https://github.com/ArashJenab/ontario-ltb-data", "Source repository",
          "All data, scripts, and per-analysis methodology notes"),
     ):

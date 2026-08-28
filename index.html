@@ -204,8 +204,8 @@ footer a { color:var(--ink-muted); }
 </figure>
 <div class="finding">This one cuts cleanly against the landlord side of the ledger and belongs here for that reason. Whatever else is true about who bears the financial loss, <b>the party facing loss of housing is the one more likely to be absent and far less likely to have anyone speaking for them</b>.</div>
 <h2>Where it concentrates</h2>
-<a class="preview-link wide" href="map.html"><img src="docs/map-preview.png" loading="lazy" alt="Interactive map of Ontario rental dispute rates by postal area"><div class="preview-caption"><span>All 520 postal areas, raw counts or per 10,000 residents</span><span>Open the map</span></div></a>
-<p class="src">The map currently normalises by <b>population</b>, which is a weaker denominator than the one used elsewhere on this site: an area that is 80% renters will look busier than one that is 20% renters with nothing else differing. Per-renter-household rates are in <code>results/exposure/fsa_access_income.csv</code> and are what section 7 of the report uses; moving the map onto them is outstanding work. A <a href="city-map.html">municipality view</a> of the same data is available for anyone who does not think in postal codes.</p>
+<a class="preview-link wide" href="map.html"><img src="docs/map-preview.png" loading="lazy" alt="Interactive map of Ontario rental dispute rates by postal area"><div class="preview-caption"><span>520 postal areas or 577 municipalities, per renter household</span><span>Open the map</span></div></a>
+<p class="src">One map, three toggles: <b>postal area or municipality</b>, <b>per 1,000 renter households, per 10,000 residents, or raw count</b>, and total against landlord-filed against tenant-filed. It opens on the renter-household rate, which is the denominator the rest of this site argues from: an area that is 80% renters would otherwise look busier than one that is 20% renters with nothing else differing. Areas with too few renter households to give a stable rate are left grey rather than given a number they cannot support.</p>
 <h2>Who the parties are</h2>
 <p>First names carry a signal about gender. It is a weak instrument, so it is reported only alongside how much of each group it resolves, and the interesting part is not the headline but the split by case type.</p>
 <figure>
@@ -230,8 +230,7 @@ footer a { color:var(--ink-muted); }
 <a class="file-row" href="report.html"><span class="name">Full report</span><span class="desc">Nine sections, every chart, sources beside each number</span></a>
 <a class="file-row" href="onepager.html"><span class="name">One-page briefing</span><span class="desc">Print-ready summary for a constituency office</span></a>
 <a class="file-row" href="sources.html"><span class="name">Sources and provenance</span><span class="desc">Every source, its licence, and which figure came from where</span></a>
-<a class="file-row" href="map.html"><span class="name">Map by postal area</span><span class="desc">520 areas, raw counts or per 10,000 residents, zoomable and works offline</span></a>
-<a class="file-row" href="city-map.html"><span class="name">Map by municipality</span><span class="desc">The same data rolled up to recognisable city names</span></a>
+<a class="file-row" href="map.html"><span class="name">Interactive map</span><span class="desc">520 postal areas or 577 municipalities, per renter household or per resident</span></a>
 <a class="file-row" href="https://github.com/ArashJenab/ontario-ltb-data"><span class="name">Source repository</span><span class="desc">All data, scripts, and per-analysis methodology notes</span></a>
 </div><footer>
 
