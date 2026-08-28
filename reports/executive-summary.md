@@ -51,7 +51,18 @@ This cuts both ways. The Board's file understates how often tenants lose housing
 
 **18.4% of landlord-filed orders are made without a hearing, against 2.1% of tenant-filed ones.** Much of that gap is procedurally expected, since an application to enforce something already agreed may proceed without a fresh hearing, but the size of it is a fact about the system worth knowing.
 
-Where a hearing did happen, orders name who attended. Landlords appear at **90.3%** of them and are represented at **73.6%**. Tenants appear at **52.2%** and are represented at **7.6%**. Among those who do attend, 81.4% of landlords have someone acting for them against 14.6% of tenants. This finding cuts against the landlord side of the ledger and is reported for that reason: whoever bears the financial loss, the party facing loss of housing is the one more likely to be absent and far less likely to have anyone speaking for them.
+Where a hearing did happen, orders name who attended. Split by who brought the application, because in a landlord-filed case the tenant is the respondent by construction:
+
+| Filed by | Party | Attended | Represented |
+|---|---|---:|---:|
+| Landlord | Landlord | 88.7% | 70.9% |
+| Landlord | Tenant | 51.6% | 7.4% |
+| Tenant | Landlord | 82.2% | 51.2% |
+| Tenant | Tenant | 71.5% | 24.9% |
+
+**Part of the attendance gap is structural**: the applicant turns up to their own case. Tenants attend 71.5% of the hearings they bring against 51.6% of those brought against them.
+
+**Representation does not behave that way.** Even bringing their own case, tenants have someone acting for them 24.9% of the time, against 51.2% for landlords who are only responding to it. This cuts against the landlord side of the ledger and is reported for that reason: whoever bears the financial loss, the party facing loss of housing is far less likely to have anyone speaking for them, on either side of the case.
 
 ## 5. What was tested and not found
 

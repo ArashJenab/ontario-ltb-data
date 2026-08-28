@@ -1,0 +1,5 @@
+filed_by,orders_in_sample,party,orders_naming_attendance,attended,pct_attended,represented,pct_represented,pct_represented_of_attending
+landlord,5140,landlord,3015,2675,88.7,2138,70.9,79.9
+landlord,5140,tenant,3015,1557,51.6,224,7.4,14.4
+tenant,759,landlord,473,389,82.2,242,51.2,62.2
+tenant,759,tenant,473,338,71.5,118,24.9,34.9

@@ -80,9 +80,19 @@ def load():
         ("burden_months", "months_owed.csv"),
         ("burden_bands", "months_distribution.csv"),
         ("burden_kinds", "by_landlord_kind.csv"),
-        ("attendance", "attendance.csv"),
     ):
         path = burden_dir / filename
+        d[key] = read(path) if path.exists() else None
+
+    # Attendance comes from the all-category sample, not the burden one. The
+    # burden sample is L1/L2/L4 only, where the landlord is the applicant in
+    # every order, so it cannot say anything about attendance in general.
+    process_dir = RESULTS / "process"
+    for key, filename in (
+        ("attendance", "attendance_overall.csv"),
+        ("attendance_by_filer", "attendance_by_filer.csv"),
+    ):
+        path = process_dir / filename
         d[key] = read(path) if path.exists() else None
 
     # Measured per-case figures, keyed by landlord kind, when the extraction

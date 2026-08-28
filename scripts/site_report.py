@@ -338,32 +338,53 @@ def build(d):
                       for b in bands]))
         a("</figure>")
 
-    if d.get("attendance"):
-        att = {r["party"]: r for r in d["attendance"]}
-        ll, tt = att["landlord"], att["tenant"]
+    byfiler = d.get("attendance_by_filer")
+    if byfiler:
+        def cell(filer, party, key):
+            row = next(r for r in byfiler
+                       if r["filed_by"] == filer and r["party"] == party)
+            return num(row[key])
+
+        heard = int(num(byfiler[0]["orders_naming_attendance"]))
         a("<h3>Who turns up, and who has help</h3>")
+        a("<p>Split by who brought the application. Without that split the answer is "
+          "mostly an artifact: in a landlord-filed case the tenant is the respondent "
+          "by construction, so a landlord-money-only sample cannot say anything "
+          "general about attendance.</p>")
         a("<figure>")
         a(sv.grouped_hbar(
-            [{"label": "Attended the hearing",
-              "values": [num(ll["pct_attended"]), num(tt["pct_attended"])],
-              "displays": [f'{ll["pct_attended"]}%', f'{tt["pct_attended"]}%']},
-             {"label": "Had a representative",
-              "values": [num(ll["pct_represented"]), num(tt["pct_represented"])],
-              "displays": [f'{ll["pct_represented"]}%', f'{tt["pct_represented"]}%']}],
-            series=[("Landlord side", SERIES["landlord"]),
-                    ("Tenant side", SERIES["tenant"])],
-            label_width=200, title="Presence at the hearing, by side",
-            chart_label="Attendance and representation by side"))
-        a(f'<figcaption>Landlords appear at {ll["pct_attended"]}% of hearings and are '
-          f'represented at {ll["pct_represented"]}%. Tenants appear at '
-          f'{tt["pct_attended"]}% and are represented at '
-          f'<b>{tt["pct_represented"]}%</b>. Among those who do attend, '
-          f'{ll["pct_represented_of_those_attending"]}% of landlords have someone '
-          f'acting for them against {tt["pct_represented_of_those_attending"]}% of '
-          f'tenants. Read from {int(num(ll["orders_with_a_hearing_line"])):,} orders '
-          'naming who attended; orders without that sentence are excluded rather than '
-          'scored as a no-show.</figcaption>')
+            [{"label": f'{filer.title()} filed: {party}',
+              "values": [cell(filer, party, "pct_attended"),
+                         cell(filer, party, "pct_represented")],
+              "displays": [f'{cell(filer, party, "pct_attended")}%',
+                           f'{cell(filer, party, "pct_represented")}%']}
+             for filer in ("landlord", "tenant") for party in ("landlord", "tenant")],
+            series=[("Attended the hearing", SERIES["landlord"]),
+                    ("Had a representative", SERIES["tenant"])],
+            label_width=210, title="Presence at the hearing, by who filed",
+            chart_label="Attendance and representation by party and by filer"))
+        a(f'<figcaption><b>Part of the attendance gap is structural.</b> Tenants '
+          f'attend {cell("tenant", "tenant", "pct_attended")}% of the hearings they '
+          f'bring against {cell("landlord", "tenant", "pct_attended")}% of those '
+          f'brought against them; the applicant turns up to their own case. '
+          f'<b>Representation does not behave that way.</b> Bringing their own case, '
+          f'tenants are represented {cell("tenant", "tenant", "pct_represented")}% of '
+          f'the time, against {cell("tenant", "landlord", "pct_represented")}% for '
+          f'landlords who are merely responding to it. Read from orders naming who '
+          'attended; those without that sentence are excluded rather than scored as a '
+          'no-show.</figcaption>')
+        a(data_table(
+            ["Filed by", "Party", "Attended", "Represented", "Of those attending"],
+            [[r["filed_by"].title(), r["party"].title(), f'{r["pct_attended"]}%',
+              f'{r["pct_represented"]}%', f'{r["pct_represented_of_attending"]}%']
+             for r in byfiler], numeric_from=2))
         a("</figure>")
+        a('<div class="finding"><b>This corrects an earlier figure.</b> A previous '
+          'version reported these rates from a sample of L1, L2 and L4 orders only, '
+          'where the landlord is the applicant in every case, and presented the '
+          'result as a fact about hearings generally. The figures above come from a '
+          f'sample drawn across every application type ({heard:,} of them naming who '
+          'attended), and are split by who filed.</div>')
 
     a("<h3>How concentrated the filing is</h3>")
     a("<figure>")

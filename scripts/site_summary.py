@@ -145,20 +145,40 @@ def build(d):
         f"of it is a fact about the system worth knowing.",
         "",
     ]
-    if att:
+    byfiler = d.get("attendance_by_filer")
+    if byfiler:
+        def cell(filer, party, key):
+            row = next(r for r in byfiler
+                       if r["filed_by"] == filer and r["party"] == party)
+            return row[key]
+
         out += [
-            f"Where a hearing did happen, orders name who attended. Landlords appear "
-            f"at **{att['landlord']['pct_attended']}%** of them and are represented at "
-            f"**{att['landlord']['pct_represented']}%**. Tenants appear at "
-            f"**{att['tenant']['pct_attended']}%** and are represented at "
-            f"**{att['tenant']['pct_represented']}%**. Among those who do attend, "
-            f"{att['landlord']['pct_represented_of_those_attending']}% of landlords "
-            f"have someone acting for them against "
-            f"{att['tenant']['pct_represented_of_those_attending']}% of tenants. This "
-            f"finding cuts against the landlord side of the ledger and is reported for "
-            f"that reason: whoever bears the financial loss, the party facing loss of "
-            f"housing is the one more likely to be absent and far less likely to have "
-            f"anyone speaking for them.",
+            "Where a hearing did happen, orders name who attended. Split by who "
+            "brought the application, because in a landlord-filed case the tenant is "
+            "the respondent by construction:",
+            "",
+            "| Filed by | Party | Attended | Represented |",
+            "|---|---|---:|---:|",
+        ] + [
+            f"| {r['filed_by'].title()} | {r['party'].title()} "
+            f"| {r['pct_attended']}% | {r['pct_represented']}% |"
+            for r in byfiler
+        ] + [
+            "",
+            f"**Part of the attendance gap is structural**: the applicant turns up to "
+            f"their own case. Tenants attend "
+            f"{cell('tenant', 'tenant', 'pct_attended')}% of the hearings they bring "
+            f"against {cell('landlord', 'tenant', 'pct_attended')}% of those brought "
+            f"against them.",
+            "",
+            f"**Representation does not behave that way.** Even bringing their own "
+            f"case, tenants have someone acting for them "
+            f"{cell('tenant', 'tenant', 'pct_represented')}% of the time, against "
+            f"{cell('tenant', 'landlord', 'pct_represented')}% for landlords who are "
+            f"only responding to it. This cuts against the landlord side of the "
+            f"ledger and is reported for that reason: whoever bears the financial "
+            f"loss, the party facing loss of housing is far less likely to have "
+            f"anyone speaking for them, on either side of the case.",
             "",
         ]
     out += [

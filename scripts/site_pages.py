@@ -147,11 +147,12 @@ FIGURE_PROVENANCE = [
      "Measured, not modelled. Median of the 780 orders naming both a rent and an "
      "amount for an individual owner. Means carry bootstrap intervals. Supersedes "
      "the modelled per-case figure, which could not vary by kind of owner."),
-    ("Landlords represented at 73.6%, tenants at 7.6%",
-     "The same 5,000 orders",
-     "Counted from the sentence naming who attended, present in 2,961 of them. "
-     "Orders without that sentence are excluded rather than scored as a no-show, so "
-     "these are rates among orders that say."),
+    ("Landlords represented at 67.8%, tenants at 9.7%",
+     "6,000 orders sampled across every application type",
+     "Counted from the sentence naming who attended, present in 3,564 of them, and "
+     "reported split by who filed. An earlier version of this figure came from an "
+     "L1/L2/L4-only sample in which the landlord is the applicant every time, which "
+     "made it a statement about one side of the docket rather than about hearings."),
     ("31% of a unit's annual rent",
      "The above, divided by census average rent",
      "Combines an estimate with a 2021 rent figure. Directionally solid, not "
@@ -666,40 +667,50 @@ def build_index(d):
     a("</figure>")
 
     # ---- 3. who turns up ---------------------------------------------------
-    if d.get("attendance"):
-        att = {r["party"]: r for r in d["attendance"]}
-        ll, tt = att["landlord"], att["tenant"]
+    byfiler = d.get("attendance_by_filer")
+    if byfiler:
+        def cell(filer, party, key):
+            row = next(r for r in byfiler
+                       if r["filed_by"] == filer and r["party"] == party)
+            return num(row[key])
+
         a("<h2>Who turns up, and who has help</h2>")
         a("<p>Orders name who attended the hearing and who appeared for them, so both "
-          "can be counted directly rather than inferred.</p>")
+          "can be counted rather than inferred. Split by who actually brought the "
+          "application, because otherwise the answer is mostly an artifact of which "
+          "side of the case each party is on.</p>")
         a("<figure>")
         a(sv.grouped_hbar(
-            [{"label": "Attended the hearing",
-              "values": [num(ll["pct_attended"]), num(tt["pct_attended"])],
-              "displays": [f'{ll["pct_attended"]}%', f'{tt["pct_attended"]}%']},
-             {"label": "Had a representative",
-              "values": [num(ll["pct_represented"]), num(tt["pct_represented"])],
-              "displays": [f'{ll["pct_represented"]}%', f'{tt["pct_represented"]}%']}],
-            series=[("Landlord side", SERIES["landlord"]),
-                    ("Tenant side", SERIES["tenant"])],
-            label_width=200, title="Presence at the hearing, by side",
-            chart_label="Attendance and representation by side"))
-        a(f'<figcaption>Landlords appear at '
-          f'{ll["pct_attended"]}% of hearings and bring a paralegal, agent or lawyer '
-          f'to {ll["pct_represented"]}% of them. Tenants appear at '
-          f'{tt["pct_attended"]}% and are represented at <b>{tt["pct_represented"]}%</b>. '
-          f'Among those who do turn up, {ll["pct_represented_of_those_attending"]}% of '
-          f'landlords have someone acting for them against '
-          f'{tt["pct_represented_of_those_attending"]}% of tenants. Read from '
-          f'{int(num(ll["orders_with_a_hearing_line"])):,} orders that name who '
-          'attended; orders without that sentence are excluded rather than counted as '
-          'a no-show.</figcaption>')
+            [{"label": f'{filer.title()} filed: {party}',
+              "values": [cell(filer, party, "pct_attended"),
+                         cell(filer, party, "pct_represented")],
+              "displays": [f'{cell(filer, party, "pct_attended")}%',
+                           f'{cell(filer, party, "pct_represented")}%']}
+             for filer in ("landlord", "tenant") for party in ("landlord", "tenant")],
+            series=[("Attended the hearing", SERIES["landlord"]),
+                    ("Had a representative", SERIES["tenant"])],
+            label_width=210, title="Presence at the hearing, by who filed",
+            chart_label="Attendance and representation by party and by filer"))
+        a(f'<figcaption><b>Part of the attendance gap is structural: the applicant '
+          f'turns up.</b> Tenants attend '
+          f'{cell("tenant", "tenant", "pct_attended")}% of the hearings they bring, '
+          f'against {cell("landlord", "tenant", "pct_attended")}% of those brought '
+          f'against them. <b>Representation does not work that way.</b> Even bringing '
+          f'their own case, tenants have someone acting for them '
+          f'{cell("tenant", "tenant", "pct_represented")}% of the time, against '
+          f'{cell("tenant", "landlord", "pct_represented")}% for landlords who are '
+          'only responding to it. Being the applicant does not close that '
+          'gap.</figcaption>')
+        a(data_table(
+            ["Filed by", "Party", "Attended", "Represented", "Of those attending"],
+            [[r["filed_by"].title(), r["party"].title(), f'{r["pct_attended"]}%',
+              f'{r["pct_represented"]}%', f'{r["pct_represented_of_attending"]}%']
+             for r in byfiler], numeric_from=2))
         a("</figure>")
-        a('<div class="finding">This one cuts cleanly against the landlord side of '
-          'the ledger and belongs here for that reason. Whatever else is true about '
-          'who bears the financial loss, <b>the party facing loss of housing is the '
-          'one more likely to be absent and far less likely to have anyone speaking '
-          'for them</b>.</div>')
+        a('<div class="finding">This cuts against the landlord side of the ledger and '
+          'is here for that reason. Whoever bears the financial loss, <b>the party '
+          'facing loss of housing is far less likely to have anyone speaking for '
+          'them, on either side of the case</b>.</div>')
 
     # ---- 4. the map --------------------------------------------------------
     a("<h2>Where it concentrates</h2>")

@@ -2,7 +2,7 @@
 
 What Ontario's own public records show about its rental disputes: how many there are, who brings them, what they cost, and who carries the cost. Built entirely from open data: the Landlord and Tenant Board's order export and Statistics Canada's census.
 
-**[→ Read the report](https://arashjenab.github.io/ontario-ltb-data/report.html)** · **[→ One-page briefing](https://arashjenab.github.io/ontario-ltb-data/onepager.html)** · **[→ Interactive map](https://arashjenab.github.io/ontario-ltb-data/map.html)** ([by city](https://arashjenab.github.io/ontario-ltb-data/city-map.html)) · **[→ Sources](https://arashjenab.github.io/ontario-ltb-data/sources.html)**
+**[→ Read the report](https://arashjenab.github.io/ontario-ltb-data/report.html)** · **[→ One-page briefing](https://arashjenab.github.io/ontario-ltb-data/onepager.html)** · **[→ Interactive map](https://arashjenab.github.io/ontario-ltb-data/map.html)** · **[→ Sources](https://arashjenab.github.io/ontario-ltb-data/sources.html)**
 
 ![Map preview](docs/map-preview.png)
 
@@ -24,9 +24,11 @@ No earlier period is published anywhere, so no trend can be measured yet. `scrip
 
 **A small group of tenants does behave differently.** 90% of tenants appear in exactly one case. The 10% who recur account for 19% of cases, and are taken to the Board for **breaching a settlement at 3.4x the rate** of one-time tenants. Most recur at the same address rather than moving on.
 
-**The two sides do not get the same process, and this one cuts the other way.** **18.4%** of landlord-filed orders are made without a hearing, against **2.1%** of tenant-filed ones. Where a hearing did happen, landlords attended **90.3%** of them and were represented at **73.6%**; tenants attended **52.2%** and were represented at **7.6%**.
+**The two sides do not get the same process, and this one cuts the other way.** **18.4%** of landlord-filed orders are made without a hearing, against **2.1%** of tenant-filed ones. On attendance, part of the gap is structural, since the applicant turns up to their own case: tenants attend **71.5%** of hearings they bring against **51.6%** of those brought against them. Representation does not behave that way. Even bringing their own case tenants are represented **24.9%** of the time, against **51.2%** for landlords who are only responding to one.
 
-**Some things were tested and not found.** Area income barely predicts where landlords file (rank correlation -0.119, about 1% of the variation). There is no gendered pairing between the sides. The serial-tenant claim is not supported at this timescale, and the apparent top of that list turns out to be legal clinics named in the tenant field.
+**On gender, the split by case type is the only interesting part.** Individual landlords who file skew about **two men to one woman in every category** (1.58 to 2.19), which reads as a fact about who owns rental property rather than about conduct. Tenants are taken to the Board at parity (1.02 to 1.06) but bring their own cases more often when they are women: maintenance **53.9%** women, bad-faith notice 53.1%, tenant rights 52.7%. Reported only alongside the share of names the dictionary resolves, because the misses are not random.
+
+**Some things were tested and not found.** Area income barely predicts where landlords file (rank correlation -0.119, about 1% of the variation). There is no gendered pairing between the sides, and repeat tenants are not more male than one-time tenants (1.09 against 1.03). The serial-tenant claim is not supported at this timescale, and the apparent top of that list turns out to be legal clinics named in the tenant field.
 
 ## What's here
 
@@ -35,7 +37,7 @@ No earlier period is published anywhere, so no trend can be measured yet. `scrip
 | **[`report.html`](report.html)** | The main artifact. Nine sections, eleven charts, sources beside each number. |
 | **[`onepager.html`](onepager.html)** | Print-ready one-page briefing. |
 | **[`sources.html`](sources.html)** | Every source, its licence, its period, and which figure came from where. |
-| **[`map.html`](map.html)** / **[`city-map.html`](city-map.html)** | Interactive choropleths by postal FSA (520 areas) or municipality. Self-contained, work offline. Note these still normalise by **population**, not renter households; the renter-household rates the report uses are in `results/exposure/`, and moving the maps onto them is outstanding. |
+| **[`map.html`](map.html)** | One interactive choropleth with three toggles: postal area (520) or municipality (577); per 1,000 renter households, per 10,000 residents, or raw count; total, landlord-filed or tenant-filed. Opens on the renter-household rate. Self-contained, works offline. `city-map.html` is now a redirect to it. |
 | **[`results/`](results/)** | One folder per analysis, each with its CSVs, its exact numbers, the command that built it, and its caveats. |
 | **[`data/`](data/)** | Source data and every derived dataset, each documented. |
 | **[`scripts/`](scripts/)** | The full pipeline in Python, reproducible end to end. |
@@ -60,17 +62,30 @@ python scripts/analyze_exposure.py            # denominators, the reason mismatc
                                               # income correlations by area
 python scripts/analyze_parties.py             # repeat tenants, ex parte, gender
 
-python scripts/extract_case_details.py --n 5000   # reads order PDFs: rent, hearing,
-                                                  # attendance, representation
+# Two PDF samples, each proportional within its own frame. The money one is
+# weighted across L1/L2/L4 only, which is the right frame for "what a landlord
+# money case costs" and the wrong one for anything about process, since the
+# landlord is the applicant in every order in it.
+python scripts/extract_case_details.py --n 5000                    # -> results/case_details/
 python scripts/analyze_burden.py                  # months of rent owed, with intervals
+python scripts/extract_case_details.py --n 6000 --categories all   # -> results/case_details_all/
+python scripts/analyze_process.py                 # attendance and representation, by filer
+
+# --- the map ------------------------------------------------------------
+python scripts/join_fsa_to_csd.py             # rolls FSA counts AND renter households
+                                              # up to municipalities, area-weighted
+python scripts/build_map_data.py              # merges both geographies into one payload
+python scripts/build_map_html.py              # -> map.html
+python scripts/check_map.py                   # drives all 18 geography x denominator
+                                              # x lens combinations in a browser
 
 # --- the site -----------------------------------------------------------
-python scripts/build_site.py                  # report, sources, one-pager, index
+python scripts/build_site.py                  # report, sources, one-pager, index, summary
 python scripts/check_pages.py                 # renders all four, light and dark,
                                               # desktop and phone, fails on overflow
 ```
 
-The maps have their own pipeline (boundary fetch, simplification, join, build) unchanged from the previous version; see the commands in `scripts/` and the notes in `results/applications_by_area/`.
+The boundary fetch and simplification steps that feed the map are unchanged and only need re-running if you want a different simplification tolerance; see `scripts/fetch_*_boundaries.py` and `scripts/simplify_*_boundaries.py`.
 
 `scripts/ltbdata.py` is the shared loader: it defines once what counts as a corporate landlord, how a name cell splits into people, and the difference between an order and a case. Every analysis imports it.
 
