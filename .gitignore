@@ -38,3 +38,9 @@ data/raw_statcan_98401X2021013/
 # Layout-check screenshots from scripts/check_pages.py — regenerated on demand,
 # and full-page renders of every page in both themes add up quickly.
 docs/checks/
+
+# Private correspondence. Saved mail carries names, file numbers and personal
+# finances, and has no place in a public repository.
+*.eml
+*.msg
+correspondence/

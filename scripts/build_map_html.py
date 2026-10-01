@@ -76,7 +76,7 @@ __CSS__
     <h1>Where Ontario's rental disputes concentrate</h1>
     <p class="dek">Landlord and Tenant Board applications, by postal area or by municipality,
        measured against renter households or against resident population. Hover any area for the
-       full breakdown; click to pin it.</p>
+       full breakdown; click to pin it. __PERIOD__</p>
   </div>
 
   <div class="controls">
@@ -486,6 +486,15 @@ def main():
     html = html.replace("__WIDTH__", str(payload["width"]))
     html = html.replace("__HEIGHT__", str(payload["height"]))
     html = html.replace("__PAYLOAD__", payload_text)
+
+    # The counts on the map are for the export's window, not a year. Said on
+    # the page because a rate with no period attached gets read as annual.
+    import ltbdata
+    s = ltbdata.summarise(ltbdata.load_orders())
+    html = html.replace(
+        "__PERIOD__",
+        f"Counts are for orders issued {s['first_date']} to {s['last_date']} "
+        f"({s['days']} days), not scaled to a year.")
 
     OUT_PATH.write_text(html, encoding="utf-8")
     print(f"Wrote {OUT_PATH} ({OUT_PATH.stat().st_size / 1e6:.2f} MB)")

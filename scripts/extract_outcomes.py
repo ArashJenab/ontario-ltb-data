@@ -120,11 +120,19 @@ def main():
         out_path = path.parent / "outcomes.csv"
         results = []
         missing = 0
+        # The cached PDFs are deleted once read, so after a top-up only the
+        # added orders are on disk. Carry forward what was already classified
+        # rather than dropping every order whose PDF is gone.
+        already = {}
+        if out_path.exists():
+            for done in csv.DictReader(open(out_path, encoding="utf-8-sig")):
+                already.setdefault(done["file_number"], done)
+        carried = 0
 
         def work(row):
             text = read_pdf(row["file_number"])
             if not text or len(text) < 300:
-                return None
+                return already.get(row["file_number"])
             outcome, consent, sheriff = classify(text)
             return {
                 "file_number": row["file_number"],
@@ -142,6 +150,7 @@ def main():
                 if result is None:
                     missing += 1
                 else:
+                    carried += result is already.get(result["file_number"])
                     results.append(result)
                 if i % 500 == 0:
                     print(f"\r  {name}: {i}/{len(rows)}", end="", file=sys.stderr)
@@ -153,7 +162,8 @@ def main():
                 writer.writeheader()
                 writer.writerows(results)
         print(f"{name}: classified {len(results):,} of {len(rows):,} "
-              f"({missing:,} PDFs not cached) -> {out_path}")
+              f"({carried:,} carried forward, {missing:,} PDFs not cached) "
+              f"-> {out_path}")
 
 
 if __name__ == "__main__":

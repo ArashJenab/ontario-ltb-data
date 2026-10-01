@@ -47,6 +47,18 @@ def build(d):
         f"Annual figures below are that window multiplied by "
         f"{s['annualisation_factor']:.3f}.",
         "",
+        f"**How current.** Retrieved from the province's open-data catalogue on "
+        f"**{d['fetched']}**. The newest order in the file was then {d['lag_days']} "
+        f"days old. That gap is the Board's: it adds orders to the catalogue in "
+        f"batches, about three months after they issue (on 2026-08-13 the newest "
+        f"order was dated 2026-05-29).",
+        "",
+        f"**Source.** Every count is taken directly from the Board's own LTB Order "
+        f"Catalogue on data.ontario.ca, through its public API. The catalogue does "
+        f"not carry amounts, rents, attendance or outcomes, so those are read from "
+        f"{d['orders_read']:,} of the order documents it links to. Rates use the "
+        f"2021 Census.",
+        "",
         "**In one sentence:** the Board handles a normal-sized caseload by "
         "international standards, but the weight of it falls on people who own a "
         "single rental unit and on tenants who never reach the Board at all, and the "
@@ -186,12 +198,12 @@ def build(d):
         "",
         f"- **Area income does not explain where landlords file.** Rank correlation "
         f"{income_corr['spearman_rho']} across {income_corr['n_fsas']} postal areas, "
-        f"about 1% of the variation between them. Rental disputes are not "
+        f"about {d['income_r2_pct']}% of the variation between them. Rental disputes are not "
         f"concentrated in poor postal codes in any strong sense, in either direction.",
         "- **No gendered pairing between the sides.** Male and female landlords face "
         "essentially the same gender mix of tenants, though individual landlords who "
         "file do skew about two to one male.",
-        f"- **The serial-tenant claim is not supported at this timescale.** About 2.7% "
+        f"- **The serial-tenant claim is not supported at this timescale.** About {d['moved_pct']}% "
         f"of tenants appear at more than one address in {s['days']} days, and the "
         f"apparent top of that list turns out to be legal clinics named in the tenant "
         f"field. What the data does support is narrower: the settlement-breach "

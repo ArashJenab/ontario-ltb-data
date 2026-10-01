@@ -1,9 +1,10 @@
 code,meaning,cases,individual,corporate,pct_individual,pct_corporate
-L1,Non-payment of rent,19951,6633,13318,33.2,66.8
-L2,End tenancy (other reasons),4879,2539,2340,52.0,48.0
-L4,Breached a settlement or order,3877,1161,2716,29.9,70.1
-L10,Collect money from a former tenant,867,668,199,77.0,23.0
-L3,Tenant gave notice but stayed,742,515,227,69.4,30.6
-L5,Above-guideline rent increase,528,119,409,22.5,77.5
-L9,Collect rent during tenancy,374,132,242,35.3,64.7
-A2,Application about a mobile home site,192,60,132,31.2,68.8
+L1,Non-payment of rent,23988,8006,15982,33.4,66.6
+L2,End tenancy (other reasons),5877,3009,2868,51.2,48.8
+L4,Breached a settlement or order,4554,1381,3173,30.3,69.7
+L10,Collect money from a former tenant,965,748,217,77.5,22.5
+L3,Tenant gave notice but stayed,936,647,289,69.1,30.9
+L5,Above-guideline rent increase,630,130,500,20.6,79.4
+L9,Collect rent during tenancy,460,147,313,32.0,68.0
+A2,Application about a mobile home site,210,67,143,31.9,68.1
+A1,Whether the Act applies,55,45,10,81.8,18.2

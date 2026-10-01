@@ -11,7 +11,8 @@ Two supply the analysis itself (the LTB order catalogue and the census). The res
 - **License**: [Open Government Licence, Ontario](https://www.ontario.ca/page/open-government-licence-ontario)
 - **What it contains**: copies of final orders issued by the LTB, published in phases (historical orders from 2021 onward; orders subject to confidentiality orders are excluded)
 - **Accessed via**: the dataset's [CKAN Data API](https://data.ontario.ca/dataset/ltb-order-catalogue) (`datastore_search`, resource id `86e75d11-1c2c-4cd9-9b0d-9fccec302b30`), not a manual browser export
-- **Used here as**: `data/ltb_open_data_export.json`, the snapshot this analysis is built from (40,844 records as of 2026-08-13)
+- **Used here as**: `data/ltb_open_data_export.json`, the snapshot this analysis is built from (49,269 records, orders issued 2026-01-02 to 2026-06-30, retrieved 2026-10-01)
+- **How current it is**: the Board adds orders to the catalogue in batches, about three months after they issue. The 2026-08-13 fetch ended at orders dated 2026-05-29; the 2026-10-01 fetch added 8,425 orders, all but three dated June 2026, and removed none. So the newest order in the file was 93 days old on the day it was retrieved, and that gap is the publisher's, not this repository's.
 
 ### Keeping the snapshot current
 
@@ -20,7 +21,8 @@ Two supply the analysis itself (the LTB order catalogue and the census). The res
 - Every fetch is archived to `data/snapshots/` (gitignored local backup, last 5 kept), regardless of outcome.
 - The fetch is compared against the current `data/ltb_open_data_export.json` by Document ID: records added + removed, as a percentage of the old total ("churn").
 - Below the churn threshold (default 10%, `--threshold` to change it): the fetch is **dismissed**. A few thousand new orders on top of ~40,000 is expected drift, not enough to skew the aggregate stats or invalidate the existing proportional dollar-amount sample.
-- At or above the threshold: the fetch is **adopted** (`data/ltb_open_data_export.json` is overwritten) and the script prints a reminder to redraw the dollar-amount sample, since resampling means re-downloading and re-extracting PDFs for ~600 orders and is deliberately not automatic.
+- At or above the threshold: the fetch is **adopted** (`data/ltb_open_data_export.json` is overwritten) and the script prints a reminder to bring the PDF samples up to date, which is deliberately not automatic because it means downloading order documents from a public server.
+- The samples are then extended rather than redrawn: `python scripts/extract_case_details.py --top-up-after <last date of the old window>` keeps every order already read and draws the newly published ones at the same sampling fraction, so the combined sample stays proportional. The 2026-10-01 refresh was done this way, with `--top-up-after 2026-05-29`.
 - Every run, adopted or not, is logged to `data/fetch_log.csv` (tracked in git) as an audit trail of what changed and what was decided.
 
 Run it whenever you want a refresh; nothing in the pipeline calls it automatically.
@@ -87,4 +89,4 @@ Everything in `results/` and `data/*normalized*` / `data/*payload*` is **derived
 
 ## Reference year and currency of the data
 
-The LTB export used here reflects orders available at the time of download (see `data/README.md` for the exact date range observed in the data). Population figures are the 2021 Census, the most recent available at time of writing. Some drift between the two reference periods is expected and noted where relevant (e.g. `results/applications_by_area/README.md`).
+The LTB export used here holds orders issued 2026-01-02 to 2026-06-30 and was retrieved on 2026-10-01. Population figures are the 2021 Census, the most recent available at time of writing. Some drift between the two reference periods is expected and noted where relevant (e.g. `results/applications_by_area/README.md`).

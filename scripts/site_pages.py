@@ -7,7 +7,7 @@ is "where did that number come from" - so every figure on the site is traced
 here to a named source, its licence, and the window it covers.
 """
 import svgchart as sv
-from build_site import BUILT, SERIES, data_table, num, table, tile
+from build_site import BUILT, SERIES, about_data, data_table, num, table, tile
 
 # Every external source, in the order a reader would want them.
 SOURCES = [
@@ -17,8 +17,11 @@ SOURCES = [
         "url": "https://data.ontario.ca/dataset/ltb-order-catalogue",
         "licence": "Open Government Licence, Ontario",
         "licence_url": "https://www.ontario.ca/page/open-government-licence-ontario",
+        # Filled in by build_sources, from the export itself.
         "window": "One rolling current-year file. The copy analysed here covers "
-                  "2026-01-02 to 2026-05-29.",
+                  "{first} to {last}, and was retrieved on {fetched}. The Board adds "
+                  "orders about three months after they issue, so the newest one was "
+                  "{lag} days old on the day it was retrieved.",
         "supplies": "Every case count, application type, party name, address and "
                     "order date. The dollar amounts are read from the order PDFs "
                     "this file links to.",
@@ -122,54 +125,99 @@ SOURCES = [
     },
 ]
 
-FIGURE_PROVENANCE = [
-    ("1 in 24 renter households per year",
-     "This export, annualised; cross-checked against Tribunals Ontario intake",
-     "Exact count of cases, divided by a census denominator. The annualisation "
-     "assumes the rest of the year resembles the 148 days observed."),
-    ("63.4% of Board cases are about unpaid rent",
-     "This export", "Exact count. No estimation."),
-    ("8% of evictions tenants report are about unpaid rent",
-     "Canadian Housing Survey 2021", "Survey estimate, national."),
-    ("9,291 individual landlords, 85.8% filed once",
-     "This export",
-     "Exact count, but the individual/corporate split is a name-based "
-     "classification, not a legal one. Individual owners filing through a "
-     "numbered company are counted as corporate, so the individual share is a "
-     "floor."),
-    ("$123.5M at stake province-wide",
-     "Sample of order PDFs, extrapolated",
-     "Estimate, not a census. cases x found-rate x mean amount, per category. "
-     "Orders stating no amount count as zero, so it understates. Good for a total, "
-     "useless for per-case comparison between kinds of landlord."),
-    ("Individual owners: $7,229 median, 4.04 months, 33.6% of annual rent",
-     "5,000 order PDFs read individually",
-     "Measured, not modelled. Median of the 780 orders naming both a rent and an "
-     "amount for an individual owner. Means carry bootstrap intervals. Supersedes "
-     "the modelled per-case figure, which could not vary by kind of owner."),
-    ("Landlords represented at 67.8%, tenants at 9.7%",
-     "6,000 orders sampled across every application type",
-     "Counted from the sentence naming who attended, present in 3,564 of them, and "
-     "reported split by who filed. An earlier version of this figure came from an "
-     "L1/L2/L4-only sample in which the landlord is the applicant every time, which "
-     "made it a statement about one side of the docket rather than about hearings."),
-    ("31% of a unit's annual rent",
-     "The above, divided by census average rent",
-     "Combines an estimate with a 2021 rent figure. Directionally solid, not "
-     "precise."),
-    ("Breach of settlement 3.4x more common among repeat tenants",
-     "This export", "Exact count within the window. Name matching merges people "
-     "who share a name."),
-    ("18.4% of landlord orders made without a hearing",
-     "This export", "Exact count of the document-type field."),
-    ("Rank correlation -0.119 between filing rate and area income",
-     "This export joined to the 2021 Census",
-     "Area-level association. Says nothing about any individual household."),
-    ("2.0 men per woman among individual landlords",
-     "First-name dictionary lookup",
-     "Weak instrument. Resolves 65% of landlord names, and the misses are not "
-     "random across communities."),
-]
+def sample_size(folder):
+    """(orders read, orders with an attendance sentence) for one PDF sample."""
+    import csv
+    from build_site import RESULTS
+    path = RESULTS / folder / "case_details_raw.csv"
+    if not path.exists():
+        return 0, 0
+    with open(path, encoding="utf-8-sig") as fh:
+        rows = list(csv.DictReader(fh))
+    return len(rows), sum(1 for r in rows if r["hearing_sentence_found"] == "True")
+
+
+def figure_provenance(d):
+    """What each headline number rests on. Built from the results rather than
+    typed, because a table that explains where the numbers came from is the last
+    place a stale number should survive a data refresh."""
+    s = d["summary"]
+    ind = d["by_kind"]["individual"]
+    ind_b, corp_b = d["burden_by_kind"]["individual"], d["burden_by_kind"]["corporate"]
+    total_m = (num(ind_b["estimated_total"]) + num(corp_b["estimated_total"])) / 1e6
+    ontario, arrears = d["exposure"][2], d["reasons"][0]
+    l4 = next(r for r in d["repeat_mix"] if r["code"] == "L4")
+    income = next(
+        r for r in d["correlations"]
+        if r["census_measure"] == "Median household income" and r["rate"].startswith("Landlord")
+    )
+    landlords = d["gender"][0]
+    money_n, _ = sample_size("case_details")
+    all_n, all_hearings = sample_size("case_details_all")
+
+    rows = [
+        (f'1 in {ontario["one_in"]} renter households per year',
+         "The Board's published intake for 2024-25; cross-checked against this "
+         "export, annualised",
+         "A published count divided by a census denominator. The cross-check "
+         f'assumes the rest of the year resembles the {s["days"]} days observed, and '
+         f'comes out at 1 in {d["exposure"][0]["one_in"]}.'),
+        (f'{arrears["pct_of_ltb_landlord_cases"]}% of Board cases are about unpaid rent',
+         "This export", "Exact count. No estimation."),
+        (f'{arrears["pct_of_tenant_reported_evictions"]}% of evictions tenants report '
+         'are about unpaid rent',
+         "Canadian Housing Survey 2021", "Survey estimate, national."),
+        (f'{int(num(ind["entities"])):,} individual landlords, '
+         f'{ind["pct_filed_exactly_once"]}% filed once',
+         "This export",
+         "Exact count, but the individual/corporate split is a name-based "
+         "classification, not a legal one. Individual owners filing through a "
+         "numbered company are counted as corporate, so the individual share is a "
+         "floor."),
+        (f'${total_m:.1f}M at stake over the {s["days"]} days',
+         "Sample of order PDFs, extrapolated",
+         "Estimate, not a census. cases x found-rate x mean amount, per category. "
+         "Orders stating no amount count as zero, so it understates. It is a total "
+         "for the window, not a year, and grows as the window does. Good for a "
+         "total, useless for per-case comparison between kinds of landlord."),
+    ]
+    mi = d["measured"].get("individual")
+    if mi:
+        rows.append(
+            (f'Individual owners: ${int(num(mi["median_amount"])):,} median, '
+             f'{mi["median_months"]} months, {mi["median_pct_of_annual_rent"]}% of '
+             'annual rent',
+             f"{money_n:,} order PDFs read individually",
+             f'Measured, not modelled. Median of the {int(num(mi["n"])):,} orders '
+             "naming both a rent and an amount for an individual owner. Means carry "
+             "bootstrap intervals. Supersedes the modelled per-case figure, which "
+             "could not vary by kind of owner."))
+    if d.get("attendance"):
+        att = {r["party"]: r for r in d["attendance"]}
+        rows.append(
+            (f'Landlords represented at {att["landlord"]["pct_represented"]}%, '
+             f'tenants at {att["tenant"]["pct_represented"]}%',
+             f"{all_n:,} orders sampled across every application type",
+             f"Counted from the sentence naming who attended, present in "
+             f"{all_hearings:,} of them, and reported split by who filed. An earlier "
+             "version of this figure came from an L1/L2/L4-only sample in which the "
+             "landlord is the applicant every time, which made it a statement about "
+             "one side of the docket rather than about hearings."))
+    rows += [
+        (f'Breach of settlement {l4["ratio"]}x more common among repeat tenants',
+         "This export", "Exact count within the window. Name matching merges people "
+         "who share a name."),
+        (f'{d["hearing"][0]["pct_ex_parte"]}% of landlord orders made without a hearing',
+         "This export", "Exact count of the document-type field."),
+        (f'Rank correlation {income["spearman_rho"]} between filing rate and area income',
+         "This export joined to the 2021 Census",
+         "Area-level association. Says nothing about any individual household."),
+        (f'{num(landlords["men_per_woman"]):.1f} men per woman among individual landlords',
+         "First-name dictionary lookup",
+         f'Weak instrument. Resolves {round(num(landlords["coverage_pct"]))}% of '
+         "landlord names, and the misses are not random across communities."),
+    ]
+    return rows
 
 
 def build_sources(d):
@@ -186,6 +234,9 @@ def build_sources(d):
 
     a("<h2>The sources</h2>")
     for src in SOURCES:
+        src = dict(src, window=src["window"].format(
+            first=s["first_date"], last=s["last_date"],
+            fetched=d["fetched"], lag=d["lag_days"]))
         a("<figure>")
         a(f'<h3 style="margin-top:0">{src["name"]}</h3>')
         a(f'<p style="margin:6px 0 0;color:var(--ink-muted);font-size:14px">'
@@ -207,7 +258,7 @@ def build_sources(d):
     a("<p>What each headline number rests on, and how far it can be pushed.</p>")
     a("<figure>")
     a(table(["Figure", "Source", "How solid"],
-            [[f, s_, h] for f, s_, h in FIGURE_PROVENANCE], numeric_from=99))
+            [[f, s_, h] for f, s_, h in figure_provenance(d)], numeric_from=99))
     a("</figure>")
 
     a("<h2>The two kinds of number on this site</h2>")
@@ -225,7 +276,7 @@ def build_sources(d):
     a("<h2>Known limits</h2>")
     a("<figure>")
     a(table(["Limit", "What it means for the numbers"],
-            [["A 148-day window",
+            [[f'A {s["days"]}-day window',
               "Not a full year and not all time. Seasonality cannot be separated "
               "from trend, and nothing here shows whether things are getting better "
               "or worse."],
@@ -282,6 +333,7 @@ def build_onepager(d):
     a('<div class="nav no-print"><a href="report.html">Full report</a>'
       '<a href="sources.html">Sources</a>'
       '<a href="javascript:window.print()">Print this page</a></div>')
+    a(about_data(d))
 
     a('<div class="tiles">')
     a(tile(f'1 in {ontario["one_in"]}', "renter households have a case filed against them each year", "a"))
@@ -363,8 +415,9 @@ def build_onepager(d):
               "order PDFs one at a time. The Board holds these figures already."],
              ["No outcome field",
               "Whether an application ended in eviction, payment, settlement or "
-              "dismissal is not published, so 'how often does filing end a tenancy' "
-              "cannot be answered from public data at all."]],
+              "dismissal is not in the export. 'How often does filing end a tenancy' "
+              "could only be answered here by reading it out of the order documents "
+              "one at a time."]],
             numeric_from=99))
     a("</figure>")
     a('<div class="finding">A public dashboard covering these three gaps would cost '
@@ -432,17 +485,15 @@ def build_index(d):
       'direction they came out.</p>')
     a(f'<div class="lede">The Board handles a normal-sized caseload by international '
       f'standards. What is not normal is where the weight of it lands. '
-      f'<b>{int(num(ind["entities"])):,} people who own a single rental unit</b> '
+      f'<b>{int(num(ind["entities"])):,} individual owners</b>, '
+      f'{ind["pct_holds_one_address"]}% of them with a single rental address, '
       f'bring {ind["pct_of_cases"]}% of all landlord cases, and for '
       f'{ind["pct_filed_exactly_once"]}% of them it happens once and never again. By '
       f'the time an order arrives the typical one is owed '
       f'<b>{months_owed} months of rent on their only '
       f'property</b>. On the other side, the evictions tenants most often actually '
       'experience barely appear in this record at all.</div>')
-    a(f'<div class="window"><b>{s["files"]:,} cases</b> over {s["days"]} days '
-      f'({s["first_date"]} to {s["last_date"]}). Not a full year and not all time: '
-      'Ontario publishes one rolling current-year file, so no trend can be measured '
-      'yet. Annualised figures say so where they appear.</div>')
+    a(about_data(d))
     a('<div class="nav">'
       '<a class="primary" href="report.html">Read the full report</a>'
       '<a href="onepager.html">One-page briefing</a>'
@@ -464,9 +515,14 @@ def build_index(d):
 
     # ---- 1. the weight on a single-unit owner ------------------------------
     a("<h2>What this costs someone who owns one unit</h2>")
-    a('<p>The aggregate figure, roughly $123M at stake across the province, invites '
-      'the reading that a class of landlords received a windfall. It is spread '
-      'across about 12,000 separate landlords, and two thirds of them are people, '
+    total_m = (num(ind_b["estimated_total"]) + num(corp_b["estimated_total"])) / 1e6
+    owed = num(ind_b["entities_owed_money"]) + num(corp_b["entities_owed_money"])
+    share = num(ind_b["entities_owed_money"]) / owed
+    people = "two thirds" if 0.62 <= share <= 0.71 else f"{share:.0%}"
+    a(f'<p>The aggregate figure, roughly ${total_m:.0f}M at stake across the '
+      f'province in these {s["days"]} days, invites the reading that a class of '
+      'landlords received a windfall. It is spread across about '
+      f'{round(owed, -3):,.0f} separate landlords, and {people} of them are people, '
       'not companies. Set out per landlord, the same money looks entirely '
       'different.</p>')
     if mi:
@@ -763,11 +819,13 @@ def build_index(d):
             label_width=290, max_value=60,
             title="Share of the tenants involved who are women, by case type",
             chart_label="Share of tenants who are women by application type"))
+        women = {r["code"]: r["tenant_pct_women"] for r in codes}
         a('<figcaption>Orange is an application a tenant brought; blue is one brought '
-          'against them. Maintenance cases are 53.9% women, bad-faith notice 53.1%, '
-          'tenant rights 52.7%, against 49% or below for everything filed against '
-          'tenants. Real, consistent, and small: nothing here is far from even. The '
-          'axis tops at 60% so the differences are visible at all.</figcaption>')
+          f'against them. Maintenance cases are {women["T6"]}% women, bad-faith notice '
+          f'{women["T5"]}%, tenant rights {women["T2"]}%, against {women["L1"]}% for '
+          f'non-payment and {women["L2"]}% for other evictions. Real, consistent, and '
+          'small: nothing here is far from even. The axis tops at 60% so the '
+          'differences are visible at all.</figcaption>')
         a("</figure>")
         a('<div class="finding"><b>The coverage caveat matters more than the finding.</b> '
           'The dictionary resolves Anglo and European given names far better than '
@@ -783,15 +841,16 @@ def build_index(d):
     a("<figure>")
     a(f'<p><b>Area income does not explain where landlords file.</b> Rank '
       f'correlation {income_corr["spearman_rho"]} across {income_corr["n_fsas"]} '
-      'postal areas, about 1% of the variation between them. Rental disputes are not '
+      f'postal areas, about {d["income_r2_pct"]}% of the variation between them. Rental disputes are not '
       'concentrated in poor postal codes in any strong sense, in either direction.</p>')
     a('<p><b>There is no gendered pairing between the sides.</b> Male and female '
       'landlords face essentially the same gender mix of tenants, though individual '
       'landlords who file do skew about two to one male.</p>')
     a(f'<p><b>The serial-tenant claim is not supported at this timescale.</b> About '
-      f'2.7% of tenants appear at more than one address in {s["days"]} days, and the '
+      f'{d["moved_pct"]}% of tenants appear at more than one address in {s["days"]} days, and the '
       'apparent top of that list turns out to be legal clinics named in the tenant '
-      'field. What the data <i>does</i> support is narrower and real: the 10% of '
+      'field. What the data <i>does</i> support is narrower and real: the '
+      f'{100 - round(num(d["repeat"][0]["pct_of_tenants"]))}% of '
       f'tenants who recur are taken to the Board for breaching a settlement at '
       f'{l4["ratio"]} times the rate of one-time tenants.</p>')
     a("</figure>")

@@ -2,7 +2,7 @@
 
 Built by `scripts/analyze_process.py` from `results/case_details_all/case_details_raw.csv`.
 
-**Sample.** 6,000 orders drawn across *every* application type in proportion to how common each is, so an unweighted rate over the sample is a caseload rate. 3,564 of them (59%) carry the sentence naming who attended the hearing; the rest are excluded rather than scored as a no-show.
+**Sample.** 7,230 orders drawn across *every* application type in proportion to how common each is, so an unweighted rate over the sample is a caseload rate. 4,237 of them (59%) carry the sentence naming who attended the hearing; the rest are excluded rather than scored as a no-show.
 
 ## Why this needed its own sample
 
@@ -12,23 +12,23 @@ An earlier version of this figure came from a sample of L1, L2 and L4 orders onl
 
 | Application filed by | Party | Attended | Represented | Represented, of those attending |
 |---|---|---:|---:|---:|
-| Landlord | Landlord | 88.7% | 70.9% | 79.9% |
-| Landlord | Tenant | 51.6% | 7.4% | 14.4% |
-| Tenant | Landlord | 82.2% | 51.2% | 62.2% |
-| Tenant | Tenant | 71.5% | 24.9% | 34.9% |
+| Landlord | Landlord | 89.1% | 71.7% | 80.5% |
+| Landlord | Tenant | 51.3% | 7.7% | 15.0% |
+| Tenant | Landlord | 83.3% | 50.9% | 61.0% |
+| Tenant | Tenant | 70.5% | 23.6% | 33.5% |
 
 ## What it says
 
-**The applicant shows up.** In landlord-filed cases the landlord attends 88.7% of hearings and the tenant 51.6%. In tenant-filed cases the tenant attends 71.5% and the landlord 82.2%. So a good part of the attendance gap is structural: whoever brought the application turns up to it, and the respondent is likelier to be absent whichever side they are on.
+**The applicant shows up.** In landlord-filed cases the landlord attends 89.1% of hearings and the tenant 51.3%. In tenant-filed cases the tenant attends 70.5% and the landlord 83.3%. So a good part of the attendance gap is structural: whoever brought the application turns up to it, and the respondent is likelier to be absent whichever side they are on.
 
-**Representation does not work like that.** Landlords are represented at 70.9% of the hearings they bring and 51.2% of the ones brought against them. Tenants are represented at 24.9% of the hearings they bring and 7.4% of the ones brought against them. Being the applicant does not close that gap, and it is the finding worth carrying: a tenant is far less likely to have anyone speaking for them regardless of which side of the case they are on.
+**Representation does not work like that.** Landlords are represented at 71.7% of the hearings they bring and 50.9% of the ones brought against them. Tenants are represented at 23.6% of the hearings they bring and 7.7% of the ones brought against them. Being the applicant does not close that gap, and it is the finding worth carrying: a tenant is far less likely to have anyone speaking for them regardless of which side of the case they are on.
 
 ## Across the whole caseload
 
 | Party | Attended | Represented |
 |---|---:|---:|
-| Landlord | 87.2% | 67.8% |
-| Tenant | 53.8% | 9.7% |
+| Landlord | 87.6% | 68.3% |
+| Tenant | 53.4% | 9.8% |
 
 ## Method and limits
 

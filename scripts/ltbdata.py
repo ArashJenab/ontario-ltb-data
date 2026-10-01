@@ -307,10 +307,19 @@ def load_orders(path=EXPORT_PATH, unique_files=False):
 
 
 def date_span(orders):
-    """(first, last, days_inclusive) over order dates."""
+    """(first, last, days_inclusive) over order dates.
+
+    Bounded to the calendar year that holds most of the orders. The catalogue
+    is a current-year file, but the Oct 2026 fetch carries one order dated
+    2025-01-08 on a 2022 file. Taken literally that single row stretches the
+    window from 180 days to 539 and cuts every annualised figure by two thirds.
+    The stray order is still counted; it just does not set the window.
+    """
     from datetime import date
 
     dates = sorted(o["order_date"] for o in orders if o["order_date"])
+    year = Counter(d[:4] for d in dates).most_common(1)[0][0]
+    dates = [d for d in dates if d.startswith(year)]
     first, last = dates[0], dates[-1]
     days = (date.fromisoformat(last) - date.fromisoformat(first)).days + 1
     return first, last, days

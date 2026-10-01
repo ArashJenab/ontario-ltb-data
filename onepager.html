@@ -58,6 +58,23 @@ a { color:var(--series-1); }
           border:1px solid var(--warn-border); border-radius:10px;
           font-size:14px; color:var(--warn-ink); }
 .window b { color:var(--warn-ink); }
+/* What period, how current, whose data: asked before any figure is believed,
+   so it sits above them. Same warning tone as .window, which it replaces on
+   the pages that carry it. */
+.facts { display:grid; grid-template-columns:repeat(3,1fr); margin:22px 0 0;
+         background:var(--warn-bg); border:1px solid var(--warn-border);
+         border-radius:10px; color:var(--warn-ink); }
+.facts > div { padding:14px 18px 16px; border-left:1px solid var(--warn-border); }
+.facts > div:first-child { border-left:0; }
+.facts h4 { margin:0 0 6px; font-size:12px; font-weight:700; letter-spacing:.05em;
+            text-transform:uppercase; }
+.facts p { margin:0; font-size:13.5px; line-height:1.5; }
+.facts b, .facts a { color:var(--warn-ink); }
+@media (max-width:760px){
+  .facts { grid-template-columns:1fr; }
+  .facts > div { border-left:0; border-top:1px solid var(--warn-border); }
+  .facts > div:first-child { border-top:0; }
+}
 .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:30px 0 0; }
 @media (max-width:820px){ .tiles{ grid-template-columns:repeat(2,1fr);} }
 @media (max-width:420px){ .tiles{ grid-template-columns:1fr;} }
@@ -143,7 +160,7 @@ footer a { color:var(--ink-muted); }
   body { background:#fff; color:#000; padding:0; display:block; }
   .page { max-width:none; }
   .no-print { display:none !important; }
-  figure, .tile, .lede, .window, .finding {
+  figure, .tile, .lede, .window, .facts, .finding {
     box-shadow:none; border:1px solid #ccc; break-inside:avoid; }
   h2 { break-after:avoid; }
   a { color:#000; text-decoration:none; }
@@ -154,28 +171,29 @@ footer a { color:var(--ink-muted); }
 <div class="page">
 <div class="eyebrow">Briefing note &middot; Ontario rental disputes</div>
 <h1>What Ontario's rental disputes cost, and who pays</h1>
-<p class="dek">Built entirely from the Landlord and Tenant Board's own published order data (37,401 cases, 2026-01-02 to 2026-05-29) and the 2021 Census. Independent analysis; not affiliated with the Government of Ontario or the Board.</p>
+<p class="dek">Built entirely from the Landlord and Tenant Board's own published order data (44,743 cases, 2026-01-02 to 2026-06-30) and the 2021 Census. Independent analysis; not affiliated with the Government of Ontario or the Board.</p>
 <div class="nav no-print"><a href="report.html">Full report</a><a href="sources.html">Sources</a><a href="javascript:window.print()">Print this page</a></div>
+<div class="facts"><div><h4>What period does it cover?</h4><p>Orders the Board issued from <b>2 January to 30 June 2026</b>: 180 days, 49,269 orders on 44,743 cases. Not a full year, so annual figures are scaled up and say so. No earlier period is published, so no trend can be measured yet.</p></div><div><h4>How current is it?</h4><p>Retrieved <b>1 October 2026</b>. The newest order in the file is dated 30 June, 93 days earlier. That gap is the Board's: it adds orders to its catalogue in batches, about three months after they issue. On 13 August the newest was dated 29 May.</p></div><div><h4>Is it straight from the Board?</h4><p><b>Yes.</b> Every count is taken from the Board's own <a href="https://data.ontario.ca/dataset/ltb-order-catalogue">LTB Order Catalogue</a> on data.ontario.ca, through its public API. The catalogue does not carry amounts, rents, attendance or outcomes, so those are read from 8,125 of the order documents it links to. Rates use the 2021 Census.</p></div></div>
 <div class="tiles">
 <div class="tile"><div class="n a">1 in 24</div><div class="t">renter households have a case filed against them each year</div></div>
-<div class="tile"><div class="n c">85.8%</div><div class="t">of individual landlords filed exactly once</div></div>
+<div class="tile"><div class="n c">84.3%</div><div class="t">of individual landlords filed exactly once</div></div>
 <div class="tile"><div class="n a">30.9%</div><div class="t">of a unit's annual rent is owed by the time an order lands</div></div>
-<div class="tile"><div class="n b">18.4% / 2.1%</div><div class="t">of landlord / tenant orders are made without a hearing</div></div>
+<div class="tile"><div class="n b">18.5% / 2.1%</div><div class="t">of landlord / tenant orders are made without a hearing</div></div>
 </div>
 <h2>Five things the public record shows</h2>
 <figure>
-<p><b>1. The scale is ordinary; the distribution is not.</b> About 4.22% of Ontario renter households have a landlord case filed against them each year, roughly half the United States rate of 8.0%. But 90% of tenants appear exactly once, and most landlords do too. This is a system that touches a lot of people once, not a small group repeatedly.</p>
-<p><b>2. Individual landlords are not small versions of corporate ones. Their cases are bigger.</b> 9,291 individual owners bring 37.7% of cases; 85.8% file exactly once and 91.1% own a single address. Read from the orders themselves, the median individual owner is owed <b>$7,229 after 4.04 months without rent</b>, which is 33.6% of that unit's annual gross revenue before mortgage, tax or repairs. The corporate median is $5,108 after 3.14 months, or 26.2%. The 95% intervals on the two means do not overlap.</p>
-<p><b>3. The Board's file is not a picture of eviction.</b> 63.4% of landlord cases are about unpaid rent, against 8% of the evictions tenants report to Statistics Canada. The reasons tenants most often give, that the landlord sold or wanted the unit, mostly end without an order and leave no record at all.</p>
-<p><b>4. A small recurring group behaves differently.</b> The 10% of tenants who appear more than once are taken to the Board for breaching a settlement at 3.44 times the rate of one-time tenants (29.8% against 8.7%). Most of them recur at the same address rather than moving on.</p>
-<p><b>5. The two sides do not get the same process.</b> 18.4% of landlord-filed orders are made without a hearing, against 2.1% of tenant-filed ones. Much of that gap is procedurally expected, but the size of it is a fact about the system worth knowing.
- Where a hearing did happen, landlords attended 87.2% of them and were represented at 67.8%; tenants attended 53.8% and were represented at <b>9.7%</b>. That one cuts against the landlord side of this ledger, and is here for that reason.
+<p><b>1. The scale is ordinary; the distribution is not.</b> About 4.22% of Ontario renter households have a landlord case filed against them each year, roughly half the United States rate of 8.0%. But 88% of tenants appear exactly once, and most landlords do too. This is a system that touches a lot of people once, not a small group repeatedly.</p>
+<p><b>2. Individual landlords are not small versions of corporate ones. Their cases are bigger.</b> 10,873 individual owners bring 37.6% of cases; 84.3% file exactly once and 90.5% own a single address. Read from the orders themselves, the median individual owner is owed <b>$7,212 after 4.06 months without rent</b>, which is 33.8% of that unit's annual gross revenue before mortgage, tax or repairs. The corporate median is $5,062 after 3.13 months, or 26.1%. The 95% intervals on the two means do not overlap.</p>
+<p><b>3. The Board's file is not a picture of eviction.</b> 63.7% of landlord cases are about unpaid rent, against 8% of the evictions tenants report to Statistics Canada. The reasons tenants most often give, that the landlord sold or wanted the unit, mostly end without an order and leave no record at all.</p>
+<p><b>4. A small recurring group behaves differently.</b> The 12% of tenants who appear more than once are taken to the Board for breaching a settlement at 3.67 times the rate of one-time tenants (28.7% against 7.8%). Most of them recur at the same address rather than moving on.</p>
+<p><b>5. The two sides do not get the same process.</b> 18.5% of landlord-filed orders are made without a hearing, against 2.1% of tenant-filed ones. Much of that gap is procedurally expected, but the size of it is a fact about the system worth knowing.
+ Where a hearing did happen, landlords attended 87.6% of them and were represented at 68.3%; tenants attended 53.4% and were represented at <b>9.8%</b>. That one cuts against the landlord side of this ledger, and is here for that reason.
 </p>
 </figure>
 <h2>What is not in the data, and could be</h2>
 <figure>
 <p>None of this required information the province does not already hold. The Board publishes its orders; Statistics Canada publishes the census. Putting them together took a few days with public tools. Three gaps stand out, and all three are cheap to close:</p>
-<div class="scroll"><table><thead><tr><th>Gap</th><th>Why it matters</th></tr></thead><tbody><tr><td>Only a rolling current-year file is published</td><td>No trend can be measured. Nobody, inside or outside government, can presently say whether the situation is improving or deteriorating.</td></tr><tr><td>Amounts are not in the export</td><td>Every dollar figure on this site required downloading and reading order PDFs one at a time. The Board holds these figures already.</td></tr><tr><td>No outcome field</td><td>Whether an application ended in eviction, payment, settlement or dismissal is not published, so 'how often does filing end a tenancy' cannot be answered from public data at all.</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>Gap</th><th>Why it matters</th></tr></thead><tbody><tr><td>Only a rolling current-year file is published</td><td>No trend can be measured. Nobody, inside or outside government, can presently say whether the situation is improving or deteriorating.</td></tr><tr><td>Amounts are not in the export</td><td>Every dollar figure on this site required downloading and reading order PDFs one at a time. The Board holds these figures already.</td></tr><tr><td>No outcome field</td><td>Whether an application ended in eviction, payment, settlement or dismissal is not in the export. 'How often does filing end a tenancy' could only be answered here by reading it out of the order documents one at a time.</td></tr></tbody></table></div>
 </figure>
 <div class="finding">A public dashboard covering these three gaps would cost a small fraction of most provincial data initiatives, and would let landlords, tenants, journalists and members of the Legislature check these numbers directly instead of taking a private analysis's word for them.</div><footer>
 
@@ -186,7 +204,7 @@ LTB Order Catalogue</a> (Open Government Licence, Ontario) and the 2021 Census
 underlying government data keeps its own licence terms. Figures here are derived from
 public data and are not official statistics of either agency.
 <p style="margin:10px 0 0">This is an independent analysis developed using data published by the Government of Ontario. It is not an official publication of, and is not affiliated with or endorsed by, the Government of Ontario or the Landlord and Tenant Board.</p>
-<p style="margin:10px 0 0">Page built 2026-08-28.</p>
+<p style="margin:10px 0 0">Page built 2026-10-01.</p>
 </footer>
 </div>
 </body>

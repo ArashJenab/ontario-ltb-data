@@ -99,7 +99,10 @@ def build(d):
       f'distinct cases, because review and amended orders repeat a case. Annual '
       f'figures are that window multiplied by {s["annualisation_factor"]:.3f}. '
       'Ontario publishes one rolling current-year file, so there is no earlier period '
-      'to compare against and no trend can be measured yet.</div>')
+      'to compare against and no trend can be measured yet. Retrieved from the '
+      f'province on <b>{d["fetched"]}</b>, when the newest order in the file was '
+      f'{d["lag_days"]} days old: the Board adds orders to its catalogue about three '
+      'months after they issue.</div>')
     a('<div class="nav no-print">'
       '<a class="primary" href="map.html">Explore the map</a>'
       '<a href="sources.html">Every source</a>'
@@ -120,7 +123,7 @@ def build(d):
 
     # ---- 1 -----------------------------------------------------------------
     section(a, "How many people does this actually affect?",
-            "About <b>1 in 24 Ontario renter households</b> has a case filed against "
+            f"About <b>1 in {ontario['one_in']} Ontario renter households</b> has a case filed against "
             "it each year. That is roughly half the United States rate. The scale is "
             "unremarkable; what happens inside it is not.")
     rows = [{"label": lab, "value": num(r["pct_of_renter_households"]),
@@ -441,7 +444,7 @@ def build(d):
     section(a, "Is any of this about income, or gender?",
             "<b>Income, almost not at all.</b> How often landlords file is close to "
             f"unrelated to how rich an area is (rank correlation "
-            f"{income_corr['spearman_rho']}, about 1% of the variation). Gender shows "
+            f"{income_corr['spearman_rho']}, about {d['income_r2_pct']}% of the variation). Gender shows "
             "one consistent pattern and several nulls.")
     a("<figure>")
     a(sv.hbar([{"label": r["role"], "value": num(r["men_per_woman"]),
@@ -454,8 +457,9 @@ def build(d):
     a('<figcaption>Individual landlords who file skew about two to one male, '
       'consistently across every application type. Tenants named in cases are even. '
       'Tenants who bring their own case are slightly more often women. Inferred from '
-      'first names, which resolves 65% of landlord and 78% of tenant names, and the '
-      'misses are not random across communities.</figcaption>')
+      f'first names, which resolves {round(num(d["gender"][0]["coverage_pct"]))}% of '
+      f'landlord and {round(num(d["gender"][1]["coverage_pct"]))}% of tenant names, '
+      'and the misses are not random across communities.</figcaption>')
     a(data_table(["Role", "Men", "Women", "Men per woman", "Names resolved"],
                  [[r["role"], f'{int(num(r["men"])):,}', f'{int(num(r["women"])):,}',
                    r["men_per_woman"], f'{r["coverage_pct"]}%'] for r in d["gender"]]))
@@ -475,10 +479,12 @@ def build(d):
       f'{income_corr["spearman_rho"]} across {income_corr["n_fsas"]} postal areas.</p>')
     a('<p><b>No gendered pairing between the sides.</b> Male and female landlords face '
       'essentially the same gender mix of tenants.</p>')
-    a('<p><b>Repeat tenants are not more male</b> than one-time tenants (1.09 against '
-      '1.03), and a one-adult tenancy is not more male than a two-adult one.</p>')
+    a(f'<p><b>Repeat tenants are not more male</b> than one-time tenants '
+      f'({d["recurrence"]["more than one case"]} against '
+      f'{d["recurrence"]["one case"]}), and a one-adult tenancy is not more male than '
+      'a two-adult one.</p>')
     a(f'<p><b>The serial-tenant claim is not supported at this timescale.</b> About '
-      f'2.7% of tenants appear at more than one address in {s["days"]} days, and the '
+      f'{d["moved_pct"]}% of tenants appear at more than one address in {s["days"]} days, and the '
       'apparent top of that list turns out to be legal clinics named in the tenant '
       'field rather than tenants.</p>')
     a("</figure>")

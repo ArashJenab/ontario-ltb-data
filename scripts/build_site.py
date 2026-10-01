@@ -119,7 +119,78 @@ def load():
     # summarise() derives `files` from unique file numbers either way, so this
     # gives the correct value for both.
     d["summary"] = ltbdata.summarise(ltbdata.load_orders())
+
+    # When the export was last taken from the province, and how far behind
+    # that the newest order in it is. The first thing a reader outside the
+    # project asks, so it is computed rather than typed.
+    log = read(BASE / "data" / "fetch_log.csv")
+    adopted = [r for r in log if r["adopted"] == "True"] or log
+    d["fetched"] = adopted[-1]["date"]
+    d["lag_days"] = (
+        datetime.date.fromisoformat(d["fetched"])
+        - datetime.date.fromisoformat(d["summary"]["last_date"])
+    ).days
+
+    # How many order documents were read for the figures the export does not
+    # carry. The two samples overlap, so this counts distinct files.
+    read_files = set()
+    for folder in ("case_details", "case_details_all"):
+        path = RESULTS / folder / "case_details_raw.csv"
+        if path.exists():
+            read_files.update(
+                r["file_number"] for r in read(path) if r.get("extraction_method")
+            )
+    d["orders_read"] = len(read_files)
+
+    # Figures the prose quotes that used to be typed into it. They moved when
+    # the window grew from 148 days to 180, which is how they were found.
+    tenants = sum(int(r["tenants"]) for r in d["repeat"] if r["pct_of_cases"])
+    moved = next(r for r in d["repeat"] if "different address" in r["cases_against_this_tenant"])
+    d["moved_pct"] = round(100 * int(moved["tenants"]) / tenants, 1)
+    income = next(
+        r for r in d["correlations"]
+        if r["census_measure"] == "Median household income" and r["rate"].startswith("Landlord")
+    )
+    d["income_r2_pct"] = max(1, round(100 * num(income["spearman_rho"]) ** 2))
+    d["recurrence"] = {r["group"]: r["men_per_woman"] for r in d["gender_by_recurrence"]}
     return d
+
+
+def long_date(iso, year=True):
+    """'2026-06-30' -> '30 June 2026', for the prose a non-specialist reads."""
+    day = datetime.date.fromisoformat(iso)
+    return f"{day.day} {day:%B}" + (f" {day.year}" if year else "")
+
+
+def about_data(d):
+    """The three questions a reader asks before trusting any number here:
+    what period, how current, and whose data. Shared by the landing page and
+    the briefing note so the two always give the same answer."""
+    s = d["summary"]
+    same_year = s["first_date"][:4] == s["last_date"][:4]
+    return (
+        '<div class="facts">'
+        '<div><h4>What period does it cover?</h4>'
+        f'<p>Orders the Board issued from <b>{long_date(s["first_date"], not same_year)} '
+        f'to {long_date(s["last_date"])}</b>: {s["days"]} days, {s["orders"]:,} orders '
+        f'on {s["files"]:,} cases. Not a full year, so annual figures are scaled up '
+        'and say so. No earlier period is published, so no trend can be measured '
+        'yet.</p></div>'
+        '<div><h4>How current is it?</h4>'
+        f'<p>Retrieved <b>{long_date(d["fetched"])}</b>. The newest order in the file '
+        f'is dated {long_date(s["last_date"], False)}, {d["lag_days"]} days earlier. '
+        'That gap is the Board\'s: it adds orders to its catalogue in batches, about '
+        'three months after they issue. On 13 August the newest was dated 29 '
+        'May.</p></div>'
+        '<div><h4>Is it straight from the Board?</h4>'
+        '<p><b>Yes.</b> Every count is taken from the Board\'s own '
+        '<a href="https://data.ontario.ca/dataset/ltb-order-catalogue">LTB Order '
+        'Catalogue</a> on data.ontario.ca, through its public API. The catalogue '
+        'does not carry amounts, rents, attendance or outcomes, so those are read '
+        f'from {d["orders_read"]:,} of the order documents it links to. Rates use '
+        'the 2021 Census.</p></div>'
+        '</div>'
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -179,6 +250,23 @@ a { color:var(--series-1); }
           border:1px solid var(--warn-border); border-radius:10px;
           font-size:14px; color:var(--warn-ink); }
 .window b { color:var(--warn-ink); }
+/* What period, how current, whose data: asked before any figure is believed,
+   so it sits above them. Same warning tone as .window, which it replaces on
+   the pages that carry it. */
+.facts { display:grid; grid-template-columns:repeat(3,1fr); margin:22px 0 0;
+         background:var(--warn-bg); border:1px solid var(--warn-border);
+         border-radius:10px; color:var(--warn-ink); }
+.facts > div { padding:14px 18px 16px; border-left:1px solid var(--warn-border); }
+.facts > div:first-child { border-left:0; }
+.facts h4 { margin:0 0 6px; font-size:12px; font-weight:700; letter-spacing:.05em;
+            text-transform:uppercase; }
+.facts p { margin:0; font-size:13.5px; line-height:1.5; }
+.facts b, .facts a { color:var(--warn-ink); }
+@media (max-width:760px){
+  .facts { grid-template-columns:1fr; }
+  .facts > div { border-left:0; border-top:1px solid var(--warn-border); }
+  .facts > div:first-child { border-top:0; }
+}
 .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:30px 0 0; }
 @media (max-width:820px){ .tiles{ grid-template-columns:repeat(2,1fr);} }
 @media (max-width:420px){ .tiles{ grid-template-columns:1fr;} }
@@ -251,7 +339,7 @@ PRINT_CSS = """
   body { background:#fff; color:#000; padding:0; display:block; }
   .page { max-width:none; }
   .no-print { display:none !important; }
-  figure, .tile, .lede, .window, .finding {
+  figure, .tile, .lede, .window, .facts, .finding {
     box-shadow:none; border:1px solid #ccc; break-inside:avoid; }
   h2 { break-after:avoid; }
   a { color:#000; text-decoration:none; }

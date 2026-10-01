@@ -382,6 +382,7 @@ def _write_readme(repeat_rows, mix_rows, ex_rows, gender_rows, crosstab, cross_t
     l4 = next((r for r in mix_rows if r["code"] == "L4"), None)
     landlord_g = gender_rows[0]
     tenant_g = gender_rows[1]
+    by_code = {r["code"]: r for r in code_rows}
     filer_g = gender_rows[2]
 
     lines = [
@@ -441,7 +442,7 @@ def _write_readme(repeat_rows, mix_rows, ex_rows, gender_rows, crosstab, cross_t
         "",
         "### What this does and does not show",
         "",
-        "This is a **148-day window**, which is too short to detect someone who moves "
+        f"This is a **{ltbdata.date_span(ltbdata.load_orders())[2]}-day window**, which is too short to detect someone who moves "
         "once a year. The 'different address' figure above is therefore a floor on "
         "recurrence across tenancies, not a measurement of it. It is also an "
         "over-count in the other direction: matching is on name text, so two "
@@ -540,10 +541,14 @@ def _write_readme(repeat_rows, mix_rows, ex_rows, gender_rows, crosstab, cross_t
         "is a fact about who owns rental property rather than about how anyone "
         "behaves.",
         "* **Tenants are taken to the Board at parity, but bring their own cases "
-        "more often when they are women.** Tenants named in landlord applications "
-        "run 1.02 to 1.06 men per woman, essentially even. Tenant-filed applications "
-        "run the other way: maintenance 0.85 (53.9% women), bad-faith notice to "
-        "terminate 0.88, tenant rights 0.90.",
+        "more often when they are women.** Tenants named in the three large "
+        f"landlord applications run {by_code['L4']['tenant_men_per_woman']} to "
+        f"{by_code['L2']['tenant_men_per_woman']} men per woman, essentially even. "
+        "Tenant-filed applications run the other way: maintenance "
+        f"{by_code['T6']['tenant_men_per_woman']} "
+        f"({by_code['T6']['tenant_pct_women']}% women), bad-faith notice to "
+        f"terminate {by_code['T5']['tenant_men_per_woman']}, tenant rights "
+        f"{by_code['T2']['tenant_men_per_woman']}.",
         "",
         "### Gender by recurrence and by household",
         "",

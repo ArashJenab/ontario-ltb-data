@@ -25,6 +25,10 @@ orders state it in that form; a further set state "lawful rent is $X" or
 Usage:
     python scripts/extract_case_details.py --n 5000
     python scripts/extract_case_details.py --n 200 --workers 2     # a quick pass
+
+    # After a data refresh: extend the existing sample into the newly published
+    # orders instead of redrawing all of it.
+    python scripts/extract_case_details.py --top-up-after 2026-05-29
 """
 import argparse
 import csv
@@ -162,7 +166,44 @@ def parse_args():
                              "'all': every application type, weighted by how common "
                              "each is, for questions about process.")
     parser.add_argument("--outdir", default=None)
+    parser.add_argument("--top-up-after", default=None, metavar="YYYY-MM-DD",
+                        help="keep the existing sample and add to it only from "
+                             "orders dated after this day, at the sampling fraction "
+                             "the existing sample was drawn at. --n is ignored.")
     return parser.parse_args()
+
+
+def top_up_allocation(raw_path, pools, index, date_field, file_field, cutoff):
+    """(existing rows, {category: records to add}) for a top-up run.
+
+    Both samples are proportional, so every category was drawn at one sampling
+    fraction. Drawing the newly published orders at that same fraction keeps
+    the union proportional across old and new alike, which is all an unweighted
+    mean over it needs. It costs a fifth of the downloads a full redraw would,
+    against a public server.
+
+    Orders on a file that is already in the sample are left out of the draw:
+    PDFs are cached by file number, so a second order on the same file would
+    read the first one's document.
+    """
+    with open(raw_path, encoding="utf-8-sig") as fh:
+        existing = list(csv.DictReader(fh))
+    sampled = {}
+    for row in existing:
+        sampled[row["category"]] = sampled.get(row["category"], 0) + 1
+    sampled_files = {row["file_number"] for row in existing}
+
+    picks = {}
+    for code, records in pools.items():
+        old = [r for r in records if (r[index[date_field]] or "") <= cutoff]
+        new = [r for r in records if (r[index[date_field]] or "") > cutoff]
+        if not old or not new or not sampled.get(code):
+            continue
+        fresh = [r for r in new if r[index[file_field]] not in sampled_files]
+        want = min(len(fresh), round(len(new) * sampled[code] / len(old)))
+        if want:
+            picks[code] = random.sample(fresh, want)
+    return existing, picks
 
 
 def main():
@@ -191,23 +232,33 @@ def main():
         if code in pools:
             pools[code].append(record)
 
-    # Proportional allocation: the sample should mirror the real category mix
-    # so an unweighted mean over it is already a population mean.
-    population = {c: len(pools[c]) for c in categories if pools[c]}
-    total_population = sum(population.values())
-    allocation = {
-        c: min(len(pools[c]), round(args.n * population[c] / total_population))
-        for c in population
-    }
-    # Largest-remainder would be tidier, but rounding drift of a few documents
-    # across twenty categories does not move any figure derived from this.
-    print(f"Pool sizes: {population}")
-    print(f"Sampling {sum(allocation.values())} documents: {allocation}")
+    raw_path = out_dir / "case_details_raw.csv"
+    existing = []
+    if args.top_up_after:
+        existing, picks = top_up_allocation(
+            raw_path, pools, index, date_field, file_field, args.top_up_after)
+        print(f"Keeping {len(existing)} existing rows. Adding "
+              f"{sum(len(v) for v in picks.values())} from orders after "
+              f"{args.top_up_after}: { {c: len(v) for c, v in picks.items()} }")
+        sample = [(code, record) for code, records in picks.items() for record in records]
+    else:
+        # Proportional allocation: the sample should mirror the real category mix
+        # so an unweighted mean over it is already a population mean.
+        population = {c: len(pools[c]) for c in categories if pools[c]}
+        total_population = sum(population.values())
+        allocation = {
+            c: min(len(pools[c]), round(args.n * population[c] / total_population))
+            for c in population
+        }
+        # Largest-remainder would be tidier, but rounding drift of a few documents
+        # across twenty categories does not move any figure derived from this.
+        print(f"Pool sizes: {population}")
+        print(f"Sampling {sum(allocation.values())} documents: {allocation}")
 
-    sample = []
-    for code in allocation:
-        for record in random.sample(pools[code], allocation[code]):
-            sample.append((code, record))
+        sample = []
+        for code in allocation:
+            for record in random.sample(pools[code], allocation[code]):
+                sample.append((code, record))
     random.shuffle(sample)
 
     total = len(sample)
@@ -310,8 +361,8 @@ def main():
         list(pool.map(worker, sample))
     print(file=sys.stderr)
 
+    rows = existing + rows
     rows.sort(key=lambda r: (r.get("category") or "", r.get("file_number") or ""))
-    raw_path = out_dir / "case_details_raw.csv"
     keys = list({k: None for row in rows for k in row})
     with open(raw_path, "w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=keys)
@@ -320,6 +371,8 @@ def main():
 
     elapsed = time.time() - started
     print(f"\nDone in {elapsed / 60:.1f} min. {len(rows)} rows -> {raw_path}")
+    if existing:
+        print(f"  (the counts below cover the {total} added rows only)")
     print(f"  amount found : {counter['amount']} ({100 * counter['amount'] / total:.0f}%)")
     print(f"  rent found   : {counter['rent']} ({100 * counter['rent'] / total:.0f}%)")
     print(f"  hearing line : {counter['hearing']} ({100 * counter['hearing'] / total:.0f}%)")
