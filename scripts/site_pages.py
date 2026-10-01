@@ -338,7 +338,11 @@ def build_onepager(d):
     a('<div class="tiles">')
     a(tile(f'1 in {ontario["one_in"]}', "renter households have a case filed against them each year", "a"))
     a(tile(f'{ind["pct_filed_exactly_once"]}%', "of individual landlords filed exactly once", "c"))
-    a(tile(f'{ind_b["median_as_pct_of_annual_rent"]}%', "of a unit's annual rent is owed by the time an order lands", "a"))
+    # The measured share where the orders have been read, as on the landing
+    # page. This tile used to show the modelled one, three points lower, so the
+    # two pages disagreed about their own headline number.
+    annual_share = mi["median_pct_of_annual_rent"] if mi else ind_b["median_as_pct_of_annual_rent"]
+    a(tile(f'{annual_share}%', "of a unit's annual rent is owed by the time an order lands, on the typical individual owner's case", "a"))
     a(tile(f'{ll_hearing["pct_ex_parte"]}% / {tt_hearing["pct_ex_parte"]}%', "of landlord / tenant orders are made without a hearing", "b"))
     a("</div>")
 
@@ -875,6 +879,36 @@ def build_index(d):
     a("</div>")
     return "\n".join(p)
 
+
+# The briefing note is meant to be printed and handed to someone. At the screen
+# sizes it ran to three sheets with half of each empty, because every card
+# refused to split across a page. Set smaller and allowed to flow, it is one.
+ONEPAGER_CSS = """
+@media print {
+  @page { size: letter; margin: 11mm 13mm; }
+  body { font-size: 10px; line-height: 1.4; }
+  h1 { font-size: 20px; margin-top: 2px; }
+  h2 { font-size: 13.5px; margin: 10px 0 3px; }
+  .dek { font-size: 11px; margin-top: 6px; }
+  p { margin: 5px 0; }
+  .facts { grid-template-columns: repeat(3, 1fr); margin-top: 10px; }
+  .facts > div { padding: 8px 10px; border-top: 0; border-left: 1px solid #ccc; }
+  .facts > div:first-child { border-left: 0; }
+  .facts h4 { font-size: 8.5px; margin-bottom: 3px; }
+  .facts p { font-size: 9.5px; line-height: 1.4; }
+  .tiles { grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+  .tile { padding: 8px 10px; }
+  .tile .n { font-size: 17px; }
+  .tile .t { font-size: 9px; margin-top: 3px; }
+  figure { margin-top: 5px; padding: 6px 12px; break-inside: auto; }
+  figure p { break-inside: avoid; }
+  table { font-size: 9.5px; margin-top: 4px; }
+  th, td { padding: 4px 8px; }
+  .finding { margin-top: 8px; padding: 8px 12px; font-size: 10px; }
+  footer { margin-top: 8px; padding-top: 6px; font-size: 8px; line-height: 1.4; }
+  footer p { margin-top: 4px !important; }
+}
+"""
 
 INDEX_CSS = """
 .preview-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:30px; }

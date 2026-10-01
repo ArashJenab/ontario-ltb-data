@@ -18,20 +18,20 @@ For 84.3% of individual owners this is a single event at their only property. Fo
 
 ## The dollar estimate, disaggregated
 
-Estimated total at stake across L1, L2 and L4: **$148.1M**.
+Estimated total at stake across L1, L2 and L4: **$148.8M**.
 
 | | Individual owners | Corporate / institutional |
 |---|---:|---:|
-| Share of the money | 33.6% | 66.4% |
-| Mean per landlord | $5,325 | $21,205 |
-| 90th percentile | $9,099 | $30,003 |
-| Median per landlord | $5,226 | $5,226 |
+| Share of the money | 33.5% | 66.5% |
+| Mean per landlord | $5,341 | $21,332 |
+| 90th percentile | $9,016 | $30,287 |
+| Median per landlord | $5,318 | $5,318 |
 
 > **Superseded in part.** `results/burden/` reads the rent and amount out of individual orders instead of applying a category average, and finds that an individual owner's median case is *larger* than a corporate one ($7,229 against $5,108, after 4.04 months against 3.14). The model below cannot see that difference by construction, because it gives every landlord in a category the same per-case average. Prefer the measured figures for anything per-case; the model remains the basis for province-wide totals.
 
 **The two medians are identical, and that is an artifact, not a finding.** Under this model every landlord whose only case is one L1 receives the same estimate, and the median landlord of both kinds is exactly that. The median is therefore uninformative about the difference between them; the mean and the 90th percentile are the columns that carry it. A corporate owner is owed roughly 4.0 times as much on average, because it brings many cases, not because its cases are individually larger.
 
-The model gives every landlord in a category the same per-case average, so the only thing it can vary between kinds of owner is how many cases each brings. Do not read a per-case conclusion out of it. What it does support: at Ontario's household-weighted average rent of $1,407/month (2021 census), a case of this typical size is **3.7 months of rent**, or **30.9% of a unit's annual gross revenue** before mortgage, tax or repairs, and that 90.5% of individual owners have no second property to spread it across while a corporate owner does.
+The model gives every landlord in a category the same per-case average, so the only thing it can vary between kinds of owner is how many cases each brings. Do not read a per-case conclusion out of it. What it does support: at Ontario's household-weighted average rent of $1,407/month (2021 census), a case of this typical size is **3.8 months of rent**, or **31.5% of a unit's annual gross revenue** before mortgage, tax or repairs, and that 90.5% of individual owners have no second property to spread it across while a corporate owner does.
 
 ## Concentration
 
@@ -78,8 +78,8 @@ Read both directions. Individual owners dominate the categories about recovering
 
 | Category | Sample n | Found rate | Mean amount |
 |---|---:|---:|---:|
-| L1 | 100 | 0.74 | $7,062 |
-| L2 | 100 | 0.37 | $2,330 |
-| L4 | 100 | 0.73 | $5,305 |
+| L1 | 120 | 0.74 | $7,186 |
+| L2 | 121 | 0.36 | $2,083 |
+| L4 | 121 | 0.72 | $5,136 |
 
 **Window.** The export covers a single period, not all time. See the top of `data/README.md` for the exact date range; every rate here is over that window unless it says annualised.

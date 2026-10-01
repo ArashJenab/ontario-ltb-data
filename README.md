@@ -20,7 +20,7 @@ The LTB publishes **one rolling current-year file**. No earlier period is publis
 
 **The scale is ordinary; the distribution is not.** About **1 in 24** Ontario renter households has a landlord case filed against it each year. Three independent routes agree: this export annualised (1 in 23), this export counting distinct units (1 in 25), and the Board's own published intake for 2024-25 (1 in 24). That is roughly half the United States filing rate of ~8%. Meanwhile only about 1% of renters are actually evicted in a year, because an application is not an eviction.
 
-**"Landlords" is not one group, and the aggregate hides it.** 10,873 individual owners bring 37.6% of cases; **84.3% of them file exactly once and 90.5% own a single address**. For them this is a one-time event at their only property. The 5,121 corporate and institutional owners bring 62.4%, at 4.6 cases each. Province-wide the estimated $148.1M at stake over the 180 days splits 34% / 66%, because corporations bring more cases.
+**"Landlords" is not one group, and the aggregate hides it.** 10,873 individual owners bring 37.6% of cases; **84.3% of them file exactly once and 90.5% own a single address**. For them this is a one-time event at their only property. The 5,121 corporate and institutional owners bring 62.4%, at 4.6 cases each. Province-wide the estimated $148.8M at stake over the 180 days splits about one third / two thirds, because corporations bring more cases.
 
 **Per case, though, the individual owner is hit harder.** Reading 6,032 order PDFs individually rather than modelling from category averages: the median individual owner is owed **$7,212 after 4.06 months without rent, which is 33.8% of that unit's annual gross revenue** before mortgage, tax or repairs. The corporate median is $5,062 after 3.13 months, or 26.1%. The 95% intervals on the two means do not overlap, so this is a real difference. Individual owners do rent costlier units ($1,950/month against $1,640), but the months figure controls for that and the gap survives. **23% of all orders are for more than six months of rent on a single unit.**
 
@@ -86,6 +86,15 @@ python scripts/analyze_outcomes.py                # termination, voidable, dismi
 # fraction. The 2026-10-01 refresh added 1,032 and 1,230 orders this way.
 python scripts/extract_case_details.py --top-up-after 2026-05-29
 python scripts/extract_case_details.py --categories all --top-up-after 2026-05-29
+python scripts/extract_amounts.py --outdir amounts_equal_sample_100_per_category --top-up-after 2026-05-29
+python scripts/make_perspective_chart.py --n 100 --outdir amounts_equal_sample_100_per_category
+                                                  # the dollar sample behind the province-wide
+                                                  # estimate; run before analyze_who_pays.py
+
+# --- the older per-topic folders (counts by type, area, city; landlord/tenant overview)
+python scripts/make_chart.py
+python scripts/make_city_chart.py                 # after join_fsa_to_csd.py, below
+python scripts/make_overview_chart.py
 
 # --- the map ------------------------------------------------------------
 python scripts/postal_analysis.py             # case counts per postal area

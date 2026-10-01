@@ -24,8 +24,8 @@ For comparison, the United States filing rate is about 8.0% of renter households
 | Share of cases | 37.6% | 62.4% |
 | Filed exactly once | **84.3%** | 60.4% |
 | Own a single address | **90.5%** | 61.8% |
-| Share of the money at stake | 33.6% | 66.4% |
-| Mean owed each | $5,325 | $21,205 |
+| Share of the money at stake | 33.5% | 66.5% |
+| Mean owed each | $5,341 | $21,332 |
 
 Across a year a corporate owner is owed roughly 4.0 times more in total, because it brings many cases. That is the aggregate view and it is modelled from category averages.
 

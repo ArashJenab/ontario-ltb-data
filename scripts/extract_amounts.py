@@ -62,7 +62,36 @@ def parse_args():
                     help="'equal': --n docs from every category. 'proportional': --n total docs, "
                          "split across categories in proportion to each category's population size.")
     p.add_argument("--outdir", default=None, help="results subfolder name (default: n<N> or prop<N>)")
+    p.add_argument("--top-up-after", default=None, metavar="YYYY-MM-DD",
+                    help="keep the sample already in --outdir and add to it only from orders dated "
+                         "after this day, each category at the fraction it was originally drawn at. "
+                         "--n and --allocation are ignored.")
+    p.add_argument("--resummarise", action="store_true",
+                    help="download nothing: re-apply manual_review.csv to the sample already in "
+                         "--outdir and rewrite its summary.")
     return p.parse_args()
+
+
+def apply_manual_review(df, results_dir):
+    """Blank the amounts a person has read and rejected.
+
+    The extractor tags an amount 'manual review advised' when it had to fall
+    back to searching the whole document. Some of those are not awards at all:
+    a sum the tenant prepaid, or one quoted from a different order. Rejections
+    are kept in manual_review.csv beside the sample, with the reason, so the
+    correction is on the record rather than made silently in the data.
+    """
+    path = results_dir / "manual_review.csv"
+    if not path.exists():
+        return df
+    review = pd.read_csv(path)
+    for _, entry in review.iterrows():
+        hit = df["file_number"] == entry["file_number"]
+        df.loc[hit, "primary_amount"] = None
+        df.loc[hit, "amount_type"] = "reviewed-not-an-award"
+        df.loc[hit, "notes"] = f"manual review {entry['reviewed']}: {entry['reason']}"
+    print(f"Applied {len(review)} manual review decision(s) from {path.name}")
+    return df
 
 
 def allocate_proportional(total_budget, pop_counts):
@@ -394,7 +423,33 @@ def main():
     pop_counts = {c: len(by_cat.get(c, [])) for c in CATEGORIES}
     print("Pool sizes:", pop_counts)
 
-    if args.allocation == "proportional":
+    existing = None
+    if args.resummarise:
+        existing = pd.read_csv(raw_csv, encoding="utf-8-sig")
+        n_by_category = {c: 0 for c in CATEGORIES}
+    elif args.top_up_after:
+        # After a data refresh, extend the sample instead of redrawing it. Each
+        # category is topped up at the fraction it was first drawn at, so within
+        # a category the old and new orders are sampled alike and its found-rate
+        # and mean stay representative. That holds for the equal-allocation
+        # samples too, whose fractions differ by category on purpose.
+        existing = pd.read_csv(raw_csv, encoding="utf-8-sig")
+        have = existing["category"].value_counts().to_dict()
+        seen = set(existing["file_number"])
+        n_by_category = {}
+        for c in CATEGORIES:
+            rows = by_cat.get(c, [])
+            new = [r for r in rows if (r[idx[ORDER_DATE_FIELD]] or "") > args.top_up_after]
+            old = len(rows) - len(new)
+            # PDFs are cached by file number, so skip files already read.
+            fresh = [r for r in new if r[idx[FILE_NUMBER_FIELD]] not in seen]
+            n_by_category[c] = (
+                min(len(fresh), round(len(new) * have.get(c, 0) / old)) if old else 0
+            )
+            by_cat[c] = fresh
+        print(f"Keeping {len(existing)} existing rows. Adding from orders after "
+              f"{args.top_up_after}:", n_by_category)
+    elif args.allocation == "proportional":
         n_by_category = allocate_proportional(args.n, pop_counts)
         print("Proportional allocation (total budget "
               f"{args.n}, weighted by category population):", n_by_category)
@@ -476,6 +531,9 @@ def main():
             print(f"{method}, primary={primary}")
 
     df = pd.DataFrame(results)
+    if existing is not None:
+        df = pd.concat([existing, df], ignore_index=True)
+    df = apply_manual_review(df, results_dir)
     df.to_csv(raw_csv, index=False, encoding="utf-8-sig")
     print(f"\nSaved raw per-document results to {raw_csv}")
 

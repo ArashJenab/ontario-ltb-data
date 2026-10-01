@@ -453,7 +453,7 @@ def main():
             "A one-page, print-ready summary of what Ontario's public rental "
             "dispute records show.",
             site_pages.build_onepager(d),
-            "",
+            site_pages.ONEPAGER_CSS,
         ),
         (
             "index.html",

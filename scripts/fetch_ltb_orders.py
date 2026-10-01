@@ -158,13 +158,12 @@ def main():
         if churn_pct >= args.threshold and old_ids:
             print(
                 "\n*** SIGNIFICANT CHANGE — adopted. ***\n"
-                "The dollar-amount sample was drawn against the previous population and may no\n"
-                "longer be representative. Consider redrawing it:\n"
-                "  python scripts/extract_amounts.py --n 600 --allocation proportional "
-                "--outdir amounts_proportional_sample\n"
-                "  python scripts/make_perspective_chart.py --n 600 --allocation proportional "
-                "--outdir amounts_proportional_sample\n"
-                "then re-run the chart/map build scripts that read from data/ltb_open_data_export.json."
+                "The PDF samples were drawn against the previous population. Extend them into\n"
+                "the new orders, where <date> is the last order date of the old window:\n"
+                "  python scripts/extract_case_details.py --top-up-after <date>\n"
+                "  python scripts/extract_case_details.py --categories all --top-up-after <date>\n"
+                "  python scripts/extract_amounts.py --outdir <each amounts_* folder> --top-up-after <date>\n"
+                "then re-run the analyses, charts, map and site. The full order is in README.md."
             )
         else:
             print("\nAdopted (first fetch or --force).")

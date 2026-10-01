@@ -1,38 +1,41 @@
 # Landlord vs. Tenant Overview
 
-The "big picture" chart: cases filed and dollars awarded, landlord- vs. tenant-side, side by side — plus the average-award-per-case comparison, which turns out to be the sharper story.
+Orders issued and dollars ordered, landlord side against tenant side, for the six application types that were sampled for amounts. Built from the export of 49,269 orders issued 2026-01-02 to 2026-06-30, retrieved 2026-10-01.
 
 ![Overview chart](overview_chart.png)
 
 ## The numbers
 
-| | Landlord-side | Tenant-side | Ratio |
+| | Landlord side | Tenant side | Ratio |
 |---|---:|---:|---:|
-| Cases filed (L1+L2+L4 vs T1+T2+T6) | 30,567 | 4,320 | 7.1× |
-| Dollars awarded (estimated) | $129,864,717 | $4,939,095 | 26.3× |
-| **Average award per case** | **$4,249** | **$1,143** | **3.7×** |
+| Orders issued (L1+L2+L4 against T1+T2+T6) | 36,874 | 5,182 | 7.1x |
+| Dollars ordered (estimated) | $156,904,738 | $5,859,045 | 26.8x |
+| **Average per order** | **$4,255** | **$1,131** | **3.8x** |
 
-The dollar gap (26.3×) is larger than the case-volume gap (7.1×) — landlords don't just file more often, they're also awarded roughly 3.7× more *per case*, on average, than tenants are. That per-case gap is what compounds a 7× filing disparity into a 26× dollar disparity.
+The dollar gap is wider than the volume gap because the average landlord-side order is for a larger sum. That follows from what the applications are: most landlord applications are for months of unpaid rent, while tenant applications are for rebates and abatements, which are smaller amounts by nature.
 
-## Why the same 6 categories for both halves
+**What this does not show.** It counts orders and the amounts written in them. It does not measure who was right, how often either side succeeds, or whether any of the money was ever collected. For outcomes see [`results/outcomes/`](../outcomes/); for what a case costs an individual owner see [`results/burden/`](../burden/). Those two, read from several thousand orders, supersede this folder wherever they overlap.
 
-Comparing "all landlord filings" (any L-code) against "dollars from L1/L2/L4 only" would be apples-to-oranges — the volume side would include categories (L3, L5, L9, L10) that were never sampled for dollar amounts. Both donuts here use the identical six tracked categories (L1+L2+L4 landlord-side, T1+T2+T6 tenant-side — about 85% of all filings) so the volume-share and dollar-share percentages describe the same slice of the system. The province-wide filing ratio using *all* application types (not just these six) is 5.7×, not 7.1× — see the root README and `results/application_volume/`.
+## Why the same six categories on both sides
+
+Comparing every landlord application against dollars from L1, L2 and L4 only would mix two different sets. Both halves use the six sampled categories, which hold 85% of all orders, so the volume share and the dollar share describe the same slice. Across every application type the ratio of landlord-side to tenant-side orders is 5.7x (41,576 against 7,242), not 7.1x.
 
 ## Files
 
 | File | What it is |
 |---|---|
-| `overview_data.csv` | `side`, `categories`, `cases_filed`, `estimated_dollars_awarded`, `avg_dollars_per_case` — the exact numbers behind the chart |
-| `overview_chart.png` | The chart itself |
+| `overview_data.csv` | `side`, `categories`, `orders_issued`, `estimated_dollars_ordered`, `avg_dollars_per_order` |
+| `overview_chart.png` | The chart |
 
 ## How it was built
 
 ```bash
 python scripts/make_overview_chart.py
 ```
-Case counts: exact tally of `Applications/Requêtes` in the full 40,844-record export, filtered to L1+L2+L4 and T1+T2+T6. Dollar totals: pulled from [`results/amounts_equal_sample_100_per_category/perspective_chart_totals.csv`](../amounts_equal_sample_100_per_category/) (the 100-doc/category sampling design). Average-per-case = estimated dollars awarded ÷ cases filed for that side.
+Order counts are an exact tally of the full export. Dollar totals come from [`results/amounts_equal_sample_100_per_category/perspective_chart_totals.csv`](../amounts_equal_sample_100_per_category/). Average per order is the estimated dollars divided by all orders on that side.
 
 ## Caveats
 
-- Case-filing counts are exact (full population); dollar figures are estimates from a sample — see [`results/amounts_equal_sample_100_per_category/README.md`](../amounts_equal_sample_100_per_category/) for the sampling method and margin discussion, and the root [`reports/executive-summary.md`](../../reports/executive-summary.md) for how this ratio compares across three different sampling designs (26×–74×).
-- "Average award per case" divides estimated total dollars by *all* cases filed in that category group, not just the ones where an amount was found/awarded — this is the right denominator for "expected value per case filed" (blending win-rate and award size), but is not the same as "average award, among cases where money was awarded."
+- Order counts are exact. Dollar figures are estimates from a sample; across the three sampling designs in this repository the ratio runs from about 27x to 76x, which is the honest width of the uncertainty. See the sample folders for why.
+- "Average per order" divides by every order on that side, including those that state no amount. It is an expected value per order, not the average among orders that awarded money.
+- The window is 180 days and the dollar totals are for that window, not a year.

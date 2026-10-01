@@ -61,11 +61,14 @@ def main():
     landlord_avg = landlord_dollars / landlord_cases
     tenant_avg = tenant_dollars / tenant_cases
 
+    # Named for what they are. These count orders the Board issued, not
+    # applications filed, and the dollars are what orders state, not a measure
+    # of who was right.
     rows = [
-        {"side": "landlord", "categories": "L1+L2+L4", "cases_filed": landlord_cases,
-         "estimated_dollars_awarded": round(landlord_dollars), "avg_dollars_per_case": round(landlord_avg)},
-        {"side": "tenant", "categories": "T1+T2+T6", "cases_filed": tenant_cases,
-         "estimated_dollars_awarded": round(tenant_dollars), "avg_dollars_per_case": round(tenant_avg)},
+        {"side": "landlord", "categories": "L1+L2+L4", "orders_issued": landlord_cases,
+         "estimated_dollars_ordered": round(landlord_dollars), "avg_dollars_per_order": round(landlord_avg)},
+        {"side": "tenant", "categories": "T1+T2+T6", "orders_issued": tenant_cases,
+         "estimated_dollars_ordered": round(tenant_dollars), "avg_dollars_per_order": round(tenant_avg)},
     ]
     with open(OUT_CSV, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
@@ -75,8 +78,8 @@ def main():
     case_ratio = landlord_cases / tenant_cases
     dollar_ratio = landlord_dollars / tenant_dollars
     avg_ratio = landlord_avg / tenant_avg
-    print(f"Cases filed: landlord {landlord_cases:,} vs tenant {tenant_cases:,}  ({case_ratio:.1f}x)")
-    print(f"Dollars awarded: landlord ${landlord_dollars:,.0f} vs tenant ${tenant_dollars:,.0f}  ({dollar_ratio:.1f}x)")
+    print(f"Orders issued: landlord {landlord_cases:,} vs tenant {tenant_cases:,}  ({case_ratio:.1f}x)")
+    print(f"Dollars ordered: landlord ${landlord_dollars:,.0f} vs tenant ${tenant_dollars:,.0f}  ({dollar_ratio:.1f}x)")
     print(f"Avg $ per case: landlord ${landlord_avg:,.0f} vs tenant ${tenant_avg:,.0f}  ({avg_ratio:.1f}x)")
     print(f"Saved data to {OUT_CSV}")
 
@@ -103,9 +106,9 @@ def main():
         ax.set_aspect("equal")
 
     donut(axes[0], landlord_cases, tenant_cases,
-          f"Cases filed\n(L1+L2+L4 vs T1+T2+T6)")
+          f"Orders issued\n(L1+L2+L4 vs T1+T2+T6)")
     donut(axes[1], landlord_dollars, tenant_dollars,
-          f"Dollars awarded (estimated)")
+          f"Dollars ordered (estimated)")
 
     fig.legend(
         handles=[
@@ -119,18 +122,19 @@ def main():
                   fontsize=15, fontweight="bold", x=0.02, ha="left", y=0.98)
 
     stat_line = (
-        f"{case_ratio:.1f}\u00d7 more cases filed landlord-side   \u2022   "
-        f"{dollar_ratio:.1f}\u00d7 more dollars awarded landlord-side   \u2022   "
-        f"{avg_ratio:.1f}\u00d7 higher average award per case"
+        f"{case_ratio:.1f}\u00d7 as many orders on landlord applications   \u2022   "
+        f"{dollar_ratio:.1f}\u00d7 the dollars ordered   \u2022   "
+        f"{avg_ratio:.1f}\u00d7 the average per order"
     )
     fig.text(0.5, 0.145, stat_line, ha="center", fontsize=12, color="#1a2130", fontweight="bold")
     fig.text(0.5, 0.10,
-              f"Landlord-side average: \\${landlord_avg:,.0f}/case   vs.   tenant-side average: \\${tenant_avg:,.0f}/case",
+              f"Landlord-side average: \\${landlord_avg:,.0f}/order   vs.   tenant-side average: \\${tenant_avg:,.0f}/order",
               ha="center", fontsize=10.5, color="#444444")
-    fig.text(0.5, 0.06, "The dollar gap is larger than the volume gap: landlords don't just file more — they win more per case, too.",
+    fig.text(0.5, 0.06, "Unpaid rent is a larger sum than a rebate or abatement, so the dollar gap is wider than the volume gap. "
+              "It does not measure who was right.",
               ha="center", fontsize=10, color="#666666", style="italic")
     fig.text(0.02, 0.012,
-              "Volume: full population, tracked categories only. Dollars: order-of-magnitude estimate from a 100-doc/category sample.",
+              "Volume: full population, tracked categories only. Dollars: order-of-magnitude estimate from a sample of order documents.",
               fontsize=8.5, color="#888888", ha="left")
 
     fig.tight_layout(rect=(0, 0.25, 1, 0.94))

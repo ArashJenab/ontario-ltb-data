@@ -120,10 +120,14 @@ def main():
     ax.invert_yaxis()
 
     ax.set_xlabel("Estimated total dollar amount ordered, province-wide (\\$)", fontsize=10.5, color="#444444")
+    # Read from the sample itself: after a top-up the counts are no longer the
+    # round numbers the sample was first drawn with.
+    read_total = int(summary["count_total"].sum())
     if args.allocation == "proportional":
-        title_suffix = f"proportional sample, n={n_per_category} total"
+        title_suffix = f"proportional sample, {read_total:,} orders read"
     else:
-        title_suffix = f"n={n_per_category}/category"
+        title_suffix = (f"{int(summary['count_total'].min())} to "
+                        f"{int(summary['count_total'].max())} orders read per category")
     ax.set_title(
         f"Estimated dollars ordered: landlord- vs tenant-side ({title_suffix})",
         fontsize=13.5, fontweight="bold", pad=14, loc="left",
